@@ -87,15 +87,15 @@ set_output_delay -add_delay -min -clock [get_clocks {okUH0}]  -0.500 [get_ports 
 ############################################################################
 ## System Clock
 ############################################################################
-set_property IOSTANDARD LVDS_25 [get_ports {sys_clkp}]
-set_property PACKAGE_PIN W11 [get_ports {sys_clkp}]
+set_property IOSTANDARD LVDS_25 [get_ports {sys_clk_p}]
+set_property PACKAGE_PIN W11 [get_ports {sys_clk_p}]
 
-set_property IOSTANDARD LVDS_25 [get_ports {sys_clkn}]
-set_property PACKAGE_PIN W12 [get_ports {sys_clkn}]
+set_property IOSTANDARD LVDS_25 [get_ports {sys_clk_n}]
+set_property PACKAGE_PIN W12 [get_ports {sys_clk_n}]
 
-set_property DIFF_TERM FALSE [get_ports {sys_clkp}]
+set_property DIFF_TERM FALSE [get_ports {sys_clk_p}]
 
-create_clock -name sys_clk -period 5 [get_ports sys_clkp]
+create_clock -name sys_clk -period 5 [get_ports sys_clk_p]
 set_clock_groups -asynchronous -group [get_clocks {sys_clk}] -group [get_clocks {mmcm0_clk0 okUH0}]
 
 ############################################################################

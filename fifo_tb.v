@@ -3,7 +3,7 @@
 //     `define CLK_PERIOD_HALF            2.5
 
 
-// module top_bh_fpga_tb;
+// module fifo_tb;
 
 
 // 	reg clk;
@@ -29,6 +29,25 @@
 //         .dout   ( dout   ),
 //         .empty  ( empty  ),
 //         .valid  ( valid  )
+//     );
+
+
+//     wire full_fwft;
+//     wire [32 - 1:0] dout_fwft;
+//     wire empty_fwft;
+//     wire valid_fwft;
+
+//     fifo_bh_ww32d16_rw32d16 u_fifo_bh_ww32d16_rw32d16(
+//         .rst    ( !reset_n    ),
+//         .wr_clk ( clk ),
+//         .wr_en  ( wr_en  ),
+//         .din    ( din    ),
+//         .full   ( full_fwft   ),
+//         .rd_clk ( clk ),
+//         .rd_en  ( rd_en  ),
+//         .dout   ( dout_fwft   ),
+//         .empty  ( empty_fwft  ),
+//         .valid  ( valid_fwft  )
 //     );
 
 
@@ -338,7 +357,7 @@
     `define CLK_PERIOD_HALF            2.5
 
 
-module top_bh_fpga_tb;
+module fifo_tb;
 
 
 	reg clk;
@@ -353,17 +372,22 @@ module top_bh_fpga_tb;
 
     wire valid;
 
-    fifo_bh_write_width32_depth16_read_width32_depth16 u_fifo_bh_write_width32_depth16_read_width32_depth16(
+    wire full_fwft;
+    wire [32 - 1:0] dout_fwft;
+    wire empty_fwft;
+    wire valid_fwft;
+
+    fifo_bh_ww32d16_rw32d16 u_fifo_bh_ww32d16_rw32d16(
         .rst    ( !reset_n    ),
         .wr_clk ( clk ),
         .wr_en  ( wr_en  ),
         .din    ( din    ),
-        .full   ( full   ),
+        .full   ( full_fwft   ),
         .rd_clk ( clk ),
         .rd_en  ( rd_en  ),
-        .dout   ( dout   ),
-        .empty  ( empty  ),
-        .valid  ( valid  )
+        .dout   ( dout_fwft   ),
+        .empty  ( empty_fwft  ),
+        .valid  ( valid_fwft  )
     );
 
 
@@ -371,7 +395,7 @@ module top_bh_fpga_tb;
     always #(`CLK_PERIOD_HALF) clk = ~clk;
     integer i;
     initial begin
-
+// 
 
         @(negedge clk); 
         // Initial values
@@ -388,6 +412,7 @@ module top_bh_fpga_tb;
         @(posedge clk); 
         @(posedge clk); 
         @(posedge clk); 
+// fpga.ActivateTriggerIn(0x40, 0)
         @(posedge clk); 
         @(posedge clk); 
         @(posedge clk); 
@@ -504,7 +529,7 @@ module top_bh_fpga_tb;
         @(posedge clk); 
         @(posedge clk); 
         @(posedge clk); 
-        for (i = 0; i < 16; i = i + 1) begin
+        for (i = 0; i < 17; i = i + 1) begin
             @(posedge clk); 
             @(negedge clk); 
             wr_en = 1;
@@ -514,7 +539,7 @@ module top_bh_fpga_tb;
         @(negedge clk); 
         #(`CLK_PERIOD/10);
         wr_en = 0;
-        for (i = 0; i < 16; i = i + 1) begin
+        for (i = 0; i < 17; i = i + 1) begin
             @(posedge clk); 
             #(`CLK_PERIOD/10);
             @(negedge clk); 
