@@ -1,5 +1,3 @@
-// `define NO_DRAM_SIMULATION 1
-
 module d_domain(
         input sys_clk_p,
         input sys_clk_n,
@@ -181,6 +179,9 @@ localparam  DRAM_READ       = 3'b001,
 
 
     
+    wire [256 - 1:0] fifo_p2d_data_dout_align;
+    assign fifo_p2d_data_dout_align = {fifo_p2d_data_dout[32*0 +: 32], fifo_p2d_data_dout[32*1 +: 32], fifo_p2d_data_dout[32*2 +: 32], fifo_p2d_data_dout[32*3 +: 32], fifo_p2d_data_dout[32*4 +: 32], fifo_p2d_data_dout[32*5 +: 32], fifo_p2d_data_dout[32*6 +: 32], fifo_p2d_data_dout[32*7 +: 32]};
+
     always @ (*) begin
         n_config_d_domain_setting_cnt = config_d_domain_setting_cnt;
 
@@ -188,6 +189,9 @@ localparam  DRAM_READ       = 3'b001,
 
         fifo_d2a_command_wr_en = 0;
         fifo_d2a_command_din = 0;
+
+        fifo_d2a_data_wr_en = 0;
+        fifo_d2a_data_din = 0;
         
         n_d_config_asic_mode = d_config_asic_mode;
         n_d_config_training_epochs = d_config_training_epochs;
@@ -219,13 +223,13 @@ localparam  DRAM_READ       = 3'b001,
         n_write_count = write_count;
         n_dram_writing_phase = dram_writing_phase;
 
-        n_app_en = app_en;
-        n_app_cmd = app_cmd;
-        n_app_addr = app_addr;
-        n_app_wdf_wren = app_wdf_wren;
-        n_app_wdf_data = app_wdf_data;
-        n_app_wdf_end = app_wdf_end;
-        n_app_wdf_mask = app_wdf_mask;
+        n_app_en = 0;
+        n_app_cmd = 0;
+        n_app_addr = 0;
+        n_app_wdf_wren = 0;
+        n_app_wdf_data = 0;
+        n_app_wdf_end = 0;
+        n_app_wdf_mask = 0;
         
         fifo_p2d_data_rd_en = 0;
 
@@ -326,7 +330,7 @@ localparam  DRAM_READ       = 3'b001,
                 n_app_cmd = DRAM_WRITE;
                 n_app_addr = dram_write_address[0 +:29] + write_count;
                 n_app_wdf_wren = 1;
-                n_app_wdf_data = fifo_p2d_data_dout;
+                n_app_wdf_data = fifo_p2d_data_dout_align;
                 n_app_wdf_end = 1;
                 n_app_wdf_mask = 0;
                 n_write_count = write_count + 8; // 256bit / 32byte = 8
@@ -334,13 +338,29 @@ localparam  DRAM_READ       = 3'b001,
             end
         end
 
+        // if (dram_writing_phase) begin
+        //     if (dram_write_address_last + 8 == dram_write_address[0 +:29] + write_count) begin
+        //         if (!fifo_d2p_command_full) begin
+        //             fifo_d2p_command_wr_en = 1;
+        //             fifo_d2p_command_din = {17'd0, 15'd5};
+        //             n_write_count = write_count - 8; // 256bit / 32byte = 8
+        //             n_dram_writing_phase = 0;
+        //         end
+        //     end
+        // end
         if (dram_writing_phase) begin
             if (dram_write_address_last + 8 == dram_write_address[0 +:29] + write_count) begin
                 if (!fifo_d2p_command_full) begin
-                    fifo_d2p_command_wr_en = 1;
-                    fifo_d2p_command_din = {17'd0, 15'd5};
-                    n_write_count = write_count - 8; // 256bit / 32byte = 8
-                    n_dram_writing_phase = 0;
+                    if (app_rdy) begin
+                        fifo_d2p_command_wr_en = 1;
+                        fifo_d2p_command_din = {17'd0, 15'd5};
+                        n_write_count = write_count - 8; // 256bit / 32byte = 8
+                        n_dram_writing_phase = 0;
+
+                        n_app_en = 0;
+                        n_app_cmd = DRAM_READ;
+                        n_app_addr = dram_write_address[0 +:29];
+                    end
                 end
             end
         end
@@ -361,28 +381,8 @@ localparam  DRAM_READ       = 3'b001,
 
 
 
-    `ifdef NO_DRAM_SIMULATION
-
-        // DRAM 빼고 시뮬돌리고 싶을 때
-
-        reg [1:0] rst_post_cnt;
-        always @(posedge ui_clk) begin
-            if(!reset_n) begin
-                rst_post_cnt <= 0;
-            end else begin
-                if (rst_post_cnt != 3) begin
-                    rst_post_cnt <= rst_post_cnt + 1;
-                end
-            end
-        end
-        assign ui_clk = sys_clk_p; // 임시로 sys_clk_p를 ui_clk로 연결
-        assign init_calib_complete = rst_post_cnt == 3; // 초기화 완료 신호 항상 활성화
 
 
-
-
-
-	`else
         // MIG 
 
 
@@ -439,7 +439,6 @@ localparam  DRAM_READ       = 3'b001,
             .sys_rst                          ( !reset_n                  )
         );
         // ########################## MIG ########################################################################################
-	`endif
 
 
 

@@ -296,12 +296,12 @@ module top_bh_fpga(
         .rst(reset_n == 0 || ddr3_reset_n == 0),
         // write
         .wr_clk(okClk),
-        .wr_en(0),
-        .din(0),
+        .wr_en(fifo_p2d_data_wr_en),
+        .din(fifo_p2d_data_din),
         .full(fifo_p2d_data_full),
         // read
         .rd_clk(sys_clk),
-        .rd_en(0),
+        .rd_en(fifo_p2d_data_rd_en),
         .dout(fifo_p2d_data_dout),
         .empty(fifo_p2d_data_empty),
         .valid()
@@ -346,12 +346,12 @@ module top_bh_fpga(
         .rst(reset_n == 0 || ddr3_reset_n == 0),
         // write
         .wr_clk(sys_clk),
-        .wr_en(0),
-        .din(0),
+        .wr_en(0), // fifo_d2a_data_wr_en
+        .din(0), // fifo_d2a_data_din
         .full(fifo_d2a_data_full),
         // read
         .rd_clk(sys_clk2),
-        .rd_en(0),
+        .rd_en(0), // fifo_d2a_data_rd_en
         .dout(fifo_d2a_data_dout),
         .empty(fifo_d2a_data_empty),
         .valid()
@@ -553,6 +553,10 @@ module top_bh_fpga(
                 led = xem7310_led((8'b00000001 << led_pos) | p_state);
                 ep20wireout = 0;
             end 
+        end else if (p_state == P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE) begin
+            if (ep01wirein == 1) begin
+                led = xem7310_led(fifo_p2d_data_dout[7:0]);
+            end
         end
 
         if (!reset_n) begin
@@ -728,10 +732,12 @@ module top_bh_fpga(
                 end
             end
             P_STATE_03_DRAMFILL_WEIGHT_DATA: begin
-                if (!fifo_p2d_data_full && pipe_in_valid) begin
-                    fifo_p2d_data_wr_en = 1;
-                    fifo_p2d_data_din = pipe_in_data;
+                if (!fifo_p2d_data_full) begin
                     pipe_in_ready = 1;
+                    if (pipe_in_valid) begin
+                        fifo_p2d_data_wr_en = 1;
+                        fifo_p2d_data_din = pipe_in_data;
+                    end
                 end
                 // dram weight write complete
                 if (!fifo_d2p_command_empty && fifo_d2p_command_dout[14:0] == 5) begin

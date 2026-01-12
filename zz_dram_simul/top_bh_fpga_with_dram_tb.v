@@ -1198,7 +1198,7 @@ module top_bh_fpga_with_dram_tb;
         $display("Waiting for Calibration to complete...");
         // init_calib_complete가 1이 될 때까지 무한 대기
         // wait(u_top_bh_fpga.u_d_domain.u_mig_7series_0.init_calib_complete === 1'b1); 
-        Wait_TriggerOut(8'h60, 32'd1);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
         $display("Calibration Complete! Starting User Logic...");
         init_calib_complete_at_top_tb = 1'b1;
 
@@ -1214,7 +1214,7 @@ module top_bh_fpga_with_dram_tb;
         // #1000; 
         // UpdateTriggerOuts;
         // @(IsTriggered(8'h60, 1));
-        Wait_TriggerOut(8'h60, 32'd1);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
         // 11. p_config done mode (Python: SetWireInValue(0x01, 2) -> Trigger(0x40, 0))
         $display("######### p_config done mode #########");
@@ -1250,7 +1250,7 @@ module top_bh_fpga_with_dram_tb;
         ActivateTriggerIn(8'h40, 30);
         SetWireInValue(8'h01, 32'd0, NO_MASK);
         UpdateWireIns;
-        Wait_TriggerOut(8'h60, 32'd1);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
 
 
@@ -1263,7 +1263,7 @@ module top_bh_fpga_with_dram_tb;
         WriteToBlockPipeIn(8'h80, 32, 64);  
 
 
-        Wait_TriggerOut(8'h60, 32'd1);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
 
 
