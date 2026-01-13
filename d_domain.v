@@ -43,6 +43,7 @@ module d_domain(
 
         // DRAM Interface
         output                 ui_clk,
+        output                ui_clk_sync_rst,
 
         output wire [12 - 1:0]    device_temp,
 
@@ -109,11 +110,10 @@ localparam  DRAM_READ       = 3'b001,
         wire	         	app_rd_data_end;
         wire	         	app_rd_data_valid;
         wire	         	app_wdf_rdy;
-        wire          		ui_clk_sync_rst;
 
 
     always @(posedge ui_clk) begin
-        if(reset_n == 0 || ddr3_reset_n == 0) begin
+        if(reset_n == 0 || ui_clk_sync_rst) begin
             config_d_domain_setting_cnt <= 0;
 
             d_config_asic_mode <= 0;
@@ -330,7 +330,8 @@ localparam  DRAM_READ       = 3'b001,
                 n_app_cmd = DRAM_WRITE;
                 n_app_addr = dram_write_address[0 +:29] + write_count;
                 n_app_wdf_wren = 1;
-                n_app_wdf_data = fifo_p2d_data_dout_align;
+                n_app_wdf_data = fifo_p2d_data_dout;
+                // n_app_wdf_data = fifo_p2d_data_dout_align;
                 n_app_wdf_end = 1;
                 n_app_wdf_mask = 0;
                 n_write_count = write_count + 8; // 256bit / 32byte = 8
@@ -338,32 +339,32 @@ localparam  DRAM_READ       = 3'b001,
             end
         end
 
-        // if (dram_writing_phase) begin
-        //     if (dram_write_address_last + 8 == dram_write_address[0 +:29] + write_count) begin
-        //         if (!fifo_d2p_command_full) begin
-        //             fifo_d2p_command_wr_en = 1;
-        //             fifo_d2p_command_din = {17'd0, 15'd5};
-        //             n_write_count = write_count - 8; // 256bit / 32byte = 8
-        //             n_dram_writing_phase = 0;
-        //         end
-        //     end
-        // end
         if (dram_writing_phase) begin
             if (dram_write_address_last + 8 == dram_write_address[0 +:29] + write_count) begin
                 if (!fifo_d2p_command_full) begin
-                    if (app_rdy) begin
-                        fifo_d2p_command_wr_en = 1;
-                        fifo_d2p_command_din = {17'd0, 15'd5};
-                        n_write_count = write_count - 8; // 256bit / 32byte = 8
-                        n_dram_writing_phase = 0;
-
-                        n_app_en = 0;
-                        n_app_cmd = DRAM_READ;
-                        n_app_addr = dram_write_address[0 +:29];
-                    end
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = {17'd0, 15'd5};
+                    n_write_count = write_count - 8; // 256bit / 32byte = 8
+                    n_dram_writing_phase = 0;
                 end
             end
         end
+        // if (dram_writing_phase) begin
+        //     if (dram_write_address_last + 8 == dram_write_address[0 +:29] + write_count) begin
+        //         if (!fifo_d2p_command_full) begin
+        //             if (app_rdy) begin
+        //                 fifo_d2p_command_wr_en = 1;
+        //                 fifo_d2p_command_din = {17'd0, 15'd5};
+        //                 n_write_count = write_count - 8; // 256bit / 32byte = 8
+        //                 n_dram_writing_phase = 0;
+
+        //                 n_app_en = 1;
+        //                 n_app_cmd = DRAM_READ;
+        //                 n_app_addr = dram_write_address[0 +:29];
+        //             end
+        //         end
+        //     end
+        // end
 
 
 

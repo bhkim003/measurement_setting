@@ -1258,6 +1258,7 @@ module top_bh_fpga_with_dram_tb;
         // dram write
                             // 512 bit = 64 byte
         for (i_pi = 0; i_pi < 64; i_pi = i_pi + 1) begin
+            // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
             pipeIn[i_pi] = i_pi+1;
         end
         WriteToBlockPipeIn(8'h80, 32, 64);  

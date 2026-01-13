@@ -189,6 +189,7 @@ module top_bh_fpga(
 
     // ########################## MIG ########################################################################################
     wire          		ui_clk;
+    wire          		ui_clk_sync_rst;
     wire [12 - 1:0]    device_temp;
     wire          init_calib_complete;
     // ########################## MIG ########################################################################################
@@ -210,8 +211,8 @@ module top_bh_fpga(
     localparam P_STATE_02_WORKLOAD_CONFIG_DONE = 2;
     localparam P_STATE_03_DRAMFILL_WEIGHT_DATA = 3;
     localparam P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE = 4;
-    localparam P_STATE_05_DRAMFILL_INFERENCE_DATA = 5;
-    localparam P_STATE_06_DRAMFILL_TRAINING_DATA = 6;
+    localparam P_STATE_05_DRAMFILL_INFERENCE_DATA = 5; // When DRAMFILL finish, go to P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE
+    localparam P_STATE_06_DRAMFILL_TRAINING_DATA = 6; // When DRAMFILL finish, go to P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE
     localparam P_STATE_07_ASIC_CONFIG = 7;
     localparam P_STATE_08_ASIC_CONFIG_DONE = 8;
     localparam P_STATE_09_ASIC_INFERENCE_QUEUING = 9;
@@ -277,7 +278,7 @@ module top_bh_fpga(
 
     // ########################## P TO D DOMAIN CROSSING FIFO ########################################################################################
     fifo_bh_ww32d16_rw32d16 u_fifo_p2d_command(
-        .rst(reset_n == 0 || ddr3_reset_n == 0),
+        .rst(reset_n == 0 || ui_clk_sync_rst),
         // write
         .wr_clk(okClk),
         .wr_en(fifo_p2d_command_wr_en),
@@ -293,7 +294,7 @@ module top_bh_fpga(
 
 
     fifo_bh_ww32d4096_rw256d512 u_fifo_p2d_data(
-        .rst(reset_n == 0 || ddr3_reset_n == 0),
+        .rst(reset_n == 0 || ui_clk_sync_rst),
         // write
         .wr_clk(okClk),
         .wr_en(fifo_p2d_data_wr_en),
@@ -310,7 +311,7 @@ module top_bh_fpga(
 
     // ########################## D TO P DOMAIN CROSSING FIFO ########################################################################################
     fifo_bh_ww32d16_rw32d16 u_fifo_d2p_command(
-        .rst(reset_n == 0 || ddr3_reset_n == 0),
+        .rst(reset_n == 0 || ui_clk_sync_rst),
         // write
         .wr_clk(sys_clk),
         .wr_en(fifo_d2p_command_wr_en),
@@ -328,7 +329,7 @@ module top_bh_fpga(
     // ########################## D TO A DOMAIN CROSSING FIFO ########################################################################################
 
     fifo_bh_ww32d16_rw32d16 u_fifo_d2a_command(
-        .rst(reset_n == 0 || ddr3_reset_n == 0),
+        .rst(reset_n == 0 || ui_clk_sync_rst),
         // write
         .wr_clk(sys_clk),
         .wr_en(fifo_d2a_command_wr_en),
@@ -343,7 +344,7 @@ module top_bh_fpga(
     );
 
     fifo_bh_ww66d1024_rw66d1024 u_fifo_d2a_data(
-        .rst(reset_n == 0 || ddr3_reset_n == 0),
+        .rst(reset_n == 0 || ui_clk_sync_rst),
         // write
         .wr_clk(sys_clk),
         .wr_en(0), // fifo_d2a_data_wr_en
@@ -360,7 +361,7 @@ module top_bh_fpga(
 
     // ########################## A TO D DOMAIN CROSSING FIFO ########################################################################################
     fifo_bh_ww32d16_rw32d16 u_fifo_a2d_command(
-        .rst(reset_n == 0 || ddr3_reset_n == 0),
+        .rst(reset_n == 0 || ui_clk_sync_rst),
         // write
         .wr_clk(sys_clk2),
         .wr_en(fifo_a2d_command_wr_en),
@@ -409,6 +410,7 @@ module top_bh_fpga(
 
         // Memory interface ports
         .ui_clk                          ( ui_clk                          ),
+        .ui_clk_sync_rst                          ( ui_clk_sync_rst                          ),
 
         .device_temp                      ( device_temp                      ),
 
@@ -553,9 +555,10 @@ module top_bh_fpga(
                 led = xem7310_led((8'b00000001 << led_pos) | p_state);
                 ep20wireout = 0;
             end 
-        end else if (p_state == P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE) begin
-            if (ep01wirein == 1) begin
+        end else if (p_state == P_STATE_03_DRAMFILL_WEIGHT_DATA || p_state == P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE) begin
+            if (ep01wirein != 0) begin
                 led = xem7310_led(fifo_p2d_data_dout[7:0]);
+                ep20wireout = fifo_p2d_data_dout[32*(ep01wirein-1) +: 32];
             end
         end
 
