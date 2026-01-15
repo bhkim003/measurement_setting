@@ -499,6 +499,11 @@ module top_bh_fpga(
     reg       led_dir;   // 0: left->right, 1: right->left
     reg config_all_domain_setting_ongoing, n_config_all_domain_setting_ongoing;
     reg [15:0] config_all_domain_setting_cnt, n_config_all_domain_setting_cnt;
+
+        
+    reg [31:0] dram_write_address, n_dram_write_address;
+    reg [31:0] dram_write_address_last, n_dram_write_address_last;
+    reg [3:0] dram_write_address_transition_cnt, n_dram_write_address_transition_cnt;
     always @ (*) begin
         ep20wireout = 0;
         led = xem7310_led(p_state & {8{blink_1000ms}});
@@ -559,6 +564,14 @@ module top_bh_fpga(
             if (ep01wirein != 0) begin
                 led = xem7310_led(fifo_p2d_data_dout[7:0]);
                 ep20wireout = fifo_p2d_data_dout[32*(ep01wirein-1) +: 32];
+                
+                if (ep01wirein == 10) begin
+                    led = xem7310_led(dram_write_address[7:0]);
+                    ep20wireout = dram_write_address;
+                end else if (ep01wirein == 11) begin
+                    led = xem7310_led(dram_write_address_last[7:0]);
+                    ep20wireout = dram_write_address_last;
+                end
             end
         end
 
@@ -597,10 +610,7 @@ module top_bh_fpga(
     end
 
     reg dram_reset_complete_trg_have_been_sent, n_dram_reset_complete_trg_have_been_sent;
-    
-    reg [31:0] dram_write_address, n_dram_write_address;
-    reg [31:0] dram_write_address_last, n_dram_write_address_last;
-    reg [3:0] dram_write_address_transition_cnt, n_dram_write_address_transition_cnt;
+
     always @(posedge okClk) begin
         if(!reset_n) begin
             p_state <= 0;
