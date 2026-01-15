@@ -530,6 +530,7 @@ module top_bh_fpga(
     end
 
 
+    reg [17 - 1:0] app_rd_data_check, n_app_rd_data_check;
     always @ (*) begin
         n_ep20wireout = ep01wirein;
         n_ep21wireout = p_state;
@@ -591,8 +592,8 @@ module top_bh_fpga(
         end else if (p_state == P_STATE_03_DRAMFILL_WEIGHT_DATA || p_state == P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE ||
                      p_state == P_STATE_05_DRAMFILL_INFERENCE_DATA || p_state == P_STATE_06_DRAMFILL_TRAINING_DATA) begin
             if (ep01wirein != 0) begin
-                led = xem7310_led(fifo_p2d_data_dout[7:0]);
-                n_ep20wireout = fifo_p2d_data_dout[32*(ep01wirein-1) +: 32];
+                // led = xem7310_led(fifo_p2d_data_dout[7:0]);
+                // n_ep20wireout = fifo_p2d_data_dout[32*(ep01wirein-1) +: 32];
                 
                 if (ep01wirein == 10) begin
                     led = xem7310_led(dram_write_address[7:0]);
@@ -606,6 +607,9 @@ module top_bh_fpga(
                 end else if (ep01wirein == 13) begin
                     led = xem7310_led(dram_write_cnt[7:0]);
                     n_ep20wireout = dram_write_cnt;
+                end else if (ep01wirein == 14) begin
+                    led = xem7310_led(app_rd_data_check[7:0]);
+                    n_ep20wireout = app_rd_data_check;
                 end
             end
         end
@@ -674,6 +678,8 @@ module top_bh_fpga(
             dram_write_address <= 0;
             dram_write_address_last <= 0;
             dram_write_address_transition_cnt <= 0;
+
+            app_rd_data_check <= 0;
         end
         else begin
             p_state <= n_p_state;
@@ -702,6 +708,8 @@ module top_bh_fpga(
             dram_write_address <= n_dram_write_address;
             dram_write_address_last <= n_dram_write_address_last;
             dram_write_address_transition_cnt <= n_dram_write_address_transition_cnt;
+
+            app_rd_data_check <= n_app_rd_data_check;
         end
     end
 
@@ -753,7 +761,17 @@ module top_bh_fpga(
         fifo_p2d_data_din = 0;
         pipe_in_ready = 0;
 
+
+        n_dram_write_cnt = dram_write_cnt;
+        n_app_rd_data_check = app_rd_data_check;
+
         
+        if(ep40trigin[29]) begin
+            if (!fifo_p2d_data_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd6};
+            end
+        end
         if (!fifo_d2p_command_empty && fifo_d2p_command_dout[14:0] == 6) begin
             fifo_d2p_command_rd_en = 1;
             // n_dram_write_cnt = dram_write_cnt + 1;
@@ -800,6 +818,7 @@ module top_bh_fpga(
                     fifo_d2p_command_rd_en = 1;
                     ep60trigout = {31'd0, 1'b1};
                     n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
+                    n_app_rd_data_check = fifo_d2p_command_dout[15 +: 17];
                 end
             end
             P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE: begin
@@ -952,7 +971,6 @@ module top_bh_fpga(
 
 
 
-
         // dram write address setting
         if(dram_write_address_transition_cnt == 0) begin
             if(ep40trigin[30]) begin
@@ -989,7 +1007,8 @@ module top_bh_fpga(
                 fifo_p2d_command_din = {1'b0, dram_write_address_last[16 +: 16], 15'd4};
             end
         end else if (dram_write_address_transition_cnt == 6) begin
-            if(fifo_p2d_command_empty) begin
+            if(!fifo_d2p_command_empty || fifo_d2p_command_dout[14:0] == 4) begin
+                fifo_d2p_command_rd_en = 1;
                 n_dram_write_address_transition_cnt = 0;
                 ep60trigout = {31'd0, 1'b1};
             end
