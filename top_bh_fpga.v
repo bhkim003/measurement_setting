@@ -242,7 +242,7 @@ module top_bh_fpga(
     wire fifo_p2d_data_rd_en;
     wire [256 - 1:0] fifo_p2d_data_dout;
     wire fifo_p2d_data_empty;
-
+    reg [32 - 1:0] fifo_p2d_data_wr_cnt;
 
     wire fifo_d2p_command_wr_en;
     wire [32 - 1:0] fifo_d2p_command_din;
@@ -274,6 +274,15 @@ module top_bh_fpga(
     wire fifo_a2d_command_empty;
 
 
+    always @(posedge okClk) begin
+        if (!reset_n) begin
+            fifo_p2d_data_wr_cnt <= 0;
+        end else if (ep40trigin[30]) begin
+            fifo_p2d_data_wr_cnt <= 0;
+        end else if (fifo_p2d_data_wr_en) begin
+            fifo_p2d_data_wr_cnt <= fifo_p2d_data_wr_cnt + 1;
+        end
+    end
 
 
     // ########################## P TO D DOMAIN CROSSING FIFO ########################################################################################
@@ -504,6 +513,7 @@ module top_bh_fpga(
     reg [31:0] dram_write_address, n_dram_write_address;
     reg [31:0] dram_write_address_last, n_dram_write_address_last;
     reg [3:0] dram_write_address_transition_cnt, n_dram_write_address_transition_cnt;
+
     always @ (*) begin
         ep20wireout = 0;
         led = xem7310_led(p_state & {8{blink_1000ms}});
@@ -560,7 +570,8 @@ module top_bh_fpga(
                 led = xem7310_led((8'b00000001 << led_pos) | p_state);
                 ep20wireout = 0;
             end 
-        end else if (p_state == P_STATE_03_DRAMFILL_WEIGHT_DATA || p_state == P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE) begin
+        end else if (p_state == P_STATE_03_DRAMFILL_WEIGHT_DATA || p_state == P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE ||
+                     p_state == P_STATE_05_DRAMFILL_INFERENCE_DATA || p_state == P_STATE_06_DRAMFILL_TRAINING_DATA) begin
             if (ep01wirein != 0) begin
                 led = xem7310_led(fifo_p2d_data_dout[7:0]);
                 ep20wireout = fifo_p2d_data_dout[32*(ep01wirein-1) +: 32];
@@ -571,6 +582,9 @@ module top_bh_fpga(
                 end else if (ep01wirein == 11) begin
                     led = xem7310_led(dram_write_address_last[7:0]);
                     ep20wireout = dram_write_address_last;
+                end else if (ep01wirein == 12) begin
+                    led = xem7310_led(fifo_p2d_data_wr_cnt[7:0]);
+                    ep20wireout = fifo_p2d_data_wr_cnt;
                 end
             end
         end
@@ -760,10 +774,47 @@ module top_bh_fpga(
                 end
             end
             P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE: begin
+                if(ep40trigin[0]) begin
+                    if(ep01wirein == 5) begin
+                        n_p_state = P_STATE_05_DRAMFILL_INFERENCE_DATA;
+                    end else if (ep01wirein == 6) begin
+                        n_p_state = P_STATE_06_DRAMFILL_TRAINING_DATA;
+                    end else if (ep01wirein == 7) begin
+                        n_p_state = P_STATE_07_ASIC_CONFIG;
+                    end else if (ep01wirein == 8) begin
+                        n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
+                    end 
+                end
             end
             P_STATE_05_DRAMFILL_INFERENCE_DATA: begin
+                if (!fifo_p2d_data_full) begin
+                    pipe_in_ready = 1;
+                    if (pipe_in_valid) begin
+                        fifo_p2d_data_wr_en = 1;
+                        fifo_p2d_data_din = pipe_in_data;
+                    end
+                end
+                // dram INFERENCE_DATA write complete
+                if (!fifo_d2p_command_empty && fifo_d2p_command_dout[14:0] == 5) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
+                end
             end
             P_STATE_06_DRAMFILL_TRAINING_DATA: begin
+                if (!fifo_p2d_data_full) begin
+                    pipe_in_ready = 1;
+                    if (pipe_in_valid) begin
+                        fifo_p2d_data_wr_en = 1;
+                        fifo_p2d_data_din = pipe_in_data;
+                    end
+                end
+                // dram TRAINING_DATA write complete
+                if (!fifo_d2p_command_empty && fifo_d2p_command_dout[14:0] == 5) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
+                end
             end
             P_STATE_07_ASIC_CONFIG: begin
             end
