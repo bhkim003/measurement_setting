@@ -102,13 +102,13 @@ localparam  DRAM_READ       = 3'b001,
 
 
 
-        reg	         	app_en, n_app_en;
-        reg	[3 - 1:0] 	app_cmd, n_app_cmd;
-        reg	[29 - 1:0]	app_addr, n_app_addr; // 29bit address @ 7310,  30bit address @ 7360?, 29bit @ 7310? Please Check
-        reg	         	app_wdf_wren, n_app_wdf_wren;
-        reg	[256 - 1:0] app_wdf_data, n_app_wdf_data;
-        reg	         	app_wdf_end, n_app_wdf_end;
-        reg	[32 - 1:0]  app_wdf_mask, n_app_wdf_mask;
+        reg	         	app_en;
+        reg	[3 - 1:0] 	app_cmd;
+        reg	[29 - 1:0]	app_addr; // 29bit address @ 7310,  30bit address @ 7360?, 29bit @ 7310? Please Check
+        reg	         	app_wdf_wren;
+        reg	[256 - 1:0] app_wdf_data;
+        reg	         	app_wdf_end;
+        reg	[32 - 1:0]  app_wdf_mask;
 
         wire	         	app_rdy;
         wire	[256 - 1:0] app_rd_data;
@@ -145,13 +145,6 @@ localparam  DRAM_READ       = 3'b001,
             app_rd_data_check <= 0;
 
             
-                app_en <= 0;
-                app_cmd <= 0;
-                app_addr <= 0;
-                app_wdf_wren <= 0;
-                app_wdf_data <= 0;
-                app_wdf_end <= 0;
-                app_wdf_mask <= 0;
 
         end else begin
             config_d_domain_setting_cnt <= n_config_d_domain_setting_cnt;
@@ -178,14 +171,6 @@ localparam  DRAM_READ       = 3'b001,
             dram_writing_check_read_catch_flag <= n_dram_writing_check_read_catch_flag;
             app_rd_data_check <= n_app_rd_data_check;
 
-            
-                app_en <= n_app_en;
-                app_cmd <= n_app_cmd;
-                app_addr <= n_app_addr;
-                app_wdf_wren <= n_app_wdf_wren;
-                app_wdf_data <= n_app_wdf_data;
-                app_wdf_end <= n_app_wdf_end;
-                app_wdf_mask <= n_app_wdf_mask;
         end
     end
 
@@ -238,13 +223,13 @@ localparam  DRAM_READ       = 3'b001,
         n_dram_writing_check_read_catch_flag = dram_writing_check_read_catch_flag;
         n_app_rd_data_check = app_rd_data_check;
 
-        n_app_en = 0;
-        n_app_cmd = 0;
-        n_app_addr = 0;
-        n_app_wdf_wren = 0;
-        n_app_wdf_data = 0;
-        n_app_wdf_end = 0;
-        n_app_wdf_mask = 0;
+        app_en = 0;
+        app_cmd = 0;
+        app_addr = 0;
+        app_wdf_wren = 0;
+        app_wdf_data = 0;
+        app_wdf_end = 0;
+        app_wdf_mask = 0;
         
         fifo_p2d_data_rd_en = 0;
 
@@ -342,14 +327,14 @@ localparam  DRAM_READ       = 3'b001,
         if (fifo_p2d_data_valid) begin
             if (app_rdy && app_wdf_rdy) begin
                 fifo_p2d_data_rd_en = 1;
-                n_app_en = 1;
-                n_app_cmd = DRAM_WRITE;
-                n_app_addr = dram_write_address[0 +:29] + write_count;
-                n_app_wdf_wren = 1;
-                n_app_wdf_data = fifo_p2d_data_dout;
-                // n_app_wdf_data = fifo_p2d_data_dout_align;
-                n_app_wdf_end = 1;
-                n_app_wdf_mask = 0;
+                app_en = 1;
+                app_cmd = DRAM_WRITE;
+                app_addr = dram_write_address[0 +:29] + write_count;
+                app_wdf_wren = 1;
+                app_wdf_data = fifo_p2d_data_dout;
+                // app_wdf_data = fifo_p2d_data_dout_align;
+                app_wdf_end = 1;
+                app_wdf_mask = 0;
                 n_write_count = write_count + 8; // 256bit / 32byte = 8
                 if (dram_write_address_last == dram_write_address[0 +:29] + write_count) begin
                     n_dram_writing_finish_flag = 1;
@@ -372,10 +357,10 @@ localparam  DRAM_READ       = 3'b001,
             if (dram_writing_check_read_flag == 0) begin
                 if (app_rdy) begin
                     n_dram_writing_check_read_flag = 1;
-                    n_app_en = 1;
-                    n_app_cmd = DRAM_READ;
-                    n_app_addr = dram_write_address_last;
-                    // n_app_addr = dram_write_address_last-8;
+                    app_en = 1;
+                    app_cmd = DRAM_READ;
+                    app_addr = dram_write_address_last;
+                    // app_addr = dram_write_address_last-8;
                 end
             end else begin
                 if (dram_writing_check_read_catch_flag == 0) begin
