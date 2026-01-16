@@ -7,12 +7,14 @@ module d_domain(
         output reg fifo_p2d_command_rd_en,
         input [32 - 1:0] fifo_p2d_command_dout,
         input fifo_p2d_command_empty,
+        input fifo_p2d_command_valid,
 
 
         // p2d data fifo
         output reg fifo_p2d_data_rd_en,
         input [256 - 1:0] fifo_p2d_data_dout,
         input fifo_p2d_data_empty,
+        input fifo_p2d_data_valid,
 
 
         // d2p command fifo
@@ -37,6 +39,7 @@ module d_domain(
         output reg fifo_a2d_command_rd_en,
         input [32 - 1:0] fifo_a2d_command_dout,
         input fifo_a2d_command_empty,
+        input fifo_a2d_command_valid,
 
 
 
@@ -253,7 +256,7 @@ localparam  DRAM_READ       = 3'b001,
             end 
         end
 
-        if (!fifo_p2d_command_empty) begin
+        if (fifo_p2d_command_valid) begin
             if (fifo_p2d_command_dout[14:0] == 1) begin
                 if (!fifo_d2a_command_full) begin
                     fifo_p2d_command_rd_en = 1;
@@ -320,7 +323,7 @@ localparam  DRAM_READ       = 3'b001,
         end
 
 
-        if (!fifo_a2d_command_empty) begin
+        if (fifo_a2d_command_valid) begin
             if (fifo_a2d_command_dout[14:0] == 2) begin
                 if (config_d_domain_setting_cnt == 39) begin
                     if (!fifo_d2p_command_full) begin
@@ -336,7 +339,7 @@ localparam  DRAM_READ       = 3'b001,
 
 
 
-        if (!fifo_p2d_data_empty) begin
+        if (fifo_p2d_data_valid) begin
             if (app_rdy && app_wdf_rdy) begin
                 fifo_p2d_data_rd_en = 1;
                 n_app_en = 1;
@@ -356,7 +359,7 @@ localparam  DRAM_READ       = 3'b001,
 
 
 
-        if (!fifo_p2d_command_empty) begin
+        if (fifo_p2d_command_valid) begin
             if (fifo_p2d_command_dout[14:0] == 6) begin
                 if (!fifo_d2p_command_full) begin
                     fifo_d2p_command_wr_en = 1;

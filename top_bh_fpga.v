@@ -231,6 +231,7 @@ module top_bh_fpga(
     wire fifo_p2d_command_rd_en;
     wire [32 - 1:0] fifo_p2d_command_dout;
     wire fifo_p2d_command_empty;
+    wire fifo_p2d_command_valid;
 
 
     reg fifo_p2d_data_wr_en;
@@ -239,6 +240,7 @@ module top_bh_fpga(
     wire fifo_p2d_data_rd_en;
     wire [256 - 1:0] fifo_p2d_data_dout;
     wire fifo_p2d_data_empty;
+    wire fifo_p2d_data_valid;
     reg [32 - 1:0] fifo_p2d_data_wr_cnt;
     reg [32 - 1:0] dram_write_cnt, n_dram_write_cnt;
 
@@ -248,6 +250,7 @@ module top_bh_fpga(
     reg fifo_d2p_command_rd_en;
     wire [32 - 1:0] fifo_d2p_command_dout;
     wire fifo_d2p_command_empty;
+    wire fifo_d2p_command_valid;
 
     wire fifo_d2a_command_wr_en;
     wire [32 - 1:0] fifo_d2a_command_din;
@@ -255,6 +258,7 @@ module top_bh_fpga(
     wire fifo_d2a_command_rd_en;
     wire [32 - 1:0] fifo_d2a_command_dout;
     wire fifo_d2a_command_empty;
+    wire fifo_d2a_command_valid;
 
     wire fifo_d2a_data_wr_en;
     wire [66 - 1:0] fifo_d2a_data_din;
@@ -262,6 +266,7 @@ module top_bh_fpga(
     wire fifo_d2a_data_rd_en;
     wire [66 - 1:0] fifo_d2a_data_dout;
     wire fifo_d2a_data_empty;
+    wire fifo_d2a_data_valid;
 
 
     wire fifo_a2d_command_wr_en;
@@ -270,6 +275,7 @@ module top_bh_fpga(
     wire fifo_a2d_command_rd_en;
     wire [32 - 1:0] fifo_a2d_command_dout;
     wire fifo_a2d_command_empty;
+    wire fifo_a2d_command_valid;
 
 
     always @(posedge okClk) begin
@@ -301,7 +307,7 @@ module top_bh_fpga(
         .rd_en(fifo_p2d_command_rd_en),
         .dout(fifo_p2d_command_dout),
         .empty(fifo_p2d_command_empty),
-        .valid( )
+        .valid(fifo_p2d_command_valid)
     );
 
 
@@ -317,7 +323,7 @@ module top_bh_fpga(
         .rd_en(fifo_p2d_data_rd_en),
         .dout(fifo_p2d_data_dout),
         .empty(fifo_p2d_data_empty),
-        .valid()
+        .valid(fifo_p2d_data_valid)
     );
     // ########################## P TO D DOMAIN CROSSING FIFO ########################################################################################
 
@@ -334,7 +340,7 @@ module top_bh_fpga(
         .rd_en(fifo_d2p_command_rd_en),
         .dout(fifo_d2p_command_dout),
         .empty(fifo_d2p_command_empty),
-        .valid()
+        .valid(fifo_d2p_command_valid)
     );
     // ########################## D TO P DOMAIN CROSSING FIFO ########################################################################################
 
@@ -352,7 +358,7 @@ module top_bh_fpga(
         .rd_en(fifo_d2a_command_rd_en),
         .dout(fifo_d2a_command_dout),
         .empty(fifo_d2a_command_empty),
-        .valid()
+        .valid(fifo_d2a_command_valid)
     );
 
     fifo_bh_ww66d1024_rw66d1024 u_fifo_d2a_data(
@@ -367,7 +373,7 @@ module top_bh_fpga(
         .rd_en(0), // fifo_d2a_data_rd_en
         .dout(fifo_d2a_data_dout),
         .empty(fifo_d2a_data_empty),
-        .valid()
+        .valid(fifo_d2a_data_valid)
     );
     // ########################## D TO A DOMAIN CROSSING FIFO ########################################################################################
 
@@ -384,7 +390,7 @@ module top_bh_fpga(
         .rd_en(fifo_a2d_command_rd_en),
         .dout(fifo_a2d_command_dout),
         .empty(fifo_a2d_command_empty),
-        .valid()
+        .valid(fifo_a2d_command_valid)
     );
     // ########################## A TO D DOMAIN CROSSING FIFO ########################################################################################
     
@@ -398,10 +404,12 @@ module top_bh_fpga(
         .fifo_p2d_command_rd_en ( fifo_p2d_command_rd_en ),
         .fifo_p2d_command_dout  ( fifo_p2d_command_dout  ),
         .fifo_p2d_command_empty ( fifo_p2d_command_empty ),
+        .fifo_p2d_command_valid ( fifo_p2d_command_valid ),
 
         .fifo_p2d_data_rd_en    ( fifo_p2d_data_rd_en    ),
         .fifo_p2d_data_dout     ( fifo_p2d_data_dout     ),
         .fifo_p2d_data_empty    ( fifo_p2d_data_empty    ),
+        .fifo_p2d_data_valid    ( fifo_p2d_data_valid    ),
 
         .fifo_d2p_command_wr_en ( fifo_d2p_command_wr_en ),
         .fifo_d2p_command_din   ( fifo_d2p_command_din   ),
@@ -418,6 +426,7 @@ module top_bh_fpga(
         .fifo_a2d_command_rd_en    ( fifo_a2d_command_rd_en    ),
         .fifo_a2d_command_dout     ( fifo_a2d_command_dout     ),
         .fifo_a2d_command_empty    ( fifo_a2d_command_empty    ),
+        .fifo_a2d_command_valid    ( fifo_a2d_command_valid    ),
 
 
         // Memory interface ports
@@ -456,10 +465,12 @@ module top_bh_fpga(
         .fifo_d2a_command_rd_en ( fifo_d2a_command_rd_en ),
         .fifo_d2a_command_dout  ( fifo_d2a_command_dout  ),
         .fifo_d2a_command_empty ( fifo_d2a_command_empty ),
+        .fifo_d2a_command_valid ( fifo_d2a_command_valid ),
 
         .fifo_d2a_data_rd_en    ( fifo_d2a_data_rd_en    ),
         .fifo_d2a_data_dout     ( fifo_d2a_data_dout     ),
         .fifo_d2a_data_empty    ( fifo_d2a_data_empty    ),
+        .fifo_d2a_data_valid    ( fifo_d2a_data_valid    ),
 
         .fifo_a2d_command_wr_en ( fifo_a2d_command_wr_en ),
         .fifo_a2d_command_din   ( fifo_a2d_command_din   ),
@@ -772,7 +783,7 @@ module top_bh_fpga(
                 fifo_p2d_command_din = {17'd0, 15'd6};
             end
         end
-        if (!fifo_d2p_command_empty && fifo_d2p_command_dout[14:0] == 6) begin
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 6) begin
             fifo_d2p_command_rd_en = 1;
             // n_dram_write_cnt = dram_write_cnt + 1;
             n_dram_write_cnt = fifo_d2p_command_dout[15 +: 17];
@@ -814,7 +825,7 @@ module top_bh_fpga(
                     end
                 end
                 // dram weight write complete
-                if (!fifo_d2p_command_empty && fifo_d2p_command_dout[14:0] == 5) begin
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 5) begin
                     fifo_d2p_command_rd_en = 1;
                     ep60trigout = {31'd0, 1'b1};
                     n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
@@ -843,7 +854,7 @@ module top_bh_fpga(
                     end
                 end
                 // dram INFERENCE_DATA write complete
-                if (!fifo_d2p_command_empty && fifo_d2p_command_dout[14:0] == 5) begin
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 5) begin
                     fifo_d2p_command_rd_en = 1;
                     ep60trigout = {31'd0, 1'b1};
                     n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
@@ -858,7 +869,7 @@ module top_bh_fpga(
                     end
                 end
                 // dram TRAINING_DATA write complete
-                if (!fifo_d2p_command_empty && fifo_d2p_command_dout[14:0] == 5) begin
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 5) begin
                     fifo_d2p_command_rd_en = 1;
                     ep60trigout = {31'd0, 1'b1};
                     n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
@@ -889,7 +900,7 @@ module top_bh_fpga(
 
 
         if (p_state == P_STATE_00_IDLE) begin
-            if (!fifo_d2p_command_empty && fifo_d2p_command_dout[14:0] == 3) begin
+            if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 3) begin
                 if (dram_reset_complete_trg_have_been_sent == 0) begin
                     ep60trigout = {31'd0, 1'b1};
                     n_dram_reset_complete_trg_have_been_sent = 1;
@@ -1007,7 +1018,7 @@ module top_bh_fpga(
                 fifo_p2d_command_din = {1'b0, dram_write_address_last[16 +: 16], 15'd4};
             end
         end else if (dram_write_address_transition_cnt == 6) begin
-            if(!fifo_d2p_command_empty || fifo_d2p_command_dout[14:0] == 4) begin
+            if(fifo_d2p_command_valid || fifo_d2p_command_dout[14:0] == 4) begin
                 fifo_d2p_command_rd_en = 1;
                 n_dram_write_address_transition_cnt = 0;
                 ep60trigout = {31'd0, 1'b1};
@@ -1370,7 +1381,7 @@ module top_bh_fpga(
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 39) begin
-                if (!fifo_d2p_command_empty) begin
+                if (fifo_d2p_command_valid) begin
                     if (fifo_d2p_command_dout[14:0] == 2) begin
                         fifo_d2p_command_rd_en = 1;
                         n_config_all_domain_setting_cnt = 0;

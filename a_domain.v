@@ -6,12 +6,14 @@ module a_domain(
         output reg fifo_d2a_command_rd_en,
         input [32 - 1:0] fifo_d2a_command_dout,
         input fifo_d2a_command_empty,
+        input fifo_d2a_command_valid,
 
 
         // d2a data fifo
         output reg fifo_d2a_data_rd_en,
         input [66 - 1:0] fifo_d2a_data_dout,
         input fifo_d2a_data_empty,
+        input fifo_d2a_data_valid,
 
 
         // a2d command fifo
@@ -113,7 +115,7 @@ module a_domain(
         fifo_a2d_command_wr_en = 0;
         fifo_a2d_command_din = 0;
 
-        if (!fifo_d2a_command_empty) begin
+        if (fifo_d2a_command_valid) begin
             if (fifo_d2a_command_dout[14:0] == 1) begin
                 fifo_d2a_command_rd_en = 1;
                 if (config_a_domain_setting_cnt == 0) begin
