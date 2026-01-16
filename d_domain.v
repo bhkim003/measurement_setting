@@ -372,17 +372,19 @@ localparam  DRAM_READ       = 3'b001,
                     n_app_en = 1;
                     n_app_cmd = DRAM_READ;
                     n_app_addr = dram_write_address_last;
+                    // n_app_addr = dram_write_address_last-8;
                 end
             end else begin
                 if (dram_writing_check_read_catch_flag == 0) begin
                     if (app_rd_data_valid) begin
                         n_dram_writing_check_read_catch_flag = 1;
                         n_app_rd_data_check = app_rd_data[16:0];
+                        // n_app_rd_data_check = app_rd_data[16+128:128];
                     end
                 end else begin
                     if (!fifo_d2p_command_full) begin
                         fifo_d2p_command_wr_en = 1;
-                        fifo_d2p_command_din = {app_rd_data_check, 15'd5};
+                        fifo_d2p_command_din = {1'b0, app_rd_data_check[15:0], 15'd5};
                         n_dram_writing_finish_flag = 0;
                         n_dram_writing_check_read_flag = 0;
                         n_dram_writing_check_read_catch_flag = 0;

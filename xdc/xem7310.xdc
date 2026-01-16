@@ -95,8 +95,8 @@ set_property PACKAGE_PIN W12 [get_ports {sys_clk_n}]
 
 set_property DIFF_TERM FALSE [get_ports {sys_clk_p}]
 
-create_clock -name sys_clk -period 5 [get_ports sys_clk_p]
-set_clock_groups -asynchronous -group [get_clocks {sys_clk}] -group [get_clocks {mmcm0_clk0 okUH0}]
+# create_clock -name sys_clk -period 5 [get_ports sys_clk_p]
+# set_clock_groups -asynchronous -group [get_clocks {sys_clk}] -group [get_clocks {mmcm0_clk0 okUH0}]
 
 ############################################################################
 ## User Reset
@@ -515,3 +515,8 @@ set_property PACKAGE_PIN H14 [get_ports {ddr3_ck_n[0]}]
 set_property SLEW FAST [get_ports {ddr3_ck*}]
 set_property IOSTANDARD DIFF_SSTL15 [get_ports {ddr3_ck_*}]
 
+# #set_clock_groups -asynchronous -group [get_clocks {mmcm0_clk0 okUH0}] -group [get_clocks {sys_clk_p clk_pll_i}] -group [get_clocks clk_ref_mmcm_300] -group [get_clocks mmcm_ps_clk_bufg_in]
+# # set_clock_groups -asynchronous -group [get_clocks {mmcm0_clk0 okUH0}] -group [get_clocks {sys_clk_p clk_pll_i}] -group [get_clocks clk_ref_mmcm_300] -group [get_clocks mmcm_ps_clk_bufg_in] -group [get_clocks IN_clk] -group [get_clocks CLK_FPGA]
+# # set_clock_groups -asynchronous -group [get_clocks {sys_clk}] -group [get_clocks {okUH0}]
+# set_clock_groups -asynchronous -group [get_clocks {mmcm0_clk0 okUH0}] -group [get_clocks {sys_clk_p clk_pll_i}] -group [get_clocks clk_ref_mmcm_300] -group [get_clocks mmcm_ps_clk_bufg_in] -group [get_clocks -of_objects [get_pins u_clk_wiz_0/clk_out1]] -group [get_clocks IN_clk]
+set_clock_groups -asynchronous -group [get_clocks {mmcm0_clk0 okUH0}] -group [get_clocks {sys_clk_p clk_pll_i}]
