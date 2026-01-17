@@ -1,3 +1,5 @@
 zz_measure_dataset
 *.npy
 init_weight.txt
+total_inference_dataset_hex_string.txt
+total_training_dataset_hex_string.txt

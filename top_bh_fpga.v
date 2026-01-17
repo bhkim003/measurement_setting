@@ -343,7 +343,7 @@ module top_bh_fpga(
         .valid(fifo_d2p_command_valid)
     );
     // ########################## D TO P DOMAIN CROSSING FIFO ########################################################################################
-
+ 
     // ########################## D TO A DOMAIN CROSSING FIFO ########################################################################################
 
     fifo_bh_ww32d16_rw32d16 u_fifo_d2a_command(
@@ -858,6 +858,7 @@ module top_bh_fpga(
                     fifo_d2p_command_rd_en = 1;
                     ep60trigout = {31'd0, 1'b1};
                     n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
+                    n_app_rd_data_check = fifo_d2p_command_dout[15 +: 17];
                 end
             end
             P_STATE_06_DRAMFILL_TRAINING_DATA: begin
@@ -873,6 +874,7 @@ module top_bh_fpga(
                     fifo_d2p_command_rd_en = 1;
                     ep60trigout = {31'd0, 1'b1};
                     n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
+                    n_app_rd_data_check = fifo_d2p_command_dout[15 +: 17];
                 end
             end
             P_STATE_07_ASIC_CONFIG: begin

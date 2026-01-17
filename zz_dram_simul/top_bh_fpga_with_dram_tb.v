@@ -1217,7 +1217,10 @@ module top_bh_fpga_with_dram_tb;
         Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
         // 11. p_config done mode (Python: SetWireInValue(0x01, 2) -> Trigger(0x40, 0))
-        $display("######### p_config done mode #########");
+        $display("######### P_STATE_02_WORKLOAD_CONFIG_DONE #########");
+        $display("######### P_STATE_02_WORKLOAD_CONFIG_DONE #########");
+        $display("######### P_STATE_02_WORKLOAD_CONFIG_DONE #########");
+        $display("######### P_STATE_02_WORKLOAD_CONFIG_DONE #########");
         SetWireInValue(8'h01, 32'd2, NO_MASK);
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 0);
@@ -1233,6 +1236,9 @@ module top_bh_fpga_with_dram_tb;
 
 
 
+        $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode #########");
+        $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode #########");
+        $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode #########");
         $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode #########");
         SetWireInValue(8'h01, 32'd3, NO_MASK);
         UpdateWireIns;
@@ -1268,9 +1274,25 @@ module top_bh_fpga_with_dram_tb;
 
 
 
+        $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
+        $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
+        $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
+        $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
 
 
 
+
+        $display("######### P_STATE_05_DRAMFILL_INFERENCE_DATA mode ######################################################################");
+        $display("######### P_STATE_05_DRAMFILL_INFERENCE_DATA mode ######################################################################");
+        $display("######### P_STATE_05_DRAMFILL_INFERENCE_DATA mode ######################################################################");
+        $display("######### P_STATE_05_DRAMFILL_INFERENCE_DATA mode ######################################################################");
+
+        SetWireInValue(8'h01, 32'd5, NO_MASK); // start address
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 30);
+
+        SetWireInValue(8'h01, 32'd0, NO_MASK); // start address
+        UpdateWireIns;
 
 $finish;
 
