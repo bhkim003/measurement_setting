@@ -304,6 +304,12 @@ localparam  DRAM_READ       = 3'b001,
                         fifo_d2p_command_din = {17'd0, 15'd4};
                     end
                 end
+            end else if (fifo_p2d_command_dout[14:0] == 6) begin
+                if (!fifo_d2p_command_full) begin
+                    fifo_p2d_command_rd_en = 1;
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = {write_count[16:0], 15'd6};
+                end
             end
         end
 
@@ -344,14 +350,6 @@ localparam  DRAM_READ       = 3'b001,
 
 
 
-        if (fifo_p2d_command_valid) begin
-            if (fifo_p2d_command_dout[14:0] == 6) begin
-                if (!fifo_d2p_command_full) begin
-                    fifo_d2p_command_wr_en = 1;
-                    fifo_d2p_command_din = {write_count[16:0], 15'd6};
-                end
-            end
-        end
 
         if (dram_writing_finish_flag) begin
             if (dram_writing_check_read_flag == 0) begin
