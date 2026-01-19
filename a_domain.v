@@ -1,3 +1,4 @@
+// `define NO_BUF 1
 module a_domain(
         input clk_a_domain,
         input reset_n,
@@ -41,6 +42,107 @@ module a_domain(
     );
 
 
+    // ######### for TEST ###########################################################################
+    // ######### for TEST ###########################################################################
+    // ######### for TEST ###########################################################################
+    reg [31:0] config_stream_cnt, n_config_stream_cnt;
+    reg asic_start_ready_for_test, n_asic_start_ready_for_test;
+    reg [65:0] config_stream_catch_41421, n_config_stream_catch_41421;
+    reg [65:0] config_stream_catch_41418, n_config_stream_catch_41418;
+    // ######### for TEST ###########################################################################
+    // ######### for TEST ###########################################################################
+    // ######### for TEST ###########################################################################
+
+
+    // ######### IN OUT ###########################################################################
+    // ######### IN OUT ###########################################################################
+    // ######### IN OUT ###########################################################################
+    reg input_streaming_ready_from_asic_to_fpga_buf;
+    reg start_ready_from_asic_to_fpga_buf;
+    reg inferenced_label_from_asic_to_fpga_buf;
+    always @(posedge clk_a_domain) begin
+        if(!reset_n) begin
+            input_streaming_ready_from_asic_to_fpga_buf <= 0;
+            start_ready_from_asic_to_fpga_buf <= 0;
+            inferenced_label_from_asic_to_fpga_buf <= 0;
+        end
+        else begin
+            input_streaming_ready_from_asic_to_fpga_buf <= input_streaming_ready_from_asic_to_fpga;
+            start_ready_from_asic_to_fpga_buf <= start_ready_from_asic_to_fpga;
+            inferenced_label_from_asic_to_fpga_buf <= inferenced_label_from_asic_to_fpga;
+        end
+    end
+    wire input_streaming_ready;
+    wire start_ready;
+    wire inferenced_label;
+	`ifdef NO_BUF
+        assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga;
+        // assign start_ready = start_ready_from_asic_to_fpga;
+        // assign start_ready = 1'b1;
+        assign start_ready = asic_start_ready_for_test;
+        assign inferenced_label = inferenced_label_from_asic_to_fpga;
+	`else
+        assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga_buf;
+        // assign start_ready = start_ready_from_asic_to_fpga_buf;
+        // assign start_ready = 1'b1;
+        assign start_ready = asic_start_ready_for_test;
+        assign inferenced_label = inferenced_label_from_asic_to_fpga_buf;
+	`endif
+
+
+
+
+    reg input_streaming_valid_from_fpga_to_asic_buf, input_streaming_valid;
+    reg [65:0] input_streaming_data_from_fpga_to_asic_buf, input_streaming_data;
+    reg start_training_signal_from_fpga_to_asic_buf, start_training_signal; 
+    reg start_inference_signal_from_fpga_to_asic_buf, start_inference_signal; 
+    always @(posedge clk_a_domain) begin
+        if(!reset_n) begin
+            input_streaming_valid_from_fpga_to_asic_buf <= 0;
+            input_streaming_data_from_fpga_to_asic_buf <= 0;
+            start_training_signal_from_fpga_to_asic_buf <= 0;
+            start_inference_signal_from_fpga_to_asic_buf <= 0;
+        end
+        else begin
+            input_streaming_valid_from_fpga_to_asic_buf <= input_streaming_valid;
+            input_streaming_data_from_fpga_to_asic_buf <= input_streaming_data;
+            start_training_signal_from_fpga_to_asic_buf <= start_training_signal;
+            start_inference_signal_from_fpga_to_asic_buf <= start_inference_signal;
+        end
+    end
+    assign reset_n_from_fpga_to_asic = reset_n; // RESET SIGNAL NO NEES BUFFER !!!
+	`ifdef NO_BUF
+        assign input_streaming_valid_from_fpga_to_asic = input_streaming_valid;
+        assign input_streaming_data_from_fpga_to_asic = input_streaming_data;
+        assign start_training_signal_from_fpga_to_asic = start_training_signal;
+        assign start_inference_signal_from_fpga_to_asic = start_inference_signal;
+	`else
+        assign input_streaming_valid_from_fpga_to_asic = input_streaming_valid_from_fpga_to_asic_buf;
+        assign input_streaming_data_from_fpga_to_asic = input_streaming_data_from_fpga_to_asic_buf;
+        assign start_training_signal_from_fpga_to_asic = start_training_signal_from_fpga_to_asic_buf;
+        assign start_inference_signal_from_fpga_to_asic = start_inference_signal_from_fpga_to_asic_buf;
+	`endif
+    // ######### IN OUT ###########################################################################
+    // ######### IN OUT ###########################################################################
+    // ######### IN OUT ###########################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     reg [15:0] config_a_domain_setting_cnt, n_config_a_domain_setting_cnt;
 
     reg [1:0] a_config_asic_mode, n_a_config_asic_mode; // 0 training_only, 1 train_inf_sweep, 2 inference_only 
@@ -54,7 +156,8 @@ module a_domain(
     reg a_config_loser_encourage_mode, n_a_config_loser_encourage_mode;
     reg [17*15 - 1:0] a_config_layer1_cut_list, n_a_config_layer1_cut_list;
     reg [16*15 - 1:0] a_config_layer2_cut_list, n_a_config_layer2_cut_list;
-
+    reg config_on_real, n_config_on_real;
+    reg start_ready_oneclk_past;
 
 
     always @(posedge clk_a_domain) begin
@@ -72,6 +175,8 @@ module a_domain(
             a_config_loser_encourage_mode  <= 0;
             a_config_layer1_cut_list  <= 0;
             a_config_layer2_cut_list  <= 0;
+            config_on_real  <= 0;
+            start_ready_oneclk_past <= 0;
         end
         else begin
             config_a_domain_setting_cnt <= n_config_a_domain_setting_cnt;
@@ -87,9 +192,10 @@ module a_domain(
             a_config_loser_encourage_mode <= n_a_config_loser_encourage_mode;
             a_config_layer1_cut_list <= n_a_config_layer1_cut_list;
             a_config_layer2_cut_list <= n_a_config_layer2_cut_list;
+            config_on_real <= n_config_on_real;
+            start_ready_oneclk_past <= start_ready;
         end
     end
-
 
     always @ (*) begin
         n_config_a_domain_setting_cnt = config_a_domain_setting_cnt;
@@ -110,10 +216,11 @@ module a_domain(
         n_a_config_loser_encourage_mode = a_config_loser_encourage_mode;
         n_a_config_layer1_cut_list = a_config_layer1_cut_list;
         n_a_config_layer2_cut_list = a_config_layer2_cut_list;
-
+        n_config_on_real = config_on_real;
 
         fifo_a2d_command_wr_en = 0;
         fifo_a2d_command_din = 0;
+
 
         if (fifo_d2a_command_valid) begin
             if (fifo_d2a_command_dout[14:0] == 1) begin
@@ -245,7 +352,94 @@ module a_domain(
                 fifo_a2d_command_din = {{17{1'b0}}, 15'd2};
             end 
         end
+
+
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 7) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_d2a_command_rd_en = 1; 
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = {{16{1'b0}}, start_ready, 15'd7};
+                end
+            end
+        end
+
+
+
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 8) begin
+                if (start_ready) begin
+                    if (!fifo_a2d_command_full) begin
+                        fifo_d2a_command_rd_en = 1; 
+                        fifo_a2d_command_wr_en = 1;
+                        fifo_a2d_command_din = {{17{1'b0}}, 15'd8};
+                        n_config_on_real = 1;
+                    end
+                end
+            end
+        end
+
+        if (config_on_real) begin
+            if(start_ready_oneclk_past == 0 && start_ready == 1) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    // fifo_a2d_command_din = {config_stream_cnt[15:0], start_ready, 15'd9};
+                    fifo_a2d_command_din = {config_stream_catch_41418[15:0], start_ready, 15'd9};
+                    // fifo_a2d_command_din = {config_stream_catch_41421[15:0], start_ready, 15'd9};
+                    n_config_on_real = 0;
+                end
+            end
+        end
+
+
     end
+
+
+
+
+
+
+
+
+
+
+    always @ (*) begin
+        input_streaming_valid = 0;
+        input_streaming_data = 0;
+        start_training_signal = 0;
+        start_inference_signal = 0;
+
+
+        fifo_d2a_data_rd_en = 0;
+
+
+
+
+
+        if (fifo_d2a_data_valid) begin
+            fifo_d2a_data_rd_en = 1;
+            input_streaming_valid = 1;
+            input_streaming_data = fifo_d2a_data_dout;
+        end
+    end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     wire signed [16:0] a_config_layer1_cut [0:14];
@@ -257,6 +451,75 @@ module a_domain(
             assign a_config_layer2_cut[cut_i] = a_config_layer2_cut_list[16*cut_i +: 16];
         end
     endgenerate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ######### for TEST ###########################################################################
+    // ######### for TEST ###########################################################################
+    // ######### for TEST ###########################################################################
+    always @(posedge clk_a_domain) begin
+        if(!reset_n) begin
+            config_stream_cnt <= 0;
+            asic_start_ready_for_test <= 1;
+            config_stream_catch_41421 <= 0;
+            config_stream_catch_41418 <= 0;
+        end
+        else begin
+            config_stream_cnt <= n_config_stream_cnt;
+            asic_start_ready_for_test <= n_asic_start_ready_for_test;
+            config_stream_catch_41421 <= n_config_stream_catch_41421;
+            config_stream_catch_41418 <= n_config_stream_catch_41418;
+        end
+    end
+    always @ (*) begin
+        n_config_stream_cnt = config_stream_cnt;
+        n_asic_start_ready_for_test = asic_start_ready_for_test;
+        n_config_stream_catch_41421 = config_stream_catch_41421;
+        n_config_stream_catch_41418 = config_stream_catch_41418;
+
+
+        if (config_stream_cnt == 1) begin 
+            n_asic_start_ready_for_test = 0;
+        end
+
+        if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
+            n_config_stream_cnt = config_stream_cnt + 1;
+        end
+        if (config_stream_cnt == 41424) begin 
+            n_asic_start_ready_for_test = 1;
+        end
+
+        
+        if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
+            if (config_stream_cnt == 41424 - 3 - 3) begin 
+                n_config_stream_catch_41418 = fifo_d2a_data_dout;
+            end
+            if (config_stream_cnt == 41424 - 3) begin 
+                n_config_stream_catch_41421 = fifo_d2a_data_dout;
+            end
+        end
+    end
+    // ######### for TEST ###########################################################################
+    // ######### for TEST ###########################################################################
+    // ######### for TEST ###########################################################################
+
+
+
+
+
+
 
 
 endmodule

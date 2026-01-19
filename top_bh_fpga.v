@@ -365,12 +365,12 @@ module top_bh_fpga(
         .rst(reset_n == 0 || ui_clk_sync_rst),
         // write
         .wr_clk(sys_clk),
-        .wr_en(0), // fifo_d2a_data_wr_en
-        .din(0), // fifo_d2a_data_din
+        .wr_en(fifo_d2a_data_wr_en),
+        .din(fifo_d2a_data_din),
         .full(fifo_d2a_data_full),
         // read
         .rd_clk(sys_clk2),
-        .rd_en(0), // fifo_d2a_data_rd_en
+        .rd_en(fifo_d2a_data_rd_en),
         .dout(fifo_d2a_data_dout),
         .empty(fifo_d2a_data_empty),
         .valid(fifo_d2a_data_valid)
@@ -528,6 +528,7 @@ module top_bh_fpga(
     reg [31:0] dram_write_address_last, n_dram_write_address_last;
     reg [3:0] dram_write_address_transition_cnt, n_dram_write_address_transition_cnt;
 
+    reg [15:0] config_stream_cnt, n_config_stream_cnt;
 
 
     always @(posedge okClk) begin
@@ -542,6 +543,8 @@ module top_bh_fpga(
 
 
     reg [17 - 1:0] app_rd_data_check, n_app_rd_data_check;
+    reg asic_start_ready, n_asic_start_ready;
+    reg asic_config_ongoing, n_asic_config_ongoing;
     always @ (*) begin
         n_ep20wireout = ep01wirein;
         n_ep21wireout = p_state;
@@ -623,6 +626,21 @@ module top_bh_fpga(
                     n_ep20wireout = app_rd_data_check;
                 end
             end
+        end else if (p_state == P_STATE_07_ASIC_CONFIG || P_STATE_08_ASIC_CONFIG_DONE) begin
+            if (ep01wirein == 0) begin
+                if (asic_config_ongoing) begin
+                    led = xem7310_led(p_state & {8{blink_100ms}});
+                end else if (asic_start_ready == 1) begin
+                    led = xem7310_led(p_state & {8{blink_500ms}});
+                    n_ep20wireout = 1;
+                end else begin
+                    led = xem7310_led(p_state & {8{blink_1000ms}});
+                    n_ep20wireout = 0;
+                end
+            end else if (ep01wirein == 1) begin
+                led = xem7310_led(config_stream_cnt[7:0]);
+                n_ep20wireout = {16'd0, config_stream_cnt};
+            end
         end
 
         if (!reset_n) begin
@@ -630,34 +648,6 @@ module top_bh_fpga(
         end
     end
 
-    always @(posedge okClk) begin
-        if (!reset_n) begin
-            led_pos <= 3'd0;
-            led_dir <= 1'b0;
-        end
-        else if (blink_100ms & !blink_100ms_past) begin
-            if (!led_dir) begin
-                // left -> right
-                if (led_pos == 3'd7) begin
-                    led_dir <= 1'b1;
-                    led_pos <= 3'd6;
-                end
-                else begin
-                    led_pos <= led_pos + 1'b1;
-                end
-            end
-            else begin
-                // right -> left
-                if (led_pos == 3'd0) begin
-                    led_dir <= 1'b0;
-                    led_pos <= 3'd1;
-                end
-                else begin
-                    led_pos <= led_pos - 1'b1;
-                end
-            end
-        end
-    end
 
     reg dram_reset_complete_trg_have_been_sent, n_dram_reset_complete_trg_have_been_sent;
 
@@ -691,8 +681,11 @@ module top_bh_fpga(
             dram_write_address_transition_cnt <= 0;
 
             app_rd_data_check <= 0;
-        end
-        else begin
+            asic_start_ready <= 0;
+            asic_config_ongoing <= 0;
+
+            config_stream_cnt <= 0;
+        end else begin
             p_state <= n_p_state;
 
             p_config_asic_mode <= n_p_config_asic_mode;
@@ -721,6 +714,10 @@ module top_bh_fpga(
             dram_write_address_transition_cnt <= n_dram_write_address_transition_cnt;
 
             app_rd_data_check <= n_app_rd_data_check;
+            asic_start_ready <= n_asic_start_ready;
+            asic_config_ongoing <= n_asic_config_ongoing;
+
+            config_stream_cnt <= n_config_stream_cnt;
         end
     end
 
@@ -775,6 +772,10 @@ module top_bh_fpga(
 
         n_dram_write_cnt = dram_write_cnt;
         n_app_rd_data_check = app_rd_data_check;
+        n_asic_start_ready = asic_start_ready;
+        n_asic_config_ongoing = asic_config_ongoing;
+
+        n_config_stream_cnt = config_stream_cnt;
 
         
         if(ep40trigin[29]) begin
@@ -878,6 +879,23 @@ module top_bh_fpga(
                 end
             end
             P_STATE_07_ASIC_CONFIG: begin
+                if(ep40trigin[0]) begin
+                    if (!fifo_p2d_data_full) begin
+                        fifo_p2d_command_wr_en = 1;
+                        fifo_p2d_command_din = {17'd0, 15'd8};
+                        n_asic_start_ready = 0;
+                        n_config_stream_cnt = 0;
+                        n_asic_config_ongoing = 1;
+                    end
+                end
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 9) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
+                    n_asic_start_ready = fifo_d2p_command_dout[15];
+                    n_config_stream_cnt = fifo_d2p_command_dout[31:16];
+                    n_asic_config_ongoing = 0;
+                end
             end
             P_STATE_08_ASIC_CONFIG_DONE: begin
             end
@@ -1028,6 +1046,24 @@ module top_bh_fpga(
         end
 
 
+
+
+
+
+
+
+        // Check ASIC start ready == 1
+        if(ep40trigin[28]) begin
+            if (!fifo_p2d_data_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd7};
+                n_asic_start_ready = 0;
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 7) begin
+            fifo_d2p_command_rd_en = 1;
+            n_asic_start_ready = fifo_d2p_command_dout[15];
+        end
 
 
 
@@ -1412,6 +1448,34 @@ module top_bh_fpga(
 
 
     // ########################## LED BLINK ########################################################################################
+    always @(posedge okClk) begin
+        if (!reset_n) begin
+            led_pos <= 3'd0;
+            led_dir <= 1'b0;
+        end
+        else if (blink_100ms & !blink_100ms_past) begin
+            if (!led_dir) begin
+                // left -> right
+                if (led_pos == 3'd7) begin
+                    led_dir <= 1'b1;
+                    led_pos <= 3'd6;
+                end
+                else begin
+                    led_pos <= led_pos + 1'b1;
+                end
+            end
+            else begin
+                // right -> left
+                if (led_pos == 3'd0) begin
+                    led_dir <= 1'b0;
+                    led_pos <= 3'd1;
+                end
+                else begin
+                    led_pos <= led_pos - 1'b1;
+                end
+            end
+        end
+    end
     always @(posedge okClk) begin // 9.92ns 100.806MHz
         if (!reset_n) begin
             blink_1000ms     <= 1'b0;

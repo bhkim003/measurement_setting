@@ -73,6 +73,23 @@ module d_domain(
 localparam  DRAM_READ       = 3'b001,
             DRAM_WRITE      = 3'b000;
 
+
+	localparam       BIT_WIDTH_INPUT_STREAMING_DATA = 66;
+
+	localparam       LAYER1_DEPTH_SRAM             = 980;
+	localparam       LAYER1_SET_NUM                = 10;
+	localparam       LAYER1_BIT_WIDTH_SRAM         = 160;  
+    localparam       LAYER1_BIT_WIDTH_MEMBRANE      = 17;
+	localparam       LAYER2_DEPTH_SRAM             = 200;
+	localparam       LAYER2_SET_NUM                = 10;
+	localparam       LAYER2_BIT_WIDTH_SRAM         = 160;  
+    localparam       LAYER2_BIT_WIDTH_MEMBRANE      = 16;
+	localparam       LAYER3_DEPTH_SRAM             = 200;
+	localparam       LAYER3_SET_NUM                = 10;
+	localparam       LAYER3_BIT_WIDTH_SRAM         = 160;  
+    localparam       LAYER3_BIT_WIDTH_MEMBRANE      = 16;
+
+
     reg [15:0] config_d_domain_setting_cnt, n_config_d_domain_setting_cnt;
 
     reg [1:0] d_config_asic_mode, n_d_config_asic_mode; // 0 training_only, 1 train_inf_sweep, 2 inference_only 
@@ -84,8 +101,8 @@ localparam  DRAM_READ       = 3'b001,
     reg d_config_long_time_input_streaming_mode, n_d_config_long_time_input_streaming_mode;
     reg d_config_binary_classifier_mode, n_d_config_binary_classifier_mode;
     reg d_config_loser_encourage_mode, n_d_config_loser_encourage_mode;
-    // reg [17*15 - 1:0] d_config_layer1_cut_list, n_d_config_layer1_cut_list;
-    // reg [16*15 - 1:0] d_config_layer2_cut_list, n_d_config_layer2_cut_list;
+    reg [17*15 - 1:0] d_config_layer1_cut_list, n_d_config_layer1_cut_list;
+    reg [16*15 - 1:0] d_config_layer2_cut_list, n_d_config_layer2_cut_list;
 
     reg dram_reset_complete_trg_have_been_sent, n_dram_reset_complete_trg_have_been_sent;
 
@@ -99,7 +116,18 @@ localparam  DRAM_READ       = 3'b001,
     reg dram_writing_check_read_catch_flag, n_dram_writing_check_read_catch_flag;
     reg [17 - 1:0] app_rd_data_check, n_app_rd_data_check;
 
-
+    reg config_on_broadcasting_send_have_been, n_config_on_broadcasting_send_have_been;
+    reg config_on_real, n_config_on_real;
+	reg main_config_now, n_main_config_now;
+	reg layer1_config_now, n_layer1_config_now;
+	reg layer2_config_now, n_layer2_config_now;
+	reg layer3_config_now, n_layer3_config_now;
+	reg [15:0] config_counter, n_config_counter;
+	reg [1:0] config_counter_one_two_three, n_config_counter_one_two_three;
+	reg [31:0] config_dram_read_address, n_config_dram_read_address;
+    reg [255:0] config_dram_word, n_config_dram_word;
+    reg config_dram_word_ready, n_config_dram_word_ready;
+    reg config_dram_word_request_have_been, n_config_dram_word_request_have_been;
 
 
         reg	         	app_en;
@@ -131,6 +159,8 @@ localparam  DRAM_READ       = 3'b001,
             d_config_long_time_input_streaming_mode  <= 0;
             d_config_binary_classifier_mode  <= 0;
             d_config_loser_encourage_mode  <= 0;
+            d_config_layer1_cut_list  <= 0;
+            d_config_layer2_cut_list  <= 0;
 
             dram_reset_complete_trg_have_been_sent  <= 0;
 
@@ -144,7 +174,19 @@ localparam  DRAM_READ       = 3'b001,
             dram_writing_check_read_catch_flag <= 0;
             app_rd_data_check <= 0;
 
-            
+            config_on_broadcasting_send_have_been <= 0;
+            config_on_real <= 0;
+            main_config_now <= 0;
+            layer1_config_now <= 0;
+            layer2_config_now <= 0;
+            layer3_config_now <= 0;
+            config_counter <= 0;
+            config_counter_one_two_three <= 0;
+            config_dram_read_address <= 0;
+            config_dram_word <= 0;
+            config_dram_word_ready <= 0;
+            config_dram_word_request_have_been <= 0;
+
 
         end else begin
             config_d_domain_setting_cnt <= n_config_d_domain_setting_cnt;
@@ -158,6 +200,8 @@ localparam  DRAM_READ       = 3'b001,
             d_config_long_time_input_streaming_mode <= n_d_config_long_time_input_streaming_mode;
             d_config_binary_classifier_mode <= n_d_config_binary_classifier_mode;
             d_config_loser_encourage_mode <= n_d_config_loser_encourage_mode;
+            d_config_layer1_cut_list  <= n_d_config_layer1_cut_list;
+            d_config_layer2_cut_list  <= n_d_config_layer2_cut_list;
 
             dram_reset_complete_trg_have_been_sent <= n_dram_reset_complete_trg_have_been_sent;
 
@@ -171,6 +215,19 @@ localparam  DRAM_READ       = 3'b001,
             dram_writing_check_read_catch_flag <= n_dram_writing_check_read_catch_flag;
             app_rd_data_check <= n_app_rd_data_check;
 
+            config_on_broadcasting_send_have_been <= n_config_on_broadcasting_send_have_been;
+            config_on_real <= n_config_on_real;
+            main_config_now <= n_main_config_now;
+            layer1_config_now <= n_layer1_config_now;
+            layer2_config_now <= n_layer2_config_now;
+            layer3_config_now <= n_layer3_config_now;
+            config_counter <= n_config_counter;
+            config_counter_one_two_three <= n_config_counter_one_two_three;
+            config_dram_read_address <= n_config_dram_read_address;
+            config_dram_word <= n_config_dram_word;
+            config_dram_word_ready <= n_config_dram_word_ready;
+            config_dram_word_request_have_been <= n_config_dram_word_request_have_been;
+
         end
     end
 
@@ -178,6 +235,9 @@ localparam  DRAM_READ       = 3'b001,
     
     wire [256 - 1:0] fifo_p2d_data_dout_align;
     assign fifo_p2d_data_dout_align = {fifo_p2d_data_dout[32*0 +: 32], fifo_p2d_data_dout[32*1 +: 32], fifo_p2d_data_dout[32*2 +: 32], fifo_p2d_data_dout[32*3 +: 32], fifo_p2d_data_dout[32*4 +: 32], fifo_p2d_data_dout[32*5 +: 32], fifo_p2d_data_dout[32*6 +: 32], fifo_p2d_data_dout[32*7 +: 32]};
+
+
+    reg [BIT_WIDTH_INPUT_STREAMING_DATA*3-1:0] config_value;
 
     always @ (*) begin
         n_config_d_domain_setting_cnt = config_d_domain_setting_cnt;
@@ -199,6 +259,8 @@ localparam  DRAM_READ       = 3'b001,
         n_d_config_long_time_input_streaming_mode = d_config_long_time_input_streaming_mode;
         n_d_config_binary_classifier_mode = d_config_binary_classifier_mode;
         n_d_config_loser_encourage_mode = d_config_loser_encourage_mode;
+        n_d_config_layer1_cut_list = d_config_layer1_cut_list;
+        n_d_config_layer2_cut_list = d_config_layer2_cut_list;
         
         n_dram_reset_complete_trg_have_been_sent = dram_reset_complete_trg_have_been_sent;
 
@@ -223,6 +285,24 @@ localparam  DRAM_READ       = 3'b001,
         n_dram_writing_check_read_catch_flag = dram_writing_check_read_catch_flag;
         n_app_rd_data_check = app_rd_data_check;
 
+        n_config_on_broadcasting_send_have_been = config_on_broadcasting_send_have_been;
+        n_config_on_real = config_on_real;
+        n_main_config_now = main_config_now;
+        n_layer1_config_now = layer1_config_now;
+        n_layer2_config_now = layer2_config_now;
+        n_layer3_config_now = layer3_config_now;
+        n_config_counter = config_counter;
+        n_config_counter_one_two_three = config_counter_one_two_three;
+        n_config_dram_read_address = config_dram_read_address;
+        n_config_dram_word = config_dram_word;
+        n_config_dram_word_ready = config_dram_word_ready;
+        n_config_dram_word_request_have_been = config_dram_word_request_have_been;
+
+        config_value = 0;
+
+
+
+
         app_en = 0;
         app_cmd = 0;
         app_addr = 0;
@@ -232,6 +312,15 @@ localparam  DRAM_READ       = 3'b001,
         app_wdf_mask = 0;
         
         fifo_p2d_data_rd_en = 0;
+
+
+
+
+
+
+
+
+
 
         if (!fifo_d2p_command_full) begin
             if (dram_reset_complete_trg_have_been_sent == 0 && init_calib_complete) begin
@@ -274,9 +363,100 @@ localparam  DRAM_READ       = 3'b001,
                     end else if (config_d_domain_setting_cnt == 8) begin
                         n_d_config_loser_encourage_mode = fifo_p2d_command_dout[15 +: 1];
                         n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
-                    end else if (config_d_domain_setting_cnt >= 9 && config_d_domain_setting_cnt <= 38) begin
+                    // end else if (config_d_domain_setting_cnt >= 9 && config_d_domain_setting_cnt <= 38) begin
+                    //     n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    // end 
+                    end else if (config_d_domain_setting_cnt == 9) begin
+                        n_d_config_layer1_cut_list[17*0 +: 17] = fifo_p2d_command_dout[15 +: 17];
                         n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
-                    end 
+                    end else if (config_d_domain_setting_cnt == 10) begin
+                        n_d_config_layer1_cut_list[17*1 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 11) begin
+                        n_d_config_layer1_cut_list[17*2 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 12) begin
+                        n_d_config_layer1_cut_list[17*3 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 13) begin
+                        n_d_config_layer1_cut_list[17*4 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 14) begin
+                        n_d_config_layer1_cut_list[17*5 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 15) begin
+                        n_d_config_layer1_cut_list[17*6 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 16) begin
+                        n_d_config_layer1_cut_list[17*7 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 17) begin
+                        n_d_config_layer1_cut_list[17*8 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 18) begin
+                        n_d_config_layer1_cut_list[17*9 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 19) begin
+                        n_d_config_layer1_cut_list[17*10 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 20) begin
+                        n_d_config_layer1_cut_list[17*11 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 21) begin
+                        n_d_config_layer1_cut_list[17*12 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 22) begin
+                        n_d_config_layer1_cut_list[17*13 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 23) begin
+                        n_d_config_layer1_cut_list[17*14 +: 17] = fifo_p2d_command_dout[15 +: 17];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 24) begin
+                        n_d_config_layer2_cut_list[16*0 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 25) begin
+                        n_d_config_layer2_cut_list[16*1 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 26) begin
+                        n_d_config_layer2_cut_list[16*2 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 27) begin
+                        n_d_config_layer2_cut_list[16*3 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 28) begin
+                        n_d_config_layer2_cut_list[16*4 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 29) begin
+                        n_d_config_layer2_cut_list[16*5 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 30) begin
+                        n_d_config_layer2_cut_list[16*6 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 31) begin
+                        n_d_config_layer2_cut_list[16*7 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 32) begin
+                        n_d_config_layer2_cut_list[16*8 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 33) begin
+                        n_d_config_layer2_cut_list[16*9 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 34) begin
+                        n_d_config_layer2_cut_list[16*10 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 35) begin
+                        n_d_config_layer2_cut_list[16*11 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 36) begin
+                        n_d_config_layer2_cut_list[16*12 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 37) begin
+                        n_d_config_layer2_cut_list[16*13 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end else if (config_d_domain_setting_cnt == 38) begin
+                        n_d_config_layer2_cut_list[16*14 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_config_d_domain_setting_cnt = config_d_domain_setting_cnt + 1;
+                    end
                     // else if (config_d_domain_setting_cnt == 39) begin
                         // @ last no cnt increment
                     // end
@@ -310,6 +490,32 @@ localparam  DRAM_READ       = 3'b001,
                     fifo_d2p_command_wr_en = 1;
                     fifo_d2p_command_din = {write_count[16:0], 15'd6};
                 end
+            end else if (fifo_p2d_command_dout[14:0] == 7) begin
+                if (!fifo_d2a_command_full) begin
+                    fifo_p2d_command_rd_en = 1;
+                    fifo_d2a_command_wr_en = 1;
+                    fifo_d2a_command_din = fifo_p2d_command_dout;
+                end
+            end else if (fifo_p2d_command_dout[14:0] == 8) begin
+                if (config_on_broadcasting_send_have_been == 0) begin
+
+                    fifo_d2a_command_wr_en = 1;
+                    fifo_d2a_command_din = fifo_p2d_command_dout;
+
+                    n_config_on_broadcasting_send_have_been = 1;
+                end else begin
+                    if (fifo_a2d_command_valid && fifo_a2d_command_dout[14:0] == 8) begin
+                        fifo_p2d_command_rd_en = 1;
+                        fifo_a2d_command_rd_en = 1;
+                        n_config_on_real = 1;
+                        n_main_config_now = 1;
+                        n_layer1_config_now = 0;
+                        n_layer2_config_now = 0;
+                        n_layer3_config_now = 0;
+                        
+                        n_config_on_broadcasting_send_have_been = 0;
+                    end
+                end
             end
         end
 
@@ -323,6 +529,18 @@ localparam  DRAM_READ       = 3'b001,
                         fifo_d2p_command_din = fifo_a2d_command_dout;
                         n_config_d_domain_setting_cnt = 0;
                     end
+                end
+            end else if (fifo_a2d_command_dout[14:0] == 7) begin
+                if (!fifo_d2p_command_full) begin
+                    fifo_a2d_command_rd_en = 1;
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = fifo_a2d_command_dout;
+                end
+            end else if (fifo_a2d_command_dout[14:0] == 9) begin
+                if (!fifo_d2p_command_full) begin
+                    fifo_a2d_command_rd_en = 1;
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = fifo_a2d_command_dout;
                 end
             end
         end
@@ -347,10 +565,6 @@ localparam  DRAM_READ       = 3'b001,
                 end
             end
         end
-
-
-
-
         if (dram_writing_finish_flag) begin
             if (dram_writing_check_read_flag == 0) begin
                 if (app_rdy) begin
@@ -378,15 +592,265 @@ localparam  DRAM_READ       = 3'b001,
                 end
             end
         end
+        
+
+
+
+        if (config_on_real) begin
+                
+
+            if (main_config_now) begin
+                if (!fifo_d2a_data_full) begin
+                    fifo_d2a_data_wr_en = 1;
+                    if (config_counter_one_two_three != 2) begin
+                        n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                    end else begin
+                        n_config_counter_one_two_three = 0;
+                        config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-1){1'b0}}, d_config_long_time_input_streaming_mode};
+                        n_config_counter = 0;
+                        n_main_config_now = 0;
+                        n_layer1_config_now = 1;
+                        n_layer2_config_now = 0;
+                        n_layer3_config_now = 0;
+                    end
+                end
+
+
+
+            end else if (layer1_config_now) begin
+                if (config_counter < LAYER1_DEPTH_SRAM*LAYER1_SET_NUM) begin
+                    if (config_dram_word_ready == 0) begin
+                        if (config_dram_word_request_have_been == 0) begin
+                            if (app_rdy) begin
+                                app_en = 1;
+                                app_cmd = DRAM_READ;
+                                app_addr = config_dram_read_address;
+                                n_config_dram_word_request_have_been = 1;
+                                n_config_dram_read_address = config_dram_read_address + 8;
+                            end
+                        end else begin 
+                            if (app_rd_data_valid) begin
+                                n_config_dram_word = app_rd_data;
+                                n_config_dram_word_request_have_been = 0;
+                                n_config_dram_word_ready = 1;
+                            end
+                        end
+                    end else begin
+                        if (!fifo_d2a_data_full) begin
+                            fifo_d2a_data_wr_en = 1;
+                            if (config_counter_one_two_three != 2) begin
+                                n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                            end else begin
+                                n_config_counter_one_two_three = 0;
+                                n_config_counter = config_counter + 1;
+                                n_config_dram_word_ready = 0;
+                            end
+                            config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-LAYER1_BIT_WIDTH_SRAM){1'b0}}, config_dram_word[0 +: LAYER1_BIT_WIDTH_SRAM]};
+                        end
+                    end                        
+                end else if (config_counter < LAYER1_DEPTH_SRAM*LAYER1_SET_NUM+1) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        if (config_counter_one_two_three != 2) begin
+                            n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                        end else begin
+                            n_config_counter_one_two_three = 0;
+                            n_config_counter = config_counter + 1;
+                        end
+                        config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-LAYER1_BIT_WIDTH_MEMBRANE){1'b0}}, d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*0 +: LAYER1_BIT_WIDTH_MEMBRANE]};
+                    end
+                end else if (config_counter < LAYER1_DEPTH_SRAM*LAYER1_SET_NUM+2) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        if (config_counter_one_two_three != 2) begin
+                            n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                        end else begin
+                            n_config_counter_one_two_three = 0;
+                            n_config_counter = config_counter + 1;
+                        end
+                        config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-7*LAYER1_BIT_WIDTH_MEMBRANE){1'b0}}, d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*7 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*6 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*5 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*4 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*3 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*2 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*1 +: LAYER1_BIT_WIDTH_MEMBRANE]};
+                    end
+                end else if (config_counter < LAYER1_DEPTH_SRAM*LAYER1_SET_NUM+2+1) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        if (config_counter_one_two_three != 2) begin
+                            n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                        end else begin
+                            n_config_counter_one_two_three = 0;
+                            n_config_counter = 0;
+                            n_main_config_now = 0;
+                            n_layer1_config_now = 0;
+                            n_layer2_config_now = 1;
+                            n_layer3_config_now = 0;
+                        end
+                        config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-7*LAYER1_BIT_WIDTH_MEMBRANE){1'b0}}, d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*14 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*13 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*12 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*11 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*10 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*9 +: LAYER1_BIT_WIDTH_MEMBRANE], d_config_layer1_cut_list[LAYER1_BIT_WIDTH_MEMBRANE*8 +: LAYER1_BIT_WIDTH_MEMBRANE]};
+                    end
+                end
+
+
+
+
+
+
+
+
+
+
+            end else if (layer2_config_now) begin
+                if (config_counter < LAYER2_DEPTH_SRAM*LAYER2_SET_NUM) begin
+                    if (config_dram_word_ready == 0) begin
+                        if (config_dram_word_request_have_been == 0) begin
+                            if (app_rdy) begin
+                                app_en = 1;
+                                app_cmd = DRAM_READ;
+                                app_addr = config_dram_read_address;
+                                n_config_dram_word_request_have_been = 1;
+                                n_config_dram_read_address = config_dram_read_address + 8;
+                            end
+                        end else begin 
+                            if (app_rd_data_valid) begin
+                                n_config_dram_word = app_rd_data;
+                                n_config_dram_word_request_have_been = 0;
+                                n_config_dram_word_ready = 1;
+                            end
+                        end
+                    end else begin
+                        if (!fifo_d2a_data_full) begin
+                            fifo_d2a_data_wr_en = 1;
+                            if (config_counter_one_two_three != 2) begin
+                                n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                            end else begin
+                                n_config_counter_one_two_three = 0;
+                                n_config_counter = config_counter + 1;
+                                n_config_dram_word_ready = 0;
+                            end
+                            config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-LAYER2_BIT_WIDTH_SRAM){1'b0}}, config_dram_word[0 +: LAYER2_BIT_WIDTH_SRAM]};
+                        end
+                    end                        
+                end else if (config_counter < LAYER2_DEPTH_SRAM*LAYER2_SET_NUM+1) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        if (config_counter_one_two_three != 2) begin
+                            n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                        end else begin
+                            n_config_counter_one_two_three = 0;
+                            n_config_counter = config_counter + 1;
+                        end
+                        config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-LAYER2_BIT_WIDTH_MEMBRANE){1'b0}}, d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*0 +: LAYER2_BIT_WIDTH_MEMBRANE]};
+                    end
+                end else if (config_counter < LAYER2_DEPTH_SRAM*LAYER2_SET_NUM+2) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        if (config_counter_one_two_three != 2) begin
+                            n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                        end else begin
+                            n_config_counter_one_two_three = 0;
+                            n_config_counter = config_counter + 1;
+                        end
+                        config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-7*LAYER2_BIT_WIDTH_MEMBRANE){1'b0}}, d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*7 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*6 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*5 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*4 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*3 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*2 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*1 +: LAYER2_BIT_WIDTH_MEMBRANE]};
+                    end
+                end else if (config_counter < LAYER2_DEPTH_SRAM*LAYER2_SET_NUM+2+1) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        if (config_counter_one_two_three != 2) begin
+                            n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                        end else begin
+                            n_config_counter_one_two_three = 0;
+                            n_config_counter = 0;
+                            n_main_config_now = 0;
+                            n_layer1_config_now = 0;
+                            n_layer2_config_now = 0;
+                            n_layer3_config_now = 1;
+                        end
+                        config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-7*LAYER2_BIT_WIDTH_MEMBRANE){1'b0}}, d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*14 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*13 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*12 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*11 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*10 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*9 +: LAYER2_BIT_WIDTH_MEMBRANE], d_config_layer2_cut_list[LAYER2_BIT_WIDTH_MEMBRANE*8 +: LAYER2_BIT_WIDTH_MEMBRANE]};
+                    end
+                end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            end else if (layer3_config_now) begin
+                if (config_counter < LAYER3_DEPTH_SRAM*LAYER3_SET_NUM) begin
+                    if (config_dram_word_ready == 0) begin
+                        if (config_dram_word_request_have_been == 0) begin
+                            if (app_rdy) begin
+                                app_en = 1;
+                                app_cmd = DRAM_READ;
+                                app_addr = config_dram_read_address;
+                                n_config_dram_word_request_have_been = 1;
+                                n_config_dram_read_address = config_dram_read_address + 8;
+                            end
+                        end else begin 
+                            if (app_rd_data_valid) begin
+                                n_config_dram_word = app_rd_data;
+                                n_config_dram_word_request_have_been = 0;
+                                n_config_dram_word_ready = 1;
+                            end
+                        end
+                    end else begin
+                        if (!fifo_d2a_data_full) begin
+                            fifo_d2a_data_wr_en = 1;
+                            if (config_counter_one_two_three != 2) begin
+                                n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                            end else begin
+                                n_config_counter_one_two_three = 0;
+                                n_config_counter = config_counter + 1;
+                                n_config_dram_word_ready = 0;
+                            end
+                            config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-LAYER3_BIT_WIDTH_SRAM){1'b0}}, config_dram_word[0 +: LAYER3_BIT_WIDTH_SRAM]};
+                        end
+                    end                        
+                end else if (config_counter < LAYER3_DEPTH_SRAM*LAYER3_SET_NUM+1) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        if (config_counter_one_two_three != 2) begin
+                            n_config_counter_one_two_three = config_counter_one_two_three + 1;
+                        end else begin
+                            n_config_counter_one_two_three = 0;
+                            n_config_counter = 0;
+                            n_main_config_now = 0;
+                            n_layer1_config_now = 0;
+                            n_layer2_config_now = 0;
+                            n_layer3_config_now = 0;
+
+                            n_config_on_real = 0;
+                            n_config_dram_read_address = 0;
+                        end
+                        config_value = {{(BIT_WIDTH_INPUT_STREAMING_DATA*3-2){1'b0}}, d_config_loser_encourage_mode, d_config_binary_classifier_mode};
+                    end
+                end
+
+
+
+
+            end
+
+
+
+
+
+            fifo_d2a_data_din = config_value[BIT_WIDTH_INPUT_STREAMING_DATA*config_counter_one_two_three +: BIT_WIDTH_INPUT_STREAMING_DATA];
+        end
+
+
+
+
+
 
 
 
 
     end
-
-
-
-
 
 
 
