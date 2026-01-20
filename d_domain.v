@@ -72,7 +72,17 @@ module d_domain(
 
 localparam  DRAM_READ       = 3'b001,
             DRAM_WRITE      = 3'b000;
-
+localparam DVS_GESTURE_BITS_PER_SAMPLE = 9984;
+localparam DVS_GESTURE_READ_REQUEST_PER_SAMPLE = 39; // 9984 / 256 = 39
+localparam DVS_GESTURE_BITS_PER_TIME_IN_DRAM = 984;
+localparam N_MNIST_BITS_PER_SAMPLE = 3072;
+localparam N_MNIST_READ_REQUEST_PER_SAMPLE = 12; // 3072 / 256 = 12
+localparam N_MNIST_BITS_PER_TIME_IN_DRAM = 582;
+localparam NTIDIGITS_BITS_PER_SAMPLE = 4352;
+localparam NTIDIGITS_READ_REQUEST_PER_SAMPLE = 17; // 4352 / 256 = 17
+localparam NTIDIGITS_BITS_PER_TIME_IN_DRAM = 516;
+localparam CLOCK_INPUT_SPIKE_COLLECT_LONG = 15; // 986 <= 66*15 ==990
+localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
 
 	localparam       BIT_WIDTH_INPUT_STREAMING_DATA = 66;
 
@@ -133,6 +143,32 @@ localparam  DRAM_READ       = 3'b001,
     reg [31:0] sample_num, n_sample_num;
     reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
 
+    reg queuing_request_send_have_been, n_queuing_request_send_have_been;
+
+    reg training_streaming_ongoing, n_training_streaming_ongoing;
+    reg inference_streaming_ongoing, n_inference_streaming_ongoing;
+    reg queuing_first_time, n_queuing_first_time;
+    reg [31:0] read_address_for_data, n_read_address_for_data;
+
+    reg [DVS_GESTURE_BITS_PER_SAMPLE-1:0] sample_data_buffer, n_sample_data_buffer;
+    reg [31:0] sample_data_buffer_num, n_sample_data_buffer_num;
+    reg [15:0] sample_data_buffer_read_request_cnt, n_sample_data_buffer_read_request_cnt;
+    reg [15:0] sample_data_buffer_cnt, n_sample_data_buffer_cnt;
+    reg sample_data_buffer_stop_read_request, n_sample_data_buffer_stop_read_request;
+
+    reg [DVS_GESTURE_BITS_PER_SAMPLE-1:0] sample_data_buffer2, n_sample_data_buffer2;
+    reg [15:0] sample_data_buffer2_cnt, n_sample_data_buffer2_cnt;
+    reg [15:0] sample_data_buffer2_cnt_small, n_sample_data_buffer2_cnt_small;
+    reg sample_data_buffer2_busy, n_sample_data_buffer2_busy;
+    reg [15:0] sample_data_buffer2_time_cnt, n_sample_data_buffer2_time_cnt;
+    reg [DVS_GESTURE_BITS_PER_TIME_IN_DRAM-1:0] gesture_label_and_data_one_timestep;
+    reg [N_MNIST_BITS_PER_TIME_IN_DRAM-1:0] nmnist_label_and_data_one_timestep;
+    reg [N_MNIST_BITS_PER_TIME_IN_DRAM-1:0] ntidigits_label_and_data_one_timestep; // nmnist bit width per time also used for ntidigits
+    reg [3:0] this_sample_label;
+    reg this_epoch_finish;
+    reg this_sample_done;
+
+    reg [31:0] sample_num_executed, n_sample_num_executed;
 
 
         reg	         	app_en;
@@ -195,6 +231,27 @@ localparam  DRAM_READ       = 3'b001,
 
             sample_num <= 0;
             sample_num_transition_cnt <= 0;
+
+            queuing_request_send_have_been <= 0;
+
+            training_streaming_ongoing <= 0;
+            inference_streaming_ongoing <= 0;
+            queuing_first_time <= 0;
+            read_address_for_data <= 0;
+
+            sample_data_buffer <= 0;
+            sample_data_buffer_num <= 0;
+            sample_data_buffer_read_request_cnt <= 0;
+            sample_data_buffer_cnt <= 0;
+            sample_data_buffer_stop_read_request <= 0;
+
+            sample_data_buffer2 <= 0;
+            sample_data_buffer2_cnt <= 0;
+            sample_data_buffer2_cnt_small <= 0;
+            sample_data_buffer2_busy <= 0;
+            sample_data_buffer2_time_cnt <= 0;
+
+            sample_num_executed <= 0;
         end else begin
             config_d_domain_setting_cnt <= n_config_d_domain_setting_cnt;
 
@@ -238,6 +295,27 @@ localparam  DRAM_READ       = 3'b001,
 
             sample_num <= n_sample_num;
             sample_num_transition_cnt <= n_sample_num_transition_cnt;
+
+            queuing_request_send_have_been <= n_sample_num_transition_cnt;
+
+            training_streaming_ongoing <= n_training_streaming_ongoing;
+            inference_streaming_ongoing <= n_inference_streaming_ongoing;
+            queuing_first_time <= n_queuing_first_time;
+            read_address_for_data <= n_read_address_for_data;
+
+            sample_data_buffer <= n_sample_data_buffer;
+            sample_data_buffer_num <= n_sample_data_buffer_num;
+            sample_data_buffer_read_request_cnt <= n_sample_data_buffer_read_request_cnt;
+            sample_data_buffer_cnt <= n_sample_data_buffer_cnt;
+            sample_data_buffer_stop_read_request <= n_sample_data_buffer_stop_read_request;
+
+            sample_data_buffer2 <= n_sample_data_buffer2;
+            sample_data_buffer2_cnt <= n_sample_data_buffer2_cnt;
+            sample_data_buffer2_cnt_small <= n_sample_data_buffer2_cnt_small;
+            sample_data_buffer2_busy <= n_sample_data_buffer2_busy;
+            sample_data_buffer2_time_cnt <= n_sample_data_buffer2_time_cnt;
+
+            sample_num_executed <= n_sample_num_executed;
         end
     end
 
@@ -312,7 +390,33 @@ localparam  DRAM_READ       = 3'b001,
         n_sample_num = sample_num;
         n_sample_num_transition_cnt = sample_num_transition_cnt;
 
+        n_queuing_request_send_have_been = queuing_request_send_have_been;
 
+        n_training_streaming_ongoing = training_streaming_ongoing;
+        n_inference_streaming_ongoing = inference_streaming_ongoing;
+        n_queuing_first_time = queuing_first_time;
+        n_read_address_for_data = read_address_for_data;
+
+        n_sample_data_buffer = sample_data_buffer;
+        n_sample_data_buffer_num = sample_data_buffer_num;
+        n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt;
+        n_sample_data_buffer_cnt = sample_data_buffer_cnt;
+        n_sample_data_buffer_stop_read_request = sample_data_buffer_stop_read_request;
+
+        n_sample_data_buffer2 = sample_data_buffer2;
+        n_sample_data_buffer2_cnt = sample_data_buffer2_cnt;
+        n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small;
+        n_sample_data_buffer2_busy = sample_data_buffer2_busy;
+        n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt;
+
+        n_sample_num_executed = sample_num_executed;
+
+        gesture_label_and_data_one_timestep = 0;
+        nmnist_label_and_data_one_timestep = 0;
+        ntidigits_label_and_data_one_timestep = 0;
+        this_sample_label = 0;
+        this_epoch_finish = 0;
+        this_sample_done = 0;
 
 
         config_value = 0;
@@ -503,16 +607,22 @@ localparam  DRAM_READ       = 3'b001,
                 end            
             end else if (fifo_p2d_command_dout[14:0] == 11) begin
                 if (sample_num_transition_cnt == 0) begin
-                    fifo_p2d_command_rd_en = 1;
-                    n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
-                    n_sample_num[0 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                    if (!fifo_d2a_command_full) begin
+                        fifo_d2a_command_wr_en = 1;
+                        fifo_d2a_command_din = fifo_p2d_command_dout;
+
+                        fifo_p2d_command_rd_en = 1;
+                        n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
+                        n_sample_num[0 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                    end
                 end else if (sample_num_transition_cnt == 1) begin
-                    if (!fifo_d2p_command_full) begin
+                    if (!fifo_d2a_command_full) begin
+                        fifo_d2a_command_wr_en = 1;
+                        fifo_d2a_command_din = fifo_p2d_command_dout;
+
                         fifo_p2d_command_rd_en = 1;
                         n_sample_num_transition_cnt = 0;
                         n_sample_num[16 +: 16] = fifo_p2d_command_dout[15 +: 16];
-                        fifo_d2p_command_wr_en = 1;
-                        fifo_d2p_command_din = {17'd0, 15'd11};
                     end
                 end
             end else if (fifo_p2d_command_dout[14:0] == 6) begin
@@ -570,8 +680,289 @@ localparam  DRAM_READ       = 3'b001,
                         end
                     end
                 end
+            end else if (fifo_p2d_command_dout[14:0] == 12) begin
+                if (queuing_request_send_have_been == 0) begin
+                    if (!fifo_d2a_command_full) begin
+                        fifo_d2a_command_wr_en = 1;
+                        fifo_d2a_command_din = fifo_p2d_command_dout;
+
+                        n_queuing_request_send_have_been = 1;
+                    end
+                end else begin
+                    if (fifo_a2d_command_valid && fifo_a2d_command_dout[14:0] == 12) begin
+                        fifo_p2d_command_rd_en = 1;
+                        fifo_a2d_command_rd_en = 1;
+
+                        n_training_streaming_ongoing = 1;
+                        n_queuing_request_send_have_been = 0;
+                        n_queuing_first_time = 1;
+
+                        n_read_address_for_data = dram_address;
+                    end
+                end
+            end else if (fifo_p2d_command_dout[14:0] == 13) begin
+                if (queuing_request_send_have_been == 0) begin
+                    if (!fifo_d2a_command_full) begin
+                        fifo_d2a_command_wr_en = 1;
+                        fifo_d2a_command_din = fifo_p2d_command_dout;
+
+                        n_queuing_request_send_have_been = 1;
+                    end
+                end else begin
+                    if (fifo_a2d_command_valid && fifo_a2d_command_dout[14:0] == 13) begin
+                        fifo_p2d_command_rd_en = 1;
+                        fifo_a2d_command_rd_en = 1;
+
+                        n_inference_streaming_ongoing = 1;
+                        n_queuing_request_send_have_been = 0;
+                        n_queuing_first_time = 1;
+
+                        n_read_address_for_data = dram_address;
+                    end
+                end
+            end else if (fifo_p2d_command_dout[14:0] == 16) begin
+                if (!fifo_d2a_command_full) begin
+                    fifo_p2d_command_rd_en = 1;
+                    fifo_d2a_command_wr_en = 1;
+                    fifo_d2a_command_din = fifo_p2d_command_dout;
+                end
+            end else if (fifo_p2d_command_dout[14:0] == 17) begin
+                if (!fifo_d2a_command_full) begin
+                    fifo_p2d_command_rd_en = 1;
+                    fifo_d2a_command_wr_en = 1;
+                    fifo_d2a_command_din = fifo_p2d_command_dout;
+                end
             end
         end
+
+
+
+        if (training_streaming_ongoing || inference_streaming_ongoing) begin
+            if (queuing_first_time) begin   
+                if (fifo_d2a_data_full) begin
+                    if (!fifo_d2p_command_full) begin
+                        fifo_d2p_command_wr_en = 1;
+                        if (training_streaming_ongoing) begin
+                            fifo_d2p_command_din = {17'd0, 15'd12};
+                        end else if (inference_streaming_ongoing) begin
+                            fifo_d2p_command_din = {17'd0, 15'd13};
+                        end
+                        n_queuing_first_time = 0;
+                    end
+                end
+            end
+        end
+
+
+
+        if (training_streaming_ongoing) begin
+            if (d_config_dataset == 0) begin
+                if (sample_data_buffer_stop_read_request == 0) begin
+                    if (sample_data_buffer_read_request_cnt != DVS_GESTURE_READ_REQUEST_PER_SAMPLE) begin
+                        if (app_rdy) begin
+                            app_en = 1;
+                            app_cmd = DRAM_READ;
+                            app_addr = read_address_for_data;
+                            n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
+                            if (read_address_for_data == dram_address_last) begin
+                                if (sample_data_buffer_num == sample_num - 1) begin
+                                    n_sample_data_buffer_stop_read_request = 1;
+                                end else begin
+                                    n_read_address_for_data = dram_address;
+                                end
+                            end else begin
+                                n_read_address_for_data = read_address_for_data + 8;
+                            end
+                        end
+                    end
+                end
+
+                if (sample_data_buffer_cnt != DVS_GESTURE_READ_REQUEST_PER_SAMPLE) begin
+                    if (app_rd_data_valid) begin
+                        n_sample_data_buffer[sample_data_buffer_cnt*256 +: 256] = app_rd_data;
+                        n_sample_data_buffer_cnt = sample_data_buffer_cnt + 1;
+                    end
+                end else begin
+                    if (!sample_data_buffer2_busy) begin
+                        n_sample_data_buffer2_busy = 1;
+                        n_sample_data_buffer2 = sample_data_buffer;
+                        n_sample_data_buffer_read_request_cnt = 0;
+                        n_sample_data_buffer_cnt = 0;
+                        if (sample_data_buffer_num != sample_num - 1) begin
+                            n_sample_data_buffer_num = sample_data_buffer_num + 1;
+                        end else begin
+                            n_sample_data_buffer_num = 0;
+                        end
+                    end
+                end
+
+                if (sample_data_buffer2_busy) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+
+                        gesture_label_and_data_one_timestep = sample_data_buffer2[sample_data_buffer2_time_cnt * DVS_GESTURE_BITS_PER_TIME_IN_DRAM +: DVS_GESTURE_BITS_PER_TIME_IN_DRAM];
+                        this_sample_label = gesture_label_and_data_one_timestep[(CLOCK_INPUT_SPIKE_COLLECT_LONG-1) * BIT_WIDTH_INPUT_STREAMING_DATA + 56 +: 4];
+                        this_epoch_finish = (sample_num_executed == sample_num - 1) && (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        this_sample_done = (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        
+                        if (sample_data_buffer2_cnt_small != CLOCK_INPUT_SPIKE_COLLECT_LONG - 1) begin
+                            n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small + 1;
+                            fifo_d2a_data_din = gesture_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: BIT_WIDTH_INPUT_STREAMING_DATA];
+                        end else begin
+                            if (sample_data_buffer2_time_cnt != d_config_timesteps - 1) begin
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {4'd0, this_sample_label, this_epoch_finish, this_sample_done, gesture_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 56]};
+                                n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt + 1;
+                            end else begin
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {4'd0, this_sample_label, this_epoch_finish, this_sample_done, gesture_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 56]};
+                                n_sample_data_buffer2_time_cnt = 0;
+
+                                n_sample_num_executed = sample_num_executed + 1;
+                                n_sample_data_buffer2_busy = 0;
+                            end
+                        end
+                    end
+                end
+            end else if (d_config_dataset == 1) begin
+                if (sample_data_buffer_stop_read_request == 0) begin
+                    if (sample_data_buffer_read_request_cnt != N_MNIST_READ_REQUEST_PER_SAMPLE) begin
+                        if (app_rdy) begin
+                            app_en = 1;
+                            app_cmd = DRAM_READ;
+                            app_addr = read_address_for_data;
+                            n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
+                            if (read_address_for_data == dram_address_last) begin
+                                if (sample_data_buffer_num == sample_num - 1) begin
+                                    n_sample_data_buffer_stop_read_request = 1;
+                                end else begin
+                                    n_read_address_for_data = dram_address;
+                                end
+                            end else begin
+                                n_read_address_for_data = read_address_for_data + 8;
+                            end
+                        end
+                    end
+                end
+
+                if (sample_data_buffer_cnt != N_MNIST_READ_REQUEST_PER_SAMPLE) begin
+                    if (app_rd_data_valid) begin
+                        n_sample_data_buffer[sample_data_buffer_cnt*256 +: 256] = app_rd_data;
+                        n_sample_data_buffer_cnt = sample_data_buffer_cnt + 1;
+                    end
+                end else begin
+                    if (!sample_data_buffer2_busy) begin
+                        n_sample_data_buffer2_busy = 1;
+                        n_sample_data_buffer2 = sample_data_buffer;
+                        n_sample_data_buffer_read_request_cnt = 0;
+                        n_sample_data_buffer_cnt = 0;
+                        if (sample_data_buffer_num != sample_num - 1) begin
+                            n_sample_data_buffer_num = sample_data_buffer_num + 1;
+                        end else begin
+                            n_sample_data_buffer_num = 0;
+                        end
+                    end
+                end
+
+                if (sample_data_buffer2_busy) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+
+                        nmnist_label_and_data_one_timestep = sample_data_buffer2[sample_data_buffer2_time_cnt * N_MNIST_BITS_PER_TIME_IN_DRAM +: N_MNIST_BITS_PER_TIME_IN_DRAM];
+                        this_sample_label = nmnist_label_and_data_one_timestep[(CLOCK_INPUT_SPIKE_COLLECT_SHORT-1) * BIT_WIDTH_INPUT_STREAMING_DATA + 50 +: 4];
+                        this_epoch_finish = (sample_num_executed == sample_num - 1) && (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        this_sample_done = (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        
+                        if (sample_data_buffer2_cnt_small != CLOCK_INPUT_SPIKE_COLLECT_SHORT - 1) begin
+                            n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small + 1;
+                            fifo_d2a_data_din = nmnist_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: BIT_WIDTH_INPUT_STREAMING_DATA];
+                        end else begin
+                            if (sample_data_buffer2_time_cnt != d_config_timesteps - 1) begin
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, nmnist_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
+                                n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt + 1;
+                            end else begin
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, nmnist_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
+                                n_sample_data_buffer2_time_cnt = 0;
+
+                                n_sample_num_executed = sample_num_executed + 1;
+                                n_sample_data_buffer2_busy = 0;
+                            end
+                        end
+                    end
+                end
+            end else if (d_config_dataset == 2) begin
+                if (sample_data_buffer_stop_read_request == 0) begin
+                    if (sample_data_buffer_read_request_cnt != NTIDIGITS_READ_REQUEST_PER_SAMPLE) begin
+                        if (app_rdy) begin
+                            app_en = 1;
+                            app_cmd = DRAM_READ;
+                            app_addr = read_address_for_data;
+                            n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
+                            if (read_address_for_data == dram_address_last) begin
+                                if (sample_data_buffer_num == sample_num - 1) begin
+                                    n_sample_data_buffer_stop_read_request = 1;
+                                end else begin
+                                    n_read_address_for_data = dram_address;
+                                end
+                            end else begin
+                                n_read_address_for_data = read_address_for_data + 8;
+                            end
+                        end
+                    end
+                end
+
+                if (sample_data_buffer_cnt != NTIDIGITS_READ_REQUEST_PER_SAMPLE) begin
+                    if (app_rd_data_valid) begin
+                        n_sample_data_buffer[sample_data_buffer_cnt*256 +: 256] = app_rd_data;
+                        n_sample_data_buffer_cnt = sample_data_buffer_cnt + 1;
+                    end
+                end else begin
+                    if (!sample_data_buffer2_busy) begin
+                        n_sample_data_buffer2_busy = 1;
+                        n_sample_data_buffer2 = sample_data_buffer;
+                        n_sample_data_buffer_read_request_cnt = 0;
+                        n_sample_data_buffer_cnt = 0;
+                        if (sample_data_buffer_num != sample_num - 1) begin
+                            n_sample_data_buffer_num = sample_data_buffer_num + 1;
+                        end else begin
+                            n_sample_data_buffer_num = 0;
+                        end
+                    end
+                end
+
+                if (sample_data_buffer2_busy) begin
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+
+                        ntidigits_label_and_data_one_timestep = {sample_data_buffer2[sample_data_buffer2_time_cnt * NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4 +: 4], 66'd0, sample_data_buffer2[sample_data_buffer2_time_cnt * NTIDIGITS_BITS_PER_TIME_IN_DRAM +: NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4]};
+                        this_sample_label = ntidigits_label_and_data_one_timestep[(CLOCK_INPUT_SPIKE_COLLECT_SHORT-1) * BIT_WIDTH_INPUT_STREAMING_DATA + 50 +: 4];
+                        this_epoch_finish = (sample_num_executed == sample_num - 1) && (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        this_sample_done = (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        
+                        if (sample_data_buffer2_cnt_small != CLOCK_INPUT_SPIKE_COLLECT_SHORT - 1) begin
+                            n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small + 1;
+                            fifo_d2a_data_din = ntidigits_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: BIT_WIDTH_INPUT_STREAMING_DATA];
+                        end else begin
+                            if (sample_data_buffer2_time_cnt != d_config_timesteps - 1) begin
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, ntidigits_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
+                                n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt + 1;
+                            end else begin
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, ntidigits_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
+                                n_sample_data_buffer2_time_cnt = 0;
+
+                                n_sample_num_executed = sample_num_executed + 1;
+                                n_sample_data_buffer2_busy = 0;
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        
 
 
         if (fifo_a2d_command_valid) begin
@@ -591,6 +982,38 @@ localparam  DRAM_READ       = 3'b001,
                     fifo_d2p_command_din = fifo_a2d_command_dout;
                 end
             end else if (fifo_a2d_command_dout[14:0] == 9) begin
+                if (!fifo_d2p_command_full) begin
+                    fifo_a2d_command_rd_en = 1;
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = fifo_a2d_command_dout;
+                end
+            end else if (fifo_a2d_command_dout[14:0] == 11) begin
+                if (!fifo_d2p_command_full) begin
+                    fifo_a2d_command_rd_en = 1;
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = fifo_a2d_command_dout;
+                end
+            end else if (fifo_a2d_command_dout[14:0] == 14) begin // training complete
+                if (!fifo_d2p_command_full) begin
+                    fifo_a2d_command_rd_en = 1;
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = {sample_num_executed[16:0], 15'd14};
+                    n_sample_num_executed = 0;
+                    n_sample_data_buffer_stop_read_request = 0;
+                    n_training_streaming_ongoing = 0;
+                    // n_read_address_for_data = 0; // no needs reset
+                end
+            end else if (fifo_a2d_command_dout[14:0] == 15) begin // inference complete
+                if (!fifo_d2p_command_full) begin
+                    fifo_a2d_command_rd_en = 1;
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = {sample_num_executed[16:0], 15'd15};
+                    n_sample_num_executed = 0;
+                    n_sample_data_buffer_stop_read_request = 0;
+                    n_inference_streaming_ongoing = 0;
+                    // n_read_address_for_data = 0; // no needs reset
+                end
+            end else if (fifo_a2d_command_dout[14:0] == 18) begin
                 if (!fifo_d2p_command_full) begin
                     fifo_a2d_command_rd_en = 1;
                     fifo_d2p_command_wr_en = 1;

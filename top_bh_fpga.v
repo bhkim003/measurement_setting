@@ -532,6 +532,11 @@ module top_bh_fpga(
 
     reg [31:0] sample_num, n_sample_num;
     reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
+    reg queuing_complete, n_queuing_complete;
+
+    reg [16:0] sample_executed_lsb_17bit, n_sample_executed_lsb_17bit;
+
+    reg [2:0] execute_8_division, n_execute_8_division;
 
     always @(posedge okClk) begin
         if (!reset_n) begin
@@ -651,19 +656,25 @@ module top_bh_fpga(
             end else if (ep01wirein == 11) begin
                 led = xem7310_led(dram_address_last[7:0]);
                 n_ep20wireout = dram_address_last;
+            end else if (ep01wirein == 12) begin
+                led = xem7310_led(sample_executed_lsb_17bit[7:0]);
+                n_ep20wireout = {15'd0, sample_executed_lsb_17bit};
             end
         end else if (p_state == P_STATE_09_ASIC_INFERENCE_QUEUING || p_state == P_STATE_11_ASIC_TRAINING_QUEUING) begin
             if (ep01wirein == 0) begin
-                if (asic_config_ongoing) begin
-                    led = xem7310_led(p_state & {8{blink_100ms}});
-                end else if (asic_start_ready == 1) begin
-                    led = xem7310_led(p_state & {8{blink_500ms}});
-                    n_ep20wireout = 1;
+                if (asic_start_ready == 1) begin
+                    if (queuing_complete) begin
+                        led = xem7310_led(p_state & {8{blink_100ms}});
+                        n_ep20wireout = 1;
+                    end else begin
+                        led = xem7310_led(p_state & {8{blink_500ms}});
+                        n_ep20wireout = 1;
+                    end
                 end else begin
                     led = xem7310_led(p_state & {8{blink_1000ms}});
                     n_ep20wireout = 0;
                 end
-            end else if (ep01wirein == 1) begin
+            end else if (ep01wirein == 1) begin // deprecated 
                 led = xem7310_led(config_stream_cnt[7:0]);
                 n_ep20wireout = {16'd0, config_stream_cnt};
             end else if (ep01wirein == 2) begin
@@ -675,6 +686,14 @@ module top_bh_fpga(
             end else if (ep01wirein == 11) begin
                 led = xem7310_led(dram_address_last[7:0]);
                 n_ep20wireout = dram_address_last;
+            end
+        end else if (p_state == P_STATE_10_ASIC_INFERENCE_PROCESSING || p_state == P_STATE_12_ASIC_TRAINING_PROCESSING) begin
+            if (execute_8_division == 0) begin
+                led = xem7310_led(p_state & {8{blink_100ms}});
+                n_ep20wireout = execute_8_division;
+            end else begin
+                led = xem7310_led((8'b00000001 << (execute_8_division-1)) & {8{blink_100ms}});
+                n_ep20wireout = execute_8_division;
             end
         end
 
@@ -723,6 +742,12 @@ module top_bh_fpga(
 
             sample_num <= 0;
             sample_num_transition_cnt <= 0;
+
+            queuing_complete <= 0;
+
+            sample_executed_lsb_17bit <= 0;
+
+            execute_8_division <= 0;
         end else begin
             p_state <= n_p_state;
 
@@ -759,6 +784,12 @@ module top_bh_fpga(
 
             sample_num <= n_sample_num;
             sample_num_transition_cnt <= n_sample_num_transition_cnt;
+
+            queuing_complete <= n_queuing_complete;
+            
+            sample_executed_lsb_17bit <= n_sample_executed_lsb_17bit;
+            
+            execute_8_division <= n_execute_8_division;
         end
     end
 
@@ -820,6 +851,12 @@ module top_bh_fpga(
 
         n_sample_num = sample_num;
         n_sample_num_transition_cnt = sample_num_transition_cnt;
+
+        n_queuing_complete = queuing_complete;
+
+        n_sample_executed_lsb_17bit = sample_executed_lsb_17bit;
+
+        n_execute_8_division = execute_8_division;
 
         
         if(ep40trigin[29]) begin
@@ -945,28 +982,81 @@ module top_bh_fpga(
                 if(ep40trigin[0]) begin
                     if (!fifo_p2d_data_full) begin
                         fifo_p2d_command_wr_en = 1;
-                        fifo_p2d_command_din = {17'd0, 15'd8};
-                        n_asic_start_ready = 0;
-                        n_config_stream_cnt = 0;
-                        n_asic_config_ongoing = 1;
+                        fifo_p2d_command_din = {17'd0, 15'd12};
+                        n_queuing_complete = 0;
+                        n_p_state = P_STATE_11_ASIC_TRAINING_QUEUING;
                     end
-                end
-                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 9) begin
-                    fifo_d2p_command_rd_en = 1;
-                    ep60trigout = {31'd0, 1'b1};
-                    n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
-                    n_asic_start_ready = fifo_d2p_command_dout[15];
-                    n_config_stream_cnt = fifo_d2p_command_dout[31:16];
-                    n_asic_config_ongoing = 0;
+                end else if(ep40trigin[1]) begin
+                    if (!fifo_p2d_data_full) begin
+                        fifo_p2d_command_wr_en = 1;
+                        fifo_p2d_command_din = {17'd0, 15'd13};
+                        n_queuing_complete = 0;
+                        n_p_state = P_STATE_09_ASIC_INFERENCE_QUEUING;
+                    end
                 end
             end
             P_STATE_09_ASIC_INFERENCE_QUEUING: begin
+                if (queuing_complete == 0) begin
+                    if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 13) begin
+                        fifo_d2p_command_rd_en = 1;
+                        n_queuing_complete = 1;
+                        ep60trigout = {31'd0, 1'b1};
+                    end
+                end else begin
+                    if(ep40trigin[0]) begin
+                        if (!fifo_p2d_data_full) begin
+                            fifo_p2d_command_wr_en = 1;
+                            fifo_p2d_command_din = {17'd0, 15'd17};
+                            n_queuing_complete = 0;
+                            n_p_state = P_STATE_10_ASIC_INFERENCE_PROCESSING;
+                        end
+                    end
+                end
             end
             P_STATE_10_ASIC_INFERENCE_PROCESSING: begin
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 15) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
+                    n_sample_executed_lsb_17bit = fifo_d2p_command_dout[15 +: 17];
+                    n_execute_8_division = 0;
+                end
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 18) begin
+                    fifo_d2p_command_rd_en = 1;
+                    n_execute_8_division = execute_8_division + 1;
+                end
             end
             P_STATE_11_ASIC_TRAINING_QUEUING: begin
+                if (queuing_complete == 0) begin
+                    if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 12) begin
+                        fifo_d2p_command_rd_en = 1;
+                        n_queuing_complete = 1;
+                        ep60trigout = {31'd0, 1'b1};
+                    end
+                end else begin
+                    if(ep40trigin[0]) begin
+                        if (!fifo_p2d_data_full) begin
+                            fifo_p2d_command_wr_en = 1;
+                            fifo_p2d_command_din = {17'd0, 15'd16};
+                            n_queuing_complete = 0;
+                            n_p_state = P_STATE_12_ASIC_TRAINING_PROCESSING;
+                        end
+                    end
+                end
             end
             P_STATE_12_ASIC_TRAINING_PROCESSING: begin
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 14) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_queuing_complete = 0;
+                    n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
+                    n_sample_executed_lsb_17bit = fifo_d2p_command_dout[15 +: 17];
+                    n_execute_8_division = 0;
+                end
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 18) begin
+                    fifo_d2p_command_rd_en = 1;
+                    n_execute_8_division = execute_8_division + 1;
+                end
             end
         endcase
 

@@ -49,6 +49,7 @@ module a_domain(
     reg asic_start_ready_for_test, n_asic_start_ready_for_test;
     reg [65:0] config_stream_catch_41421, n_config_stream_catch_41421;
     reg [65:0] config_stream_catch_41418, n_config_stream_catch_41418;
+    reg [31:0] data_stream_cnt_for_test, n_data_stream_cnt_for_test;
     // ######### for VERIFICATION ###########################################################################
     // ######### for VERIFICATION ###########################################################################
     // ######### for VERIFICATION ###########################################################################
@@ -159,7 +160,17 @@ module a_domain(
     reg config_on_real, n_config_on_real;
     reg start_ready_oneclk_past;
     reg [16:0] streaming_wait_cycle, n_streaming_wait_cycle;
+    reg queuing_ongoing, n_queuing_ongoing;
 
+    reg start_training_signal_oneclk_delay;
+    reg start_inference_signal_oneclk_delay;
+    reg training_processing_ongoing, n_training_processing_ongoing;
+    reg inference_processing_ongoing, n_inference_processing_ongoing;
+
+    reg [31:0] sample_num, n_sample_num;
+    reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
+    reg [31:0] sample_num_executed, n_sample_num_executed;
+    reg [7:0] sample_stream_cnt_small, n_sample_stream_cnt_small;
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             config_a_domain_setting_cnt <= 0;
@@ -178,6 +189,15 @@ module a_domain(
             config_on_real  <= 0;
             start_ready_oneclk_past <= 0;
             streaming_wait_cycle <= 0;
+            queuing_ongoing <= 0;
+
+            start_training_signal_oneclk_delay <= 0;
+            start_inference_signal_oneclk_delay <= 0;
+            training_processing_ongoing <= 0;
+            inference_processing_ongoing <= 0;
+
+            sample_num <= 0;
+            sample_num_transition_cnt <= 0;
         end
         else begin
             config_a_domain_setting_cnt <= n_config_a_domain_setting_cnt;
@@ -196,6 +216,15 @@ module a_domain(
             config_on_real <= n_config_on_real;
             start_ready_oneclk_past <= start_ready;
             streaming_wait_cycle <= n_streaming_wait_cycle;
+            queuing_ongoing <= n_queuing_ongoing;
+
+            start_training_signal_oneclk_delay <= start_training_signal;
+            start_inference_signal_oneclk_delay <= start_inference_signal;
+            training_processing_ongoing <= n_training_processing_ongoing;
+            inference_processing_ongoing <= n_inference_processing_ongoing;
+
+            sample_num <= n_sample_num;
+            sample_num_transition_cnt <= n_sample_num_transition_cnt;
         end
     end
 
@@ -220,9 +249,18 @@ module a_domain(
         n_a_config_layer2_cut_list = a_config_layer2_cut_list;
         n_config_on_real = config_on_real;
         n_streaming_wait_cycle = streaming_wait_cycle;
+        n_queuing_ongoing = queuing_ongoing;
 
-        fifo_a2d_command_wr_en = 0;
-        fifo_a2d_command_din = 0;
+
+        start_training_signal = 0;
+        start_inference_signal = 0;
+        n_training_processing_ongoing = training_processing_ongoing;
+        n_inference_processing_ongoing = inference_processing_ongoing;
+
+        n_sample_num = sample_num;
+        n_sample_num_transition_cnt = sample_num_transition_cnt;
+        
+
 
 
         if (fifo_d2a_command_valid) begin
@@ -403,6 +441,94 @@ module a_domain(
             end
         end
 
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 11) begin
+                if (sample_num_transition_cnt == 0) begin
+                    fifo_d2a_command_rd_en = 1;
+                    n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
+                    n_sample_num[0 +: 16] = fifo_d2a_command_dout[15 +: 16];
+                end else if (sample_num_transition_cnt == 1) begin
+                    if (!fifo_a2d_command_full) begin
+                        fifo_d2a_command_rd_en = 1;
+                        n_sample_num_transition_cnt = 0;
+                        n_sample_num[16 +: 16] = fifo_d2a_command_dout[15 +: 16];
+                        fifo_a2d_command_wr_en = 1;
+                        fifo_a2d_command_din = {17'd0, 15'd11};
+                    end
+                end
+            end
+        end
+
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 12) begin // training queuing
+                if (!fifo_a2d_command_full) begin
+                    fifo_d2a_command_rd_en = 1; 
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = fifo_d2a_command_dout;
+                    n_queuing_ongoing = 1;
+                end
+            end
+        end
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 13) begin // inference queuing
+                if (!fifo_a2d_command_full) begin
+                    fifo_d2a_command_rd_en = 1; 
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = fifo_d2a_command_dout;
+                    n_queuing_ongoing = 1;
+                end
+            end
+        end
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 16) begin // training start
+                fifo_d2a_command_rd_en = 1; 
+                start_training_signal = 1;
+                n_training_processing_ongoing = 1;
+            end
+        end
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 17) begin // inference start
+                fifo_d2a_command_rd_en = 1; 
+                start_inference_signal = 1;
+                n_inference_processing_ongoing = 0;
+            end
+        end
+
+
+        if (training_processing_ongoing) begin
+            if(start_ready_oneclk_past == 0 && start_ready == 1) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = {data_stream_cnt_for_test[15:0], start_ready, 15'd14};
+                    n_training_processing_ongoing = 0;
+                end
+            end
+        end
+        if (inference_processing_ongoing) begin
+            if(start_ready_oneclk_past == 0 && start_ready == 1) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = {data_stream_cnt_for_test[15:0], start_ready, 15'd15};
+                    n_inference_processing_ongoing = 0;
+                end
+            end
+        end
+
+
+        if (sample_num != 0 && sample_num_executed != 0) begin
+            if (sample_num_executed % (sample_num>>3) == 0) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
+                end
+            end
+        end
+
+        if (start_training_signal_oneclk_delay || start_inference_signal_oneclk_delay) begin
+            n_queuing_ongoing = 0;
+        end
+
+
     end
 
 
@@ -411,34 +537,46 @@ module a_domain(
 
 
 
-
+    // STREAMING CONTROL
     reg [16:0] streaming_count, n_streaming_count;
     reg [16:0] streaming_wait_count, n_streaming_wait_count;
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             streaming_count <= 0;
             streaming_wait_count <= 0;
+
+            sample_num_executed <= 0;
+            sample_stream_cnt_small <= 0;
         end
         else begin
             streaming_count <= n_streaming_count;
             streaming_wait_count <= n_streaming_wait_count;
+
+            sample_num_executed <= n_sample_num_executed;
+            sample_stream_cnt_small <= n_sample_stream_cnt_small;
         end
     end
     always @ (*) begin
         input_streaming_valid = 0;
         input_streaming_data = 0;
-        start_training_signal = 0;
-        start_inference_signal = 0;
         n_streaming_count = streaming_count;
         n_streaming_wait_count = streaming_wait_count;
 
+        n_sample_num_executed = sample_num_executed;
+        n_sample_stream_cnt_small = sample_stream_cnt_small;
 
         fifo_d2a_data_rd_en = 0;
 
 
         if (streaming_count != 7) begin
-            if (1'b1) begin // if (input_streaming_ready) begin
-                if (streaming_wait_cycle) begin
+            if (queuing_ongoing) begin
+                fifo_d2a_data_rd_en = 0;
+                input_streaming_valid = 0;
+                input_streaming_data = 0;
+                n_sample_num_executed = 0;
+                n_sample_stream_cnt_small = 0;
+            end else begin 
+                if (1'b1) begin // if (input_streaming_ready) begin
                     if (fifo_d2a_data_valid) begin
                         fifo_d2a_data_rd_en = 1;
                         input_streaming_valid = 1;
@@ -446,11 +584,47 @@ module a_domain(
                         if (streaming_wait_cycle != 0) begin
                             n_streaming_count = streaming_count + 1;
                         end
+
+
+
+
+
+
+
+                        if (a_config_dataset == 0) begin
+                            if (sample_stream_cnt_small == 15 - 1) begin
+                                n_sample_num_executed = sample_num_executed + 1;
+                                n_sample_stream_cnt_small = 0;
+                            end else begin
+                                n_sample_stream_cnt_small = sample_num_executed + 1;
+                            end
+                        end else if (a_config_dataset == 1) begin
+                            if (sample_stream_cnt_small == 9 - 1) begin
+                                n_sample_num_executed = sample_num_executed + 1;
+                                n_sample_stream_cnt_small = 0;
+                            end else begin
+                                n_sample_stream_cnt_small = sample_num_executed + 1;
+                            end
+                        end else if (a_config_dataset == 2) begin
+                            if (sample_stream_cnt_small == 9 - 1) begin
+                                n_sample_num_executed = sample_num_executed + 1;
+                                n_sample_stream_cnt_small = 0;
+                            end else begin
+                                n_sample_stream_cnt_small = sample_num_executed + 1;
+                            end
+                        end
+
+
+
+
+
+
+
                     end
                 end
             end
         end else begin
-            if (streaming_wait_count + 1 == streaming_wait_cycle) begin
+            if (streaming_wait_count == streaming_wait_cycle - 1) begin
                 n_streaming_count = 0;
                 n_streaming_wait_count = 0;
             end else begin
@@ -459,12 +633,6 @@ module a_domain(
         end
 
     end
-
-
-
-
-
-
 
 
 
@@ -512,12 +680,14 @@ module a_domain(
             asic_start_ready_for_test <= 1;
             config_stream_catch_41421 <= 0;
             config_stream_catch_41418 <= 0;
+            data_stream_cnt_for_test <= 0;
         end
         else begin
             config_stream_cnt <= n_config_stream_cnt;
             asic_start_ready_for_test <= n_asic_start_ready_for_test;
             config_stream_catch_41421 <= n_config_stream_catch_41421;
             config_stream_catch_41418 <= n_config_stream_catch_41418;
+            data_stream_cnt_for_test <= n_data_stream_cnt_for_test;
         end
     end
     always @ (*) begin
@@ -525,6 +695,7 @@ module a_domain(
         n_asic_start_ready_for_test = asic_start_ready_for_test;
         n_config_stream_catch_41421 = config_stream_catch_41421;
         n_config_stream_catch_41418 = config_stream_catch_41418;
+        n_data_stream_cnt_for_test = data_stream_cnt_for_test;
 
 
         if (config_stream_cnt == 1) begin 
@@ -547,10 +718,48 @@ module a_domain(
                 n_config_stream_catch_41421 = fifo_d2a_data_dout;
             end
         end
+
+
+
+
+
+        if (data_stream_cnt_for_test == 1) begin 
+            n_asic_start_ready_for_test = 0;
+        end
+
+        if (a_config_dataset == 0) begin
+            if (data_stream_cnt_for_test == sample_num * a_config_timesteps * 15) begin 
+            // if (data_stream_cnt_for_test == 29_370_000) begin 
+                n_asic_start_ready_for_test = 1;
+            end
+        end else if (a_config_dataset == 1) begin
+            if (data_stream_cnt_for_test == sample_num * a_config_timesteps * 9) begin 
+            // if (data_stream_cnt_for_test == 540_000_000) begin 
+                n_asic_start_ready_for_test = 1;
+            end
+        end else if (a_config_dataset == 2) begin
+            if (data_stream_cnt_for_test == sample_num * a_config_timesteps * 9) begin 
+            // if (data_stream_cnt_for_test == 58_060_800) begin 
+            // if (data_stream_cnt_for_test == 58_032_000) begin 
+                n_asic_start_ready_for_test = 1;
+            end
+        end
+
+
+
     end
     // ######### for VERIFICATION ###########################################################################
     // ######### for VERIFICATION ###########################################################################
     // ######### for VERIFICATION ###########################################################################
+
+
+
+
+// gesture streaming 총 횟수: 29_370_000 =  200epochs * 979samples * 10 timesteps * 15trans
+// nmnist streaming 총 횟수: 540_000_000 =  200epochs * 60000samples * 5 timesteps * 9trans
+// ntidigits wrod0 streaming 총 횟수: 58_060_800 =  200epochs * 4032samples * 8 timesteps * 9trans
+// ntidigits else streaming 총 횟수: 58_032_000 =  200epochs * 4030samples * 8 timesteps * 9trans
+
 
 
 
