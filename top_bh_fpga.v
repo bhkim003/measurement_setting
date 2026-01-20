@@ -524,12 +524,14 @@ module top_bh_fpga(
     reg [15:0] config_all_domain_setting_cnt, n_config_all_domain_setting_cnt;
 
         
-    reg [31:0] dram_write_address, n_dram_write_address;
-    reg [31:0] dram_write_address_last, n_dram_write_address_last;
-    reg [3:0] dram_write_address_transition_cnt, n_dram_write_address_transition_cnt;
+    reg [31:0] dram_address, n_dram_address;
+    reg [31:0] dram_address_last, n_dram_address_last;
+    reg [3:0] dram_address_transition_cnt, n_dram_address_transition_cnt;
 
     reg [15:0] config_stream_cnt, n_config_stream_cnt;
 
+    reg [31:0] sample_num, n_sample_num;
+    reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
 
     always @(posedge okClk) begin
         if (!reset_n) begin
@@ -610,11 +612,11 @@ module top_bh_fpga(
                 // n_ep20wireout = fifo_p2d_data_dout[32*(ep01wirein-1) +: 32];
                 
                 if (ep01wirein == 10) begin
-                    led = xem7310_led(dram_write_address[7:0]);
-                    n_ep20wireout = dram_write_address;
+                    led = xem7310_led(dram_address[7:0]);
+                    n_ep20wireout = dram_address;
                 end else if (ep01wirein == 11) begin
-                    led = xem7310_led(dram_write_address_last[7:0]);
-                    n_ep20wireout = dram_write_address_last;
+                    led = xem7310_led(dram_address_last[7:0]);
+                    n_ep20wireout = dram_address_last;
                 end else if (ep01wirein == 12) begin
                     led = xem7310_led(fifo_p2d_data_wr_cnt[7:0]);
                     n_ep20wireout = fifo_p2d_data_wr_cnt;
@@ -626,7 +628,7 @@ module top_bh_fpga(
                     n_ep20wireout = app_rd_data_check;
                 end
             end
-        end else if (p_state == P_STATE_07_ASIC_CONFIG || P_STATE_08_ASIC_CONFIG_DONE) begin
+        end else if (p_state == P_STATE_07_ASIC_CONFIG || p_state == P_STATE_08_ASIC_CONFIG_DONE) begin
             if (ep01wirein == 0) begin
                 if (asic_config_ongoing) begin
                     led = xem7310_led(p_state & {8{blink_100ms}});
@@ -640,6 +642,39 @@ module top_bh_fpga(
             end else if (ep01wirein == 1) begin
                 led = xem7310_led(config_stream_cnt[7:0]);
                 n_ep20wireout = {16'd0, config_stream_cnt};
+            end else if (ep01wirein == 2) begin
+                led = xem7310_led(sample_num[7:0]);
+                n_ep20wireout = sample_num;
+            end else if (ep01wirein == 10) begin
+                led = xem7310_led(dram_address[7:0]);
+                n_ep20wireout = dram_address;
+            end else if (ep01wirein == 11) begin
+                led = xem7310_led(dram_address_last[7:0]);
+                n_ep20wireout = dram_address_last;
+            end
+        end else if (p_state == P_STATE_09_ASIC_INFERENCE_QUEUING || p_state == P_STATE_11_ASIC_TRAINING_QUEUING) begin
+            if (ep01wirein == 0) begin
+                if (asic_config_ongoing) begin
+                    led = xem7310_led(p_state & {8{blink_100ms}});
+                end else if (asic_start_ready == 1) begin
+                    led = xem7310_led(p_state & {8{blink_500ms}});
+                    n_ep20wireout = 1;
+                end else begin
+                    led = xem7310_led(p_state & {8{blink_1000ms}});
+                    n_ep20wireout = 0;
+                end
+            end else if (ep01wirein == 1) begin
+                led = xem7310_led(config_stream_cnt[7:0]);
+                n_ep20wireout = {16'd0, config_stream_cnt};
+            end else if (ep01wirein == 2) begin
+                led = xem7310_led(sample_num[7:0]);
+                n_ep20wireout = sample_num;
+            end else if (ep01wirein == 10) begin
+                led = xem7310_led(dram_address[7:0]);
+                n_ep20wireout = dram_address;
+            end else if (ep01wirein == 11) begin
+                led = xem7310_led(dram_address_last[7:0]);
+                n_ep20wireout = dram_address_last;
             end
         end
 
@@ -676,15 +711,18 @@ module top_bh_fpga(
             config_all_domain_setting_complete <= 0;
             config_all_domain_setting_cnt <= 0;
 
-            dram_write_address <= 0;
-            dram_write_address_last <= 0;
-            dram_write_address_transition_cnt <= 0;
+            dram_address <= 0;
+            dram_address_last <= 0;
+            dram_address_transition_cnt <= 0;
 
             app_rd_data_check <= 0;
             asic_start_ready <= 0;
             asic_config_ongoing <= 0;
 
             config_stream_cnt <= 0;
+
+            sample_num <= 0;
+            sample_num_transition_cnt <= 0;
         end else begin
             p_state <= n_p_state;
 
@@ -709,15 +747,18 @@ module top_bh_fpga(
             config_all_domain_setting_complete <= n_config_all_domain_setting_complete;
             config_all_domain_setting_cnt <= n_config_all_domain_setting_cnt;
 
-            dram_write_address <= n_dram_write_address;
-            dram_write_address_last <= n_dram_write_address_last;
-            dram_write_address_transition_cnt <= n_dram_write_address_transition_cnt;
+            dram_address <= n_dram_address;
+            dram_address_last <= n_dram_address_last;
+            dram_address_transition_cnt <= n_dram_address_transition_cnt;
 
             app_rd_data_check <= n_app_rd_data_check;
             asic_start_ready <= n_asic_start_ready;
             asic_config_ongoing <= n_asic_config_ongoing;
 
             config_stream_cnt <= n_config_stream_cnt;
+
+            sample_num <= n_sample_num;
+            sample_num_transition_cnt <= n_sample_num_transition_cnt;
         end
     end
 
@@ -759,9 +800,9 @@ module top_bh_fpga(
         fifo_d2p_command_rd_en = 0;
 
 
-        n_dram_write_address = dram_write_address;
-        n_dram_write_address_last = dram_write_address_last;
-        n_dram_write_address_transition_cnt = dram_write_address_transition_cnt;
+        n_dram_address = dram_address;
+        n_dram_address_last = dram_address_last;
+        n_dram_address_transition_cnt = dram_address_transition_cnt;
 
 
 
@@ -776,6 +817,9 @@ module top_bh_fpga(
         n_asic_config_ongoing = asic_config_ongoing;
 
         n_config_stream_cnt = config_stream_cnt;
+
+        n_sample_num = sample_num;
+        n_sample_num_transition_cnt = sample_num_transition_cnt;
 
         
         if(ep40trigin[29]) begin
@@ -898,6 +942,23 @@ module top_bh_fpga(
                 end
             end
             P_STATE_08_ASIC_CONFIG_DONE: begin
+                if(ep40trigin[0]) begin
+                    if (!fifo_p2d_data_full) begin
+                        fifo_p2d_command_wr_en = 1;
+                        fifo_p2d_command_din = {17'd0, 15'd8};
+                        n_asic_start_ready = 0;
+                        n_config_stream_cnt = 0;
+                        n_asic_config_ongoing = 1;
+                    end
+                end
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 9) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
+                    n_asic_start_ready = fifo_d2p_command_dout[15];
+                    n_config_stream_cnt = fifo_d2p_command_dout[31:16];
+                    n_asic_config_ongoing = 0;
+                end
             end
             P_STATE_09_ASIC_INFERENCE_QUEUING: begin
             end
@@ -1002,45 +1063,74 @@ module top_bh_fpga(
 
 
 
-        // dram write address setting
-        if(dram_write_address_transition_cnt == 0) begin
+        // dram address setting
+        if(dram_address_transition_cnt == 0) begin
             if(ep40trigin[30]) begin
-                n_dram_write_address = ep01wirein;
-                n_dram_write_address_transition_cnt = dram_write_address_transition_cnt + 1;
+                n_dram_address = ep01wirein;
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
             end
-        end else if (dram_write_address_transition_cnt == 1) begin
+        end else if (dram_address_transition_cnt == 1) begin
             if(ep40trigin[30]) begin
-                n_dram_write_address_last = ep01wirein;
-                n_dram_write_address_transition_cnt = dram_write_address_transition_cnt + 1;
+                n_dram_address_last = ep01wirein;
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
             end
-        end else if (dram_write_address_transition_cnt == 2) begin
+        end else if (dram_address_transition_cnt == 2) begin
             if(!fifo_p2d_command_full) begin
-                n_dram_write_address_transition_cnt = dram_write_address_transition_cnt + 1;
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
                 fifo_p2d_command_wr_en = 1;
-                fifo_p2d_command_din = {1'b0, dram_write_address[0 +: 16], 15'd4};
+                fifo_p2d_command_din = {1'b0, dram_address[0 +: 16], 15'd4};
             end
-        end else if (dram_write_address_transition_cnt == 3) begin
+        end else if (dram_address_transition_cnt == 3) begin
             if(!fifo_p2d_command_full) begin
-                n_dram_write_address_transition_cnt = dram_write_address_transition_cnt + 1;
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
                 fifo_p2d_command_wr_en = 1;
-                fifo_p2d_command_din = {1'b0, dram_write_address[16 +: 16], 15'd4};
+                fifo_p2d_command_din = {1'b0, dram_address[16 +: 16], 15'd4};
             end
-        end else if (dram_write_address_transition_cnt == 4) begin
+        end else if (dram_address_transition_cnt == 4) begin
             if(!fifo_p2d_command_full) begin
-                n_dram_write_address_transition_cnt = dram_write_address_transition_cnt + 1;
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
                 fifo_p2d_command_wr_en = 1;
-                fifo_p2d_command_din = {1'b0, dram_write_address_last[0 +: 16], 15'd4};
+                fifo_p2d_command_din = {1'b0, dram_address_last[0 +: 16], 15'd4};
             end
-        end else if (dram_write_address_transition_cnt == 5) begin
+        end else if (dram_address_transition_cnt == 5) begin
             if(!fifo_p2d_command_full) begin
-                n_dram_write_address_transition_cnt = dram_write_address_transition_cnt + 1;
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
                 fifo_p2d_command_wr_en = 1;
-                fifo_p2d_command_din = {1'b0, dram_write_address_last[16 +: 16], 15'd4};
+                fifo_p2d_command_din = {1'b0, dram_address_last[16 +: 16], 15'd4};
             end
-        end else if (dram_write_address_transition_cnt == 6) begin
-            if(fifo_d2p_command_valid || fifo_d2p_command_dout[14:0] == 4) begin
+        end else if (dram_address_transition_cnt == 6) begin
+            if(fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 4) begin
                 fifo_d2p_command_rd_en = 1;
-                n_dram_write_address_transition_cnt = 0;
+                n_dram_address_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
+
+
+
+
+        // sample num setting
+        if(sample_num_transition_cnt == 0) begin
+            if(ep40trigin[26]) begin
+                n_sample_num = ep01wirein;
+                n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
+            end
+        end else if (sample_num_transition_cnt == 1) begin
+            if(!fifo_p2d_command_full) begin
+                n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {1'b0, sample_num[0 +: 16], 15'd11};
+            end
+        end else if (sample_num_transition_cnt == 2) begin
+            if(!fifo_p2d_command_full) begin
+                n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {1'b0, sample_num[16 +: 16], 15'd11};
+            end
+        end else if (sample_num_transition_cnt == 3) begin
+            if(fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 11) begin
+                fifo_d2p_command_rd_en = 1;
+                n_sample_num_transition_cnt = 0;
                 ep60trigout = {31'd0, 1'b1};
             end
         end
@@ -1054,7 +1144,7 @@ module top_bh_fpga(
 
         // Check ASIC start ready == 1
         if(ep40trigin[28]) begin
-            if (!fifo_p2d_data_full) begin
+            if (!fifo_p2d_command_full) begin
                 fifo_p2d_command_wr_en = 1;
                 fifo_p2d_command_din = {17'd0, 15'd7};
                 n_asic_start_ready = 0;
@@ -1063,6 +1153,19 @@ module top_bh_fpga(
         if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 7) begin
             fifo_d2p_command_rd_en = 1;
             n_asic_start_ready = fifo_d2p_command_dout[15];
+        end
+
+
+        // STEAMING N번 WAIT
+        if(ep40trigin[27]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {ep01wirein[16:0], 15'd10};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 10) begin
+            fifo_d2p_command_rd_en = 1;
+            ep60trigout = {31'd0, 1'b1};
         end
 
 
@@ -1147,273 +1250,273 @@ module top_bh_fpga(
         if (config_all_domain_setting_ongoing) begin
             if (config_all_domain_setting_cnt == 0) begin
                 config_value = {15'd0, p_config_asic_mode};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 1) begin
                 config_value = {1'd0, p_config_training_epochs};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 2) begin
                 config_value = {1'd0, p_config_inference_epochs};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 3) begin
                 config_value = {15'd0, p_config_dataset};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 4) begin
                 config_value = {1'd0, p_config_timesteps};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 5) begin
                 config_value = {1'd0, p_config_input_size_layer1_define};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 6) begin
                 config_value = {16'd0, p_config_long_time_input_streaming_mode};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 7) begin
                 config_value = {16'd0, p_config_binary_classifier_mode};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 8) begin
                 config_value = {16'd0, p_config_loser_encourage_mode};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 9) begin
                 config_value = {p_config_layer1_cut_list[17*0 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 10) begin
                 config_value = {p_config_layer1_cut_list[17*1 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 11) begin
                 config_value = {p_config_layer1_cut_list[17*2 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 12) begin
                 config_value = {p_config_layer1_cut_list[17*3 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 13) begin
                 config_value = {p_config_layer1_cut_list[17*4 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 14) begin
                 config_value = {p_config_layer1_cut_list[17*5 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 15) begin
                 config_value = {p_config_layer1_cut_list[17*6 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 16) begin
                 config_value = {p_config_layer1_cut_list[17*7 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 17) begin
                 config_value = {p_config_layer1_cut_list[17*8 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 18) begin
                 config_value = {p_config_layer1_cut_list[17*9 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 19) begin
                 config_value = {p_config_layer1_cut_list[17*10 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 20) begin
                 config_value = {p_config_layer1_cut_list[17*11 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 21) begin
                 config_value = {p_config_layer1_cut_list[17*12 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 22) begin
                 config_value = {p_config_layer1_cut_list[17*13 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 23) begin
                 config_value = {p_config_layer1_cut_list[17*14 +: 17]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 24) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*0 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 25) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*1 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 26) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*2 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 27) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*3 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 28) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*4 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 29) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*5 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 30) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*6 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 31) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*7 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 32) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*8 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 33) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*9 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 34) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*10 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 35) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*11 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 36) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*12 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 37) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*13 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
                 end
             end else if (config_all_domain_setting_cnt == 38) begin
                 config_value = {1'd0, p_config_layer2_cut_list[16*14 +: 16]};
-                if (fifo_p2d_command_full == 0) begin
+                if (!fifo_p2d_command_full) begin
                     n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
                     fifo_p2d_command_wr_en = 1;
                     fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};

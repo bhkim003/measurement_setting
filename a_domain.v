@@ -42,16 +42,16 @@ module a_domain(
     );
 
 
-    // ######### for TEST ###########################################################################
-    // ######### for TEST ###########################################################################
-    // ######### for TEST ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
     reg [31:0] config_stream_cnt, n_config_stream_cnt;
     reg asic_start_ready_for_test, n_asic_start_ready_for_test;
     reg [65:0] config_stream_catch_41421, n_config_stream_catch_41421;
     reg [65:0] config_stream_catch_41418, n_config_stream_catch_41418;
-    // ######### for TEST ###########################################################################
-    // ######### for TEST ###########################################################################
-    // ######### for TEST ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
 
 
     // ######### IN OUT ###########################################################################
@@ -158,7 +158,7 @@ module a_domain(
     reg [16*15 - 1:0] a_config_layer2_cut_list, n_a_config_layer2_cut_list;
     reg config_on_real, n_config_on_real;
     reg start_ready_oneclk_past;
-
+    reg [16:0] streaming_wait_cycle, n_streaming_wait_cycle;
 
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
@@ -177,6 +177,7 @@ module a_domain(
             a_config_layer2_cut_list  <= 0;
             config_on_real  <= 0;
             start_ready_oneclk_past <= 0;
+            streaming_wait_cycle <= 0;
         end
         else begin
             config_a_domain_setting_cnt <= n_config_a_domain_setting_cnt;
@@ -194,6 +195,7 @@ module a_domain(
             a_config_layer2_cut_list <= n_a_config_layer2_cut_list;
             config_on_real <= n_config_on_real;
             start_ready_oneclk_past <= start_ready;
+            streaming_wait_cycle <= n_streaming_wait_cycle;
         end
     end
 
@@ -217,6 +219,7 @@ module a_domain(
         n_a_config_layer1_cut_list = a_config_layer1_cut_list;
         n_a_config_layer2_cut_list = a_config_layer2_cut_list;
         n_config_on_real = config_on_real;
+        n_streaming_wait_cycle = streaming_wait_cycle;
 
         fifo_a2d_command_wr_en = 0;
         fifo_a2d_command_din = 0;
@@ -364,8 +367,6 @@ module a_domain(
             end
         end
 
-
-
         if (fifo_d2a_command_valid) begin
             if (fifo_d2a_command_dout[14:0] == 8) begin
                 if (start_ready) begin
@@ -383,14 +384,24 @@ module a_domain(
             if(start_ready_oneclk_past == 0 && start_ready == 1) begin
                 if (!fifo_a2d_command_full) begin
                     fifo_a2d_command_wr_en = 1;
-                    // fifo_a2d_command_din = {config_stream_cnt[15:0], start_ready, 15'd9};
-                    fifo_a2d_command_din = {config_stream_catch_41418[15:0], start_ready, 15'd9};
+                    fifo_a2d_command_din = {config_stream_cnt[15:0], start_ready, 15'd9};
+                    // fifo_a2d_command_din = {config_stream_catch_41418[15:0], start_ready, 15'd9};
                     // fifo_a2d_command_din = {config_stream_catch_41421[15:0], start_ready, 15'd9};
                     n_config_on_real = 0;
                 end
             end
         end
 
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 10) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_d2a_command_rd_en = 1; 
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = fifo_d2a_command_dout;
+                    n_streaming_wait_cycle = fifo_d2a_command_dout[15 +: 17];
+                end
+            end
+        end
 
     end
 
@@ -401,26 +412,52 @@ module a_domain(
 
 
 
-
-
+    reg [16:0] streaming_count, n_streaming_count;
+    reg [16:0] streaming_wait_count, n_streaming_wait_count;
+    always @(posedge clk_a_domain) begin
+        if(!reset_n) begin
+            streaming_count <= 0;
+            streaming_wait_count <= 0;
+        end
+        else begin
+            streaming_count <= n_streaming_count;
+            streaming_wait_count <= n_streaming_wait_count;
+        end
+    end
     always @ (*) begin
         input_streaming_valid = 0;
         input_streaming_data = 0;
         start_training_signal = 0;
         start_inference_signal = 0;
+        n_streaming_count = streaming_count;
+        n_streaming_wait_count = streaming_wait_count;
 
 
         fifo_d2a_data_rd_en = 0;
 
 
-
-
-
-        if (fifo_d2a_data_valid) begin
-            fifo_d2a_data_rd_en = 1;
-            input_streaming_valid = 1;
-            input_streaming_data = fifo_d2a_data_dout;
+        if (streaming_count != 7) begin
+            if (1'b1) begin // if (input_streaming_ready) begin
+                if (streaming_wait_cycle) begin
+                    if (fifo_d2a_data_valid) begin
+                        fifo_d2a_data_rd_en = 1;
+                        input_streaming_valid = 1;
+                        input_streaming_data = fifo_d2a_data_dout;
+                        if (streaming_wait_cycle != 0) begin
+                            n_streaming_count = streaming_count + 1;
+                        end
+                    end
+                end
+            end
+        end else begin
+            if (streaming_wait_count + 1 == streaming_wait_cycle) begin
+                n_streaming_count = 0;
+                n_streaming_wait_count = 0;
+            end else begin
+                n_streaming_wait_count = streaming_wait_count + 1;
+            end
         end
+
     end
 
 
@@ -466,9 +503,9 @@ module a_domain(
 
 
 
-    // ######### for TEST ###########################################################################
-    // ######### for TEST ###########################################################################
-    // ######### for TEST ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             config_stream_cnt <= 0;
@@ -511,9 +548,9 @@ module a_domain(
             end
         end
     end
-    // ######### for TEST ###########################################################################
-    // ######### for TEST ###########################################################################
-    // ######### for TEST ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION ###########################################################################
 
 
 

@@ -106,9 +106,9 @@ localparam  DRAM_READ       = 3'b001,
 
     reg dram_reset_complete_trg_have_been_sent, n_dram_reset_complete_trg_have_been_sent;
 
-    reg [31:0] dram_write_address, n_dram_write_address;
-    reg [31:0] dram_write_address_last, n_dram_write_address_last;
-    reg [3:0] dram_write_address_transition_cnt, n_dram_write_address_transition_cnt;
+    reg [31:0] dram_address, n_dram_address;
+    reg [31:0] dram_address_last, n_dram_address_last;
+    reg [3:0] dram_address_transition_cnt, n_dram_address_transition_cnt;
     
     reg [31:0] write_count, n_write_count;
     reg dram_writing_finish_flag, n_dram_writing_finish_flag;
@@ -116,6 +116,7 @@ localparam  DRAM_READ       = 3'b001,
     reg dram_writing_check_read_catch_flag, n_dram_writing_check_read_catch_flag;
     reg [17 - 1:0] app_rd_data_check, n_app_rd_data_check;
 
+    reg streaming_wait_cycle_send_have_been, n_streaming_wait_cycle_send_have_been;
     reg config_on_broadcasting_send_have_been, n_config_on_broadcasting_send_have_been;
     reg config_on_real, n_config_on_real;
 	reg main_config_now, n_main_config_now;
@@ -128,6 +129,10 @@ localparam  DRAM_READ       = 3'b001,
     reg [255:0] config_dram_word, n_config_dram_word;
     reg config_dram_word_ready, n_config_dram_word_ready;
     reg config_dram_word_request_have_been, n_config_dram_word_request_have_been;
+
+    reg [31:0] sample_num, n_sample_num;
+    reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
+
 
 
         reg	         	app_en;
@@ -164,9 +169,9 @@ localparam  DRAM_READ       = 3'b001,
 
             dram_reset_complete_trg_have_been_sent  <= 0;
 
-            dram_write_address <= 0;
-            dram_write_address_last <= 0;
-            dram_write_address_transition_cnt <= 0;
+            dram_address <= 0;
+            dram_address_last <= 0;
+            dram_address_transition_cnt <= 0;
 
             write_count <= 0;
             dram_writing_finish_flag <= 0;
@@ -174,6 +179,7 @@ localparam  DRAM_READ       = 3'b001,
             dram_writing_check_read_catch_flag <= 0;
             app_rd_data_check <= 0;
 
+            streaming_wait_cycle_send_have_been <= 0;
             config_on_broadcasting_send_have_been <= 0;
             config_on_real <= 0;
             main_config_now <= 0;
@@ -187,7 +193,8 @@ localparam  DRAM_READ       = 3'b001,
             config_dram_word_ready <= 0;
             config_dram_word_request_have_been <= 0;
 
-
+            sample_num <= 0;
+            sample_num_transition_cnt <= 0;
         end else begin
             config_d_domain_setting_cnt <= n_config_d_domain_setting_cnt;
 
@@ -205,9 +212,9 @@ localparam  DRAM_READ       = 3'b001,
 
             dram_reset_complete_trg_have_been_sent <= n_dram_reset_complete_trg_have_been_sent;
 
-            dram_write_address <= n_dram_write_address;
-            dram_write_address_last <= n_dram_write_address_last;
-            dram_write_address_transition_cnt <= n_dram_write_address_transition_cnt;
+            dram_address <= n_dram_address;
+            dram_address_last <= n_dram_address_last;
+            dram_address_transition_cnt <= n_dram_address_transition_cnt;
 
             write_count <= n_write_count;
             dram_writing_finish_flag <= n_dram_writing_finish_flag;
@@ -215,6 +222,7 @@ localparam  DRAM_READ       = 3'b001,
             dram_writing_check_read_catch_flag <= n_dram_writing_check_read_catch_flag;
             app_rd_data_check <= n_app_rd_data_check;
 
+            streaming_wait_cycle_send_have_been <= n_streaming_wait_cycle_send_have_been;
             config_on_broadcasting_send_have_been <= n_config_on_broadcasting_send_have_been;
             config_on_real <= n_config_on_real;
             main_config_now <= n_main_config_now;
@@ -228,6 +236,8 @@ localparam  DRAM_READ       = 3'b001,
             config_dram_word_ready <= n_config_dram_word_ready;
             config_dram_word_request_have_been <= n_config_dram_word_request_have_been;
 
+            sample_num <= n_sample_num;
+            sample_num_transition_cnt <= n_sample_num_transition_cnt;
         end
     end
 
@@ -274,9 +284,9 @@ localparam  DRAM_READ       = 3'b001,
 
 
 
-        n_dram_write_address = dram_write_address;
-        n_dram_write_address_last = dram_write_address_last;
-        n_dram_write_address_transition_cnt = dram_write_address_transition_cnt;
+        n_dram_address = dram_address;
+        n_dram_address_last = dram_address_last;
+        n_dram_address_transition_cnt = dram_address_transition_cnt;
 
 
         n_write_count = write_count;
@@ -285,6 +295,7 @@ localparam  DRAM_READ       = 3'b001,
         n_dram_writing_check_read_catch_flag = dram_writing_check_read_catch_flag;
         n_app_rd_data_check = app_rd_data_check;
 
+        n_streaming_wait_cycle_send_have_been = streaming_wait_cycle_send_have_been;
         n_config_on_broadcasting_send_have_been = config_on_broadcasting_send_have_been;
         n_config_on_real = config_on_real;
         n_main_config_now = main_config_now;
@@ -297,6 +308,12 @@ localparam  DRAM_READ       = 3'b001,
         n_config_dram_word = config_dram_word;
         n_config_dram_word_ready = config_dram_word_ready;
         n_config_dram_word_request_have_been = config_dram_word_request_have_been;
+
+        n_sample_num = sample_num;
+        n_sample_num_transition_cnt = sample_num_transition_cnt;
+
+
+
 
         config_value = 0;
 
@@ -462,26 +479,40 @@ localparam  DRAM_READ       = 3'b001,
                     // end
                 end
             end else if (fifo_p2d_command_dout[14:0] == 4) begin
-                if (dram_write_address_transition_cnt == 0) begin
+                if (dram_address_transition_cnt == 0) begin
                     n_write_count = 0;
                     fifo_p2d_command_rd_en = 1;
-                    n_dram_write_address_transition_cnt = dram_write_address_transition_cnt + 1;
-                    n_dram_write_address[0 +: 16] = fifo_p2d_command_dout[15 +: 16];
-                end else if (dram_write_address_transition_cnt == 1) begin
+                    n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
+                    n_dram_address[0 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                end else if (dram_address_transition_cnt == 1) begin
                     fifo_p2d_command_rd_en = 1;
-                    n_dram_write_address_transition_cnt = dram_write_address_transition_cnt + 1;
-                    n_dram_write_address[16 +: 16] = fifo_p2d_command_dout[15 +: 16];
-                end else if (dram_write_address_transition_cnt == 2) begin
+                    n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
+                    n_dram_address[16 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                end else if (dram_address_transition_cnt == 2) begin
                     fifo_p2d_command_rd_en = 1;
-                    n_dram_write_address_transition_cnt = dram_write_address_transition_cnt + 1;
-                    n_dram_write_address_last[0 +: 16] = fifo_p2d_command_dout[15 +: 16];
-                end else if (dram_write_address_transition_cnt == 3) begin
+                    n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
+                    n_dram_address_last[0 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                end else if (dram_address_transition_cnt == 3) begin
                     if (!fifo_d2p_command_full) begin
                         fifo_p2d_command_rd_en = 1;
-                        n_dram_write_address_transition_cnt = 0;
-                        n_dram_write_address_last[16 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        n_dram_address_transition_cnt = 0;
+                        n_dram_address_last[16 +: 16] = fifo_p2d_command_dout[15 +: 16];
                         fifo_d2p_command_wr_en = 1;
                         fifo_d2p_command_din = {17'd0, 15'd4};
+                    end
+                end            
+            end else if (fifo_p2d_command_dout[14:0] == 11) begin
+                if (sample_num_transition_cnt == 0) begin
+                    fifo_p2d_command_rd_en = 1;
+                    n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
+                    n_sample_num[0 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                end else if (sample_num_transition_cnt == 1) begin
+                    if (!fifo_d2p_command_full) begin
+                        fifo_p2d_command_rd_en = 1;
+                        n_sample_num_transition_cnt = 0;
+                        n_sample_num[16 +: 16] = fifo_p2d_command_dout[15 +: 16];
+                        fifo_d2p_command_wr_en = 1;
+                        fifo_d2p_command_din = {17'd0, 15'd11};
                     end
                 end
             end else if (fifo_p2d_command_dout[14:0] == 6) begin
@@ -498,11 +529,12 @@ localparam  DRAM_READ       = 3'b001,
                 end
             end else if (fifo_p2d_command_dout[14:0] == 8) begin
                 if (config_on_broadcasting_send_have_been == 0) begin
+                    if (!fifo_d2a_command_full) begin
+                        fifo_d2a_command_wr_en = 1;
+                        fifo_d2a_command_din = fifo_p2d_command_dout;
 
-                    fifo_d2a_command_wr_en = 1;
-                    fifo_d2a_command_din = fifo_p2d_command_dout;
-
-                    n_config_on_broadcasting_send_have_been = 1;
+                        n_config_on_broadcasting_send_have_been = 1;
+                    end
                 end else begin
                     if (fifo_a2d_command_valid && fifo_a2d_command_dout[14:0] == 8) begin
                         fifo_p2d_command_rd_en = 1;
@@ -514,6 +546,28 @@ localparam  DRAM_READ       = 3'b001,
                         n_layer3_config_now = 0;
                         
                         n_config_on_broadcasting_send_have_been = 0;
+                    end
+                end
+            end else if (fifo_p2d_command_dout[14:0] == 10) begin
+                if (streaming_wait_cycle_send_have_been == 0) begin
+                    if (!fifo_d2a_command_full) begin
+                        fifo_d2a_command_wr_en = 1;
+                        fifo_d2a_command_din = fifo_p2d_command_dout;
+
+                        n_streaming_wait_cycle_send_have_been = 1;
+                    end
+                end else begin
+                    if (fifo_a2d_command_valid && fifo_a2d_command_dout[14:0] == 10) begin
+                        if (!fifo_d2p_command_full) begin
+                            fifo_p2d_command_rd_en = 1;
+
+                            fifo_a2d_command_rd_en = 1;
+
+                            fifo_d2p_command_wr_en = 1;
+                            fifo_d2p_command_din = fifo_a2d_command_dout;
+
+                            n_streaming_wait_cycle_send_have_been = 0;
+                        end
                     end
                 end
             end
@@ -553,14 +607,14 @@ localparam  DRAM_READ       = 3'b001,
                 fifo_p2d_data_rd_en = 1;
                 app_en = 1;
                 app_cmd = DRAM_WRITE;
-                app_addr = dram_write_address[0 +:29] + write_count;
+                app_addr = dram_address[0 +:29] + write_count;
                 app_wdf_wren = 1;
                 app_wdf_data = fifo_p2d_data_dout;
                 // app_wdf_data = fifo_p2d_data_dout_align;
                 app_wdf_end = 1;
                 app_wdf_mask = 0;
                 n_write_count = write_count + 8; // 256bit / 32byte = 8
-                if (dram_write_address_last == dram_write_address[0 +:29] + write_count) begin
+                if (dram_address_last == dram_address[0 +:29] + write_count) begin
                     n_dram_writing_finish_flag = 1;
                 end
             end
@@ -571,8 +625,8 @@ localparam  DRAM_READ       = 3'b001,
                     n_dram_writing_check_read_flag = 1;
                     app_en = 1;
                     app_cmd = DRAM_READ;
-                    app_addr = dram_write_address_last;
-                    // app_addr = dram_write_address_last-8;
+                    app_addr = dram_address_last;
+                    // app_addr = dram_address_last-8;
                 end
             end else begin
                 if (dram_writing_check_read_catch_flag == 0) begin
