@@ -3,13 +3,13 @@ module adder_tree_fsm(
     input rstn,
 
     input start,
-    input [128 - 1:0] din,
+    input [127:0] din,
 
     output done,
-    output [16 - 1:0] dout
+    output [15:0] dout
 );
 
-reg [2 - 1:0] c_state, n_state;
+reg [1:0] c_state, n_state;
 
 assign state = c_state;
 
@@ -60,9 +60,9 @@ assign done = (c_state == FSM_DONE) ? 1'b1 : 1'b0;
 
 reg start_reg;
 
-reg [16 - 1:0] stage1_0, stage1_1, stage1_2, stage1_3;
-reg [16 - 1:0] stage2_0, stage2_1;
-reg [16 - 1:0] stage3;
+reg [15:0] stage1_0, stage1_1, stage1_2, stage1_3;
+reg [15:0] stage2_0, stage2_1;
+reg [15:0] stage3;
 
 reg stage1_done, stage2_done, stage3_done;
 

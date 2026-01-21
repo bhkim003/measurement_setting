@@ -30,7 +30,8 @@ module top_bh_fpga(
         // ########################## led ########################################################################################
         // ########################## led ########################################################################################
         // ########################## led ########################################################################################
-        output  reg [7:0]  led,
+        // output  reg [7:0]  led, // xem7310
+        output  reg [3:0]  led, // xem7360
         // ########################## led ########################################################################################
         // ########################## led ########################################################################################
         // ########################## led ########################################################################################
@@ -41,7 +42,7 @@ module top_bh_fpga(
         // // ########################## dram interface ########################################################################################
         // // ########################## dram interface ########################################################################################
         // // ########################## dram interface ########################################################################################
-        output wire [14:0]  ddr3_addr,
+        output wire [15:0]  ddr3_addr,
         output wire [2 :0]  ddr3_ba,
         output wire         ddr3_cas_n,
         output wire [0 :0]  ddr3_ck_n,
@@ -55,7 +56,7 @@ module top_bh_fpga(
         inout  wire [3 :0]  ddr3_dqs_n,
         inout  wire [3 :0]  ddr3_dqs_p,
 
-        // output wire [0 :0]  ddr3_cs_n,
+        output wire [0 :0]  ddr3_cs_n, // @ XEM 7360
         output wire [0 :0]  ddr3_odt,
         output wire [3 :0]  ddr3_dm,
         // // ########################## dram interface ########################################################################################
@@ -91,7 +92,7 @@ module top_bh_fpga(
         // ########################## clk generated from clock generator ########################################################################################
 
 
-
+        output [9:0] margin_pin,
 
 
         // ########################## fpga to asic, asic to fpga ########################################################################################
@@ -174,14 +175,26 @@ module top_bh_fpga(
 
 
     // ########################## LED Function ########################################################################################
-    function [7:0] xem7310_led;
-    input [7:0] a;
-    integer i_led;
-    begin
-        for(i_led = 0; i_led < 8; i_led = i_led + 1) begin
-            xem7310_led[i_led] = (a[i_led] == 1'b1) ? 1'b0 : 1'bz;
+    // function [7:0] xem7310_led;
+    //     input [7:0] a;
+    //     integer i_led;
+    //     begin
+    //         for(i_led = 0; i_led < 8; i_led = i_led + 1) begin
+    //             xem7310_led[i_led] = (a[i_led] == 1'b1) ? 1'b0 : 1'bz;
+    //         end
+    //     end
+    // endfunction
+    
+    function [3:0] xem7360_led;
+        // xem 7360 has 4 leds only!!!!!!!!!!!!!!!!!!!!!!
+        // 7310으로 짜다가 7360으로 바뀌어서 걍 이렇게 하위 4bit만 받게 함.
+        input [7:0] a; 
+        integer i_led;
+        begin
+            for(i_led = 0; i_led < 4; i_led = i_led + 1) begin
+                xem7360_led[i_led] = (a[i_led] == 1'b1) ? 1'b0 : 1'bz;
+            end
         end
-    end
     endfunction
     // ########################## LED Function ########################################################################################
 
@@ -345,7 +358,6 @@ module top_bh_fpga(
     // ########################## D TO P DOMAIN CROSSING FIFO ########################################################################################
  
     // ########################## D TO A DOMAIN CROSSING FIFO ########################################################################################
-
     fifo_bh_ww32d16_rw32d16 u_fifo_d2a_command(
         .rst(reset_n == 0 || ui_clk_sync_rst),
         // write
@@ -359,7 +371,21 @@ module top_bh_fpga(
         .dout(fifo_d2a_command_dout),
         .empty(fifo_d2a_command_empty),
         .valid(fifo_d2a_command_valid)
-    );
+    );    
+    // fifo_bh_ww32d512_rw32d512_r10MHz_w200MHz u_fifo_d2a_command(
+    //     .rst(reset_n == 0 || ui_clk_sync_rst),
+    //     // write
+    //     .wr_clk(sys_clk),
+    //     .wr_en(fifo_d2a_command_wr_en),
+    //     .din(fifo_d2a_command_din),
+    //     .full(fifo_d2a_command_full),
+    //     // read
+    //     .rd_clk(sys_clk2),
+    //     .rd_en(fifo_d2a_command_rd_en),
+    //     .dout(fifo_d2a_command_dout),
+    //     .empty(fifo_d2a_command_empty),
+    //     .valid(fifo_d2a_command_valid)
+    // );
 
     fifo_bh_ww66d1024_rw66d1024 u_fifo_d2a_data(
         .rst(reset_n == 0 || ui_clk_sync_rst),
@@ -375,6 +401,20 @@ module top_bh_fpga(
         .empty(fifo_d2a_data_empty),
         .valid(fifo_d2a_data_valid)
     );
+    // fifo_bh_ww66d1024_rw66d1024_r10MHz_w200MHz u_fifo_d2a_data(
+    //     .rst(reset_n == 0 || ui_clk_sync_rst),
+    //     // write
+    //     .wr_clk(sys_clk),
+    //     .wr_en(fifo_d2a_data_wr_en),
+    //     .din(fifo_d2a_data_din),
+    //     .full(fifo_d2a_data_full),
+    //     // read
+    //     .rd_clk(sys_clk2),
+    //     .rd_en(fifo_d2a_data_rd_en),
+    //     .dout(fifo_d2a_data_dout),
+    //     .empty(fifo_d2a_data_empty),
+    //     .valid(fifo_d2a_data_valid)
+    // );
     // ########################## D TO A DOMAIN CROSSING FIFO ########################################################################################
 
     // ########################## A TO D DOMAIN CROSSING FIFO ########################################################################################
@@ -391,7 +431,21 @@ module top_bh_fpga(
         .dout(fifo_a2d_command_dout),
         .empty(fifo_a2d_command_empty),
         .valid(fifo_a2d_command_valid)
-    );
+    );    
+    // fifo_bh_ww32d512_rw32d512_r200MHz_w10MHz u_fifo_a2d_command(
+    //     .rst(reset_n == 0 || ui_clk_sync_rst),
+    //     // write
+    //     .wr_clk(sys_clk2),
+    //     .wr_en(fifo_a2d_command_wr_en),
+    //     .din(fifo_a2d_command_din),
+    //     .full(fifo_a2d_command_full),
+    //     // read
+    //     .rd_clk(sys_clk),
+    //     .rd_en(fifo_a2d_command_rd_en),
+    //     .dout(fifo_a2d_command_dout),
+    //     .empty(fifo_a2d_command_empty),
+    //     .valid(fifo_a2d_command_valid)
+    // );
     // ########################## A TO D DOMAIN CROSSING FIFO ########################################################################################
     
     
@@ -449,7 +503,7 @@ module top_bh_fpga(
         .ddr3_dqs_p                       (   ddr3_dqs_p                ),
         .init_calib_complete              (   init_calib_complete            ),
 
-        // .ddr3_cs_n                      (ddr3_cs_n),
+        .ddr3_cs_n                      (ddr3_cs_n),
         .ddr3_dm                          ( ddr3_dm                          ),
         .ddr3_odt                         ( ddr3_odt                         )
     );
@@ -536,7 +590,7 @@ module top_bh_fpga(
 
     reg [16:0] sample_executed_lsb_17bit, n_sample_executed_lsb_17bit;
 
-    reg [2:0] execute_8_division, n_execute_8_division;
+    reg [3:0] execute_16_division, n_execute_16_division;
 
     always @(posedge okClk) begin
         if (!reset_n) begin
@@ -555,150 +609,150 @@ module top_bh_fpga(
     always @ (*) begin
         n_ep20wireout = ep01wirein;
         n_ep21wireout = p_state;
-        led = xem7310_led(p_state & {8{blink_1000ms}});
-        // led = xem7310_led(8'b00000001 << led_pos);
+        led = xem7360_led(p_state & {8{blink_1000ms}});
+        // led = xem7360_led(8'b00000001 << led_pos);
 
         if (p_state == P_STATE_00_IDLE) begin
-            led = xem7310_led({8{blink_1000ms}});
+            led = xem7360_led({8{blink_1000ms}});
         end else if (p_state == P_STATE_01_WORKLOAD_CONFIG) begin
             if (ep01wirein == 0) begin
                 if (config_all_domain_setting_complete) begin
-                    led = xem7310_led({8{blink_100ms}});
+                    led = xem7360_led({8{blink_100ms}});
                     n_ep20wireout = 42; 
                 end
             end else begin
                 if (ep01wirein == 1) begin
-                    led = xem7310_led({6'd0, p_config_asic_mode});
+                    led = xem7360_led({6'd0, p_config_asic_mode});
                     n_ep20wireout = p_config_asic_mode;
                 end else if (ep01wirein == 2) begin
-                    led = xem7310_led(p_config_training_epochs[7:0]);
+                    led = xem7360_led(p_config_training_epochs[7:0]);
                     n_ep20wireout = p_config_training_epochs;
                 end else if (ep01wirein == 3) begin
-                    led = xem7310_led(p_config_inference_epochs[7:0]);
+                    led = xem7360_led(p_config_inference_epochs[7:0]);
                     n_ep20wireout = p_config_inference_epochs;
                 end else if (ep01wirein == 4) begin
-                    led = xem7310_led({6'd0, p_config_dataset});
+                    led = xem7360_led({6'd0, p_config_dataset});
                     n_ep20wireout = p_config_dataset;
                 end else if (ep01wirein == 5) begin
-                    led = xem7310_led(p_config_timesteps[7:0]);
+                    led = xem7360_led(p_config_timesteps[7:0]);
                     n_ep20wireout = p_config_timesteps;
                 end else if (ep01wirein == 6) begin
-                    led = xem7310_led(p_config_input_size_layer1_define[7:0]);
+                    led = xem7360_led(p_config_input_size_layer1_define[7:0]);
                     n_ep20wireout = p_config_input_size_layer1_define;
                 end else if (ep01wirein == 7) begin
-                    led = xem7310_led({7'd0, p_config_long_time_input_streaming_mode});
+                    led = xem7360_led({7'd0, p_config_long_time_input_streaming_mode});
                     n_ep20wireout = p_config_long_time_input_streaming_mode;
                 end else if (ep01wirein == 8) begin
-                    led = xem7310_led({7'd0, p_config_binary_classifier_mode});
+                    led = xem7360_led({7'd0, p_config_binary_classifier_mode});
                     n_ep20wireout = p_config_binary_classifier_mode;
                 end else if (ep01wirein == 9) begin
-                    led = xem7310_led({7'd0, p_config_loser_encourage_mode});
+                    led = xem7360_led({7'd0, p_config_loser_encourage_mode});
                     n_ep20wireout = p_config_loser_encourage_mode;
                 end else if (ep01wirein == 10) begin
-                    led = xem7310_led(p_config_layer1_cut_list[17*p_config_cut_cnt_past +: 8]);
+                    led = xem7360_led(p_config_layer1_cut_list[17*p_config_cut_cnt_past +: 8]);
                     n_ep20wireout = {{15{p_config_layer1_cut_list[17*p_config_cut_cnt_past + 16]}},p_config_layer1_cut_list[17*p_config_cut_cnt_past +: 17]};
                 end else if (ep01wirein == 11) begin
-                    led = xem7310_led(p_config_layer2_cut_list[16*p_config_cut_cnt_past +: 8]);
+                    led = xem7360_led(p_config_layer2_cut_list[16*p_config_cut_cnt_past +: 8]);
                     n_ep20wireout = {{16{p_config_layer2_cut_list[16*p_config_cut_cnt_past + 15]}},p_config_layer2_cut_list[16*p_config_cut_cnt_past +: 16]};
                 end else begin
-                    led = xem7310_led(255 & {blink_1000ms, blink_1000ms, blink_1000ms, blink_1000ms, !blink_1000ms, !blink_1000ms, !blink_1000ms, !blink_1000ms});
+                    led = xem7360_led(255 & {blink_1000ms, blink_1000ms, blink_1000ms, blink_1000ms, !blink_1000ms, !blink_1000ms, !blink_1000ms, !blink_1000ms});
                     n_ep20wireout = 0;
                 end
             end
             if (config_all_domain_setting_ongoing) begin
                 // configure value update ongoing
-                led = xem7310_led((8'b00000001 << led_pos) | p_state);
+                led = xem7360_led((8'b00000001 << led_pos) | p_state);
                 n_ep20wireout = 0;
             end 
         end else if (p_state == P_STATE_03_DRAMFILL_WEIGHT_DATA || p_state == P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE ||
                      p_state == P_STATE_05_DRAMFILL_INFERENCE_DATA || p_state == P_STATE_06_DRAMFILL_TRAINING_DATA) begin
             if (ep01wirein != 0) begin
-                // led = xem7310_led(fifo_p2d_data_dout[7:0]);
+                // led = xem7360_led(fifo_p2d_data_dout[7:0]);
                 // n_ep20wireout = fifo_p2d_data_dout[32*(ep01wirein-1) +: 32];
                 
                 if (ep01wirein == 10) begin
-                    led = xem7310_led(dram_address[7:0]);
+                    led = xem7360_led(dram_address[7:0]);
                     n_ep20wireout = dram_address;
                 end else if (ep01wirein == 11) begin
-                    led = xem7310_led(dram_address_last[7:0]);
+                    led = xem7360_led(dram_address_last[7:0]);
                     n_ep20wireout = dram_address_last;
                 end else if (ep01wirein == 12) begin
-                    led = xem7310_led(fifo_p2d_data_wr_cnt[7:0]);
+                    led = xem7360_led(fifo_p2d_data_wr_cnt[7:0]);
                     n_ep20wireout = fifo_p2d_data_wr_cnt;
                 end else if (ep01wirein == 13) begin
-                    led = xem7310_led(dram_write_cnt[7:0]);
+                    led = xem7360_led(dram_write_cnt[7:0]);
                     n_ep20wireout = dram_write_cnt;
                 end else if (ep01wirein == 14) begin
-                    led = xem7310_led(app_rd_data_check[7:0]);
+                    led = xem7360_led(app_rd_data_check[7:0]);
                     n_ep20wireout = app_rd_data_check;
                 end
             end
         end else if (p_state == P_STATE_07_ASIC_CONFIG || p_state == P_STATE_08_ASIC_CONFIG_DONE) begin
             if (ep01wirein == 0) begin
                 if (asic_config_ongoing) begin
-                    led = xem7310_led(p_state & {8{blink_100ms}});
+                    led = xem7360_led(p_state & {8{blink_100ms}});
                 end else if (asic_start_ready == 1) begin
-                    led = xem7310_led(p_state & {8{blink_500ms}});
+                    led = xem7360_led(p_state & {8{blink_500ms}});
                     n_ep20wireout = 1;
                 end else begin
-                    led = xem7310_led(p_state & {8{blink_1000ms}});
+                    led = xem7360_led(p_state & {8{blink_1000ms}});
                     n_ep20wireout = 0;
                 end
             end else if (ep01wirein == 1) begin
-                led = xem7310_led(config_stream_cnt[7:0]);
+                led = xem7360_led(config_stream_cnt[7:0]);
                 n_ep20wireout = {16'd0, config_stream_cnt};
             end else if (ep01wirein == 2) begin
-                led = xem7310_led(sample_num[7:0]);
+                led = xem7360_led(sample_num[7:0]);
                 n_ep20wireout = sample_num;
             end else if (ep01wirein == 10) begin
-                led = xem7310_led(dram_address[7:0]);
+                led = xem7360_led(dram_address[7:0]);
                 n_ep20wireout = dram_address;
             end else if (ep01wirein == 11) begin
-                led = xem7310_led(dram_address_last[7:0]);
+                led = xem7360_led(dram_address_last[7:0]);
                 n_ep20wireout = dram_address_last;
             end else if (ep01wirein == 12) begin
-                led = xem7310_led(sample_executed_lsb_17bit[7:0]);
+                led = xem7360_led(sample_executed_lsb_17bit[7:0]);
                 n_ep20wireout = {15'd0, sample_executed_lsb_17bit};
             end
         end else if (p_state == P_STATE_09_ASIC_INFERENCE_QUEUING || p_state == P_STATE_11_ASIC_TRAINING_QUEUING) begin
             if (ep01wirein == 0) begin
                 if (asic_start_ready == 1) begin
                     if (queuing_complete) begin
-                        led = xem7310_led(p_state & {8{blink_100ms}});
+                        led = xem7360_led(p_state & {8{blink_100ms}});
                         n_ep20wireout = 1;
                     end else begin
-                        led = xem7310_led(p_state & {8{blink_500ms}});
+                        led = xem7360_led(p_state & {8{blink_500ms}});
                         n_ep20wireout = 1;
                     end
                 end else begin
-                    led = xem7310_led(p_state & {8{blink_1000ms}});
+                    led = xem7360_led(p_state & {8{blink_1000ms}});
                     n_ep20wireout = 0;
                 end
             end else if (ep01wirein == 1) begin // deprecated 
-                led = xem7310_led(config_stream_cnt[7:0]);
+                led = xem7360_led(config_stream_cnt[7:0]);
                 n_ep20wireout = {16'd0, config_stream_cnt};
             end else if (ep01wirein == 2) begin
-                led = xem7310_led(sample_num[7:0]);
+                led = xem7360_led(sample_num[7:0]);
                 n_ep20wireout = sample_num;
             end else if (ep01wirein == 10) begin
-                led = xem7310_led(dram_address[7:0]);
+                led = xem7360_led(dram_address[7:0]);
                 n_ep20wireout = dram_address;
             end else if (ep01wirein == 11) begin
-                led = xem7310_led(dram_address_last[7:0]);
+                led = xem7360_led(dram_address_last[7:0]);
                 n_ep20wireout = dram_address_last;
             end
         end else if (p_state == P_STATE_10_ASIC_INFERENCE_PROCESSING || p_state == P_STATE_12_ASIC_TRAINING_PROCESSING) begin
-            if (execute_8_division == 0) begin
-                led = xem7310_led(p_state & {8{blink_100ms}});
-                n_ep20wireout = execute_8_division;
+            if (execute_16_division == 0) begin
+                led = xem7360_led(p_state & {8{blink_100ms}});
+                n_ep20wireout = execute_16_division;
             end else begin
-                led = xem7310_led((8'b00000001 << (execute_8_division-1)) & {8{blink_100ms}});
-                n_ep20wireout = execute_8_division;
+                led = xem7360_led({4'd0, execute_16_division} & {8{blink_100ms}});
+                n_ep20wireout = execute_16_division;
             end
         end
 
         if (!reset_n) begin
-            led = xem7310_led(255);
+            led = xem7360_led(255);
         end
     end
 
@@ -747,7 +801,7 @@ module top_bh_fpga(
 
             sample_executed_lsb_17bit <= 0;
 
-            execute_8_division <= 0;
+            execute_16_division <= 0;
         end else begin
             p_state <= n_p_state;
 
@@ -789,7 +843,7 @@ module top_bh_fpga(
             
             sample_executed_lsb_17bit <= n_sample_executed_lsb_17bit;
             
-            execute_8_division <= n_execute_8_division;
+            execute_16_division <= n_execute_16_division;
         end
     end
 
@@ -856,7 +910,7 @@ module top_bh_fpga(
 
         n_sample_executed_lsb_17bit = sample_executed_lsb_17bit;
 
-        n_execute_8_division = execute_8_division;
+        n_execute_16_division = execute_16_division;
 
         
         if(ep40trigin[29]) begin
@@ -1019,11 +1073,11 @@ module top_bh_fpga(
                     ep60trigout = {31'd0, 1'b1};
                     n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
                     n_sample_executed_lsb_17bit = fifo_d2p_command_dout[15 +: 17];
-                    n_execute_8_division = 0;
+                    n_execute_16_division = 0;
                 end
                 if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 18) begin
                     fifo_d2p_command_rd_en = 1;
-                    n_execute_8_division = execute_8_division + 1;
+                    n_execute_16_division = execute_16_division + 1;
                 end
             end
             P_STATE_11_ASIC_TRAINING_QUEUING: begin
@@ -1051,11 +1105,11 @@ module top_bh_fpga(
                     n_queuing_complete = 0;
                     n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
                     n_sample_executed_lsb_17bit = fifo_d2p_command_dout[15 +: 17];
-                    n_execute_8_division = 0;
+                    n_execute_16_division = 0;
                 end
                 if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 18) begin
                     fifo_d2p_command_rd_en = 1;
-                    n_execute_8_division = execute_8_division + 1;
+                    n_execute_16_division = execute_16_division + 1;
                 end
             end
         endcase

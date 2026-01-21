@@ -7,7 +7,7 @@ module btpipe_speedtest(
     input   wire        sys_clk_p,
     input   wire        sys_clk_n,
 
-    output  wire [7:0]  led
+    output  wire [3:0]  led
 );
 
 IBUFGDS osc_clk(.O(sys_clk), .I(sys_clk_p), .IB(sys_clk_n));
@@ -24,17 +24,17 @@ wire pipe_in_valid;
 wire pipe_out_read;
 wire [32 - 1:0] pipe_out_data;
 
-function [7:0] xem7310_led;
-input [7:0] a;
+function [3:0] xem7360_led;
+input [3:0] a;
 integer i;
 begin
-    for(i = 0; i < 8; i = i + 1) begin
-        xem7310_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
+    for(i = 0; i < 4; i = i + 1) begin
+        xem7360_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
     end
 end
 endfunction
 
-assign led = xem7310_led(8'b0);
+assign led = xem7360_led(4'b0);
 
 // Signals
 wire rstn = ep00wire[0];

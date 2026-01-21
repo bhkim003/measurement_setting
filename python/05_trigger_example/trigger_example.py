@@ -1,11 +1,11 @@
 import numpy as np
-from mms_ok import XEM7310
+from mms_ok import XEM7360
 
 
 def main():
-    bitstream_path = r"../../bitstream/trigger_example.bit"
+    bitstream_path = r"../../bitstream/trigger_example_new.bit"
 
-    with XEM7310(bitstream_path=bitstream_path) as fpga:
+    with XEM7360(bitstream_path=bitstream_path) as fpga:
         fpga.reset()
 
         data = np.random.randint(0, 2**13, size=8, dtype=np.uint16)

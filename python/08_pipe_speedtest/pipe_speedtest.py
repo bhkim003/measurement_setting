@@ -1,7 +1,7 @@
 from secrets import token_hex
 from time import perf_counter_ns, sleep
 
-from mms_ok import XEM7310
+from mms_ok import XEM7360
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import (
@@ -11,7 +11,6 @@ from rich.progress import (
     TaskProgressColumn,
     TextColumn,
     TimeRemainingColumn,
-    TransferSpeedColumn,
 )
 from rich.table import Table
 
@@ -22,15 +21,14 @@ def format_bytes(bytes):
     if bytes < 1024:
         return f"{bytes} B"
     elif bytes < 1024 * 1024:
-        return f"{bytes / 1024:.2f} KiB"
+        return f"{bytes / 1024:.2f} KB"
     elif bytes < 1024 * 1024 * 1024:
-        return f"{bytes / 1024 / 1024:.2f} MiB"
-    else:
-        return f"{bytes / 1024 / 1024 / 1024:.2f} GiB"
+        return f"{bytes / 1024 / 1024:.2f} MB"
 
 
-def write_test(fpga, num_transfer, progress=None, task_id=None):
+def write_test(fpga, num_transfer):
     data = [token_hex(nbytes=(128 // 8)) for _ in range(num_transfer)]
+
     total_bytes = 0
 
     start = perf_counter_ns()
@@ -84,7 +82,7 @@ def bulk_write_test(fpga, num_bytes):
     return transfer_rate
 
 
-def read_test(fpga, num_transfer, progress=None, task_id=None):
+def read_test(fpga, num_transfer):
     total_bytes = 0
     start = perf_counter_ns()
 
@@ -101,8 +99,8 @@ def read_test(fpga, num_transfer, progress=None, task_id=None):
         for _ in range(num_transfer):
             read_data = fpga.ReadFromPipeOut(0xA0, 128 // 8, reorder_str=True)
             total_bytes += read_data.transfer_byte
-            progress.advance(task)
             # Update transfer rate in progress description
+            progress.advance(task)
             current_duration = perf_counter_ns() - start
             current_rate = (total_bytes / current_duration) * 1e9
             progress.update(task, speed=f"{format_bytes(current_rate)}/s")
@@ -121,6 +119,7 @@ def read_test(fpga, num_transfer, progress=None, task_id=None):
 
 def bulk_read_test(fpga, num_bytes):
     start = perf_counter_ns()
+
     with console.status("[bold green]Performing bulk read...") as status:
         read_data = fpga.ReadFromPipeOut(0xA0, num_bytes, reorder_str=True)
 
@@ -148,7 +147,7 @@ def main():
     read_rates = []
     bulk_read_rates = []
 
-    with XEM7310(bitstream_path=bitstream_path) as fpga:
+    with XEM7360(bitstream_path=bitstream_path) as fpga:
         fpga.reset()
 
         # Write tests

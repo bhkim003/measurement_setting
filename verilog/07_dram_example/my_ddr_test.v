@@ -7,15 +7,15 @@ module my_ddr_test(
 	input  wire         sys_clk_p,
 	input  wire         sys_clk_n,
 	
-	output wire [7:0]   led,
+	output wire [3:0]   led,
 	
 	inout  wire [31:0]  ddr3_dq,
-	output wire [14:0]  ddr3_addr,
+	output wire [15:0]  ddr3_addr,
 	output wire [2 :0]  ddr3_ba,
 	output wire [0 :0]  ddr3_ck_p,
 	output wire [0 :0]  ddr3_ck_n,
 	output wire [0 :0]  ddr3_cke,
-	// output wire [0 :0]  ddr3_cs_n,
+	output wire [0 :0]  ddr3_cs_n,
 	output wire         ddr3_cas_n,
 	output wire         ddr3_ras_n,
 	output wire         ddr3_we_n,
@@ -24,7 +24,6 @@ module my_ddr_test(
 	inout  wire [3 :0]  ddr3_dqs_p,
 	inout  wire [3 :0]  ddr3_dqs_n,
 	output wire         ddr3_reset_n
-	
 	);
 
 wire          init_calib_complete;
@@ -87,17 +86,17 @@ wire	[7 - 1:0]	out_fifo_wr_data_count;
 wire	[9 - 1:0]	out_fifo_rd_data_count;
 
 
-function [7:0] xem7310_led;
-input [7:0] a;
+function [3:0] xem7360_led;
+input [3:0] a;
 integer i;
 begin
-	for(i=0; i<8; i=i+1) begin: u
-		xem7310_led[i] = (a[i]==1'b1) ? (1'b0) : (1'bz);
+	for(i=0; i<4; i=i+1) begin: u
+		xem7360_led[i] = (a[i]==1'b1) ? (1'b0) : (1'bz);
 	end
 end
 endfunction
 
-assign led = xem7310_led({4'b0, in_fifo_empty, out_fifo_empty, app_wdf_rdy, init_calib_complete});
+assign led = xem7360_led({in_fifo_empty, out_fifo_empty, app_wdf_rdy, init_calib_complete});
 // assign led = xem7360_led(in_fifo_dout[3:0]);
 
 always @(posedge okClk) begin
@@ -136,7 +135,7 @@ mig_7series_0 u_mig_7series_0 (
 	.ddr3_dqs_p                     (ddr3_dqs_p),
 	.init_calib_complete            (init_calib_complete),
 	
-	// .ddr3_cs_n                      (ddr3_cs_n),
+	.ddr3_cs_n                      (ddr3_cs_n),
 	.ddr3_dm                        (ddr3_dm),
 	.ddr3_odt                       (ddr3_odt),
 	// Application interface ports

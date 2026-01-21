@@ -7,7 +7,7 @@ module fifo_example(
     input   wire        sys_clk_p,
     input   wire        sys_clk_n,
 
-    output  wire [7:0]  led
+    output  wire [3:0]  led
 );
 
 IBUFGDS osc_clk(.O(sys_clk), .I(sys_clk_p), .IB(sys_clk_n));
@@ -17,7 +17,6 @@ wire            okClk;
 wire [112:0]    okHE;
 wire [64:0]     okEH;
 
-
 // Endpoint connections
 wire [32 - 1:0] ep00wire;  // rstn
 wire [32 - 1:0] pipe_in_data; 
@@ -25,12 +24,12 @@ wire pipe_in_valid;
 wire pipe_out_read;
 wire [32 - 1:0] pipe_out_data;
 
-function [7:0] xem7310_led;
-input [7:0] a;
+function [3:0] xem7360_led;
+input [3:0] a;
 integer i;
 begin
-    for(i = 0; i < 8; i = i + 1) begin
-        xem7310_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
+    for(i = 0; i < 4; i = i + 1) begin
+        xem7360_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
     end
 end
 endfunction
@@ -80,7 +79,7 @@ wire f2p_fifo_rd_en = pipe_out_read;
 wire [32 - 1:0] f2p_fifo_dout;
 assign pipe_out_data = f2p_fifo_dout;
 
-assign led = xem7310_led(f2p_fifo_dout[7:0]);
+assign led = xem7360_led(f2p_fifo_dout[3:0]);
 
 always @(posedge sys_clk) begin
     if(!rstn) begin

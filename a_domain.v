@@ -517,7 +517,7 @@ module a_domain(
 
 
         if (sample_num != 0 && sample_num_executed != 0) begin
-            if (sample_num_executed_partial == (sample_num>>3) - 1) begin
+            if (sample_num_executed_partial == (sample_num>>4) - 1) begin
                 if (!fifo_a2d_command_full) begin
                     fifo_a2d_command_wr_en = 1;
                     fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
@@ -599,7 +599,7 @@ module a_domain(
                         if (a_config_dataset == 0) begin
                             if (sample_stream_cnt_small == 15 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial == (sample_num>>3) - 1) begin
+                                if (sample_num_executed_partial == (sample_num>>4) - 1) begin
                                     n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                 end else begin
                                     n_sample_num_executed_partial = 0;
@@ -611,7 +611,7 @@ module a_domain(
                         end else if (a_config_dataset == 1) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial == (sample_num>>3) - 1) begin
+                                if (sample_num_executed_partial == (sample_num>>4) - 1) begin
                                     n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                 end else begin
                                     n_sample_num_executed_partial = 0;
@@ -623,7 +623,7 @@ module a_domain(
                         end else if (a_config_dataset == 2) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial == (sample_num>>3) - 1) begin
+                                if (sample_num_executed_partial == (sample_num>>4) - 1) begin
                                     n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                 end else begin
                                     n_sample_num_executed_partial = 0;

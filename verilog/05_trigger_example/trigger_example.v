@@ -4,7 +4,7 @@ module trigger_example(
     inout   wire [31:0] okUHU,
     inout   wire        okAA,
 
-    output  wire [7:0]  led
+    output  wire [3:0]  led
 );
 
 // Target interface bus
@@ -23,17 +23,17 @@ wire pipein80_valid;
 reg [32 - 1:0] pipeoutA0_wire;
 wire pipeoutA0_read;
 
-function [7:0] xem7310_led;
-input [7:0] a;
+function [3:0] xem7360_led;
+input [3:0] a;
 integer i;
 begin
-    for(i = 0; i < 8; i = i + 1) begin
-        xem7310_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
+    for(i = 0; i < 4; i = i + 1) begin
+        xem7360_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
     end
 end
 endfunction
 
-assign led = xem7310_led(8'b0);
+assign led = xem7360_led(4'b0);
 
 // Signals
 wire rstn = wire00_wire[0];
@@ -56,11 +56,7 @@ always @(posedge okClk) begin
     end
     else if(pipein80_valid) begin
         store_idx <= store_idx - 1'b1;
-        data_store[32 * store_idx +: 32] <= pipein80_wire;  // [15, 14, ..., 2, 1, 0]
-    end
-
-    if(store_idx == 2'b0) begin
-        store_idx <= 2'd3;
+        data_store[32 * store_idx +: 32] <= pipein80_wire;
     end
 end
 
@@ -81,10 +77,6 @@ always @(posedge okClk) begin
     else if(pipeoutA0_read) begin
         read_idx <= read_idx - 1'b1;
         pipeoutA0_wire <= pipeout_data[32 * read_idx +: 32];
-    end
-
-    if(read_idx == 2'd0) begin
-        read_idx <= 2'd3;
     end
 end
 

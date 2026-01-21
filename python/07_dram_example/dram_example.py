@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 from bitslice import Bitslice
-from mms_ok import XEM7310
+from mms_ok import XEM7360
 from rich.console import Console
 from rich.progress import (
     BarColumn,
@@ -16,7 +16,6 @@ from rich.progress import (
     track,
 )
 from rich.table import Table
-from tqdm import tqdm
 
 console = Console()
 
@@ -39,9 +38,9 @@ def pack_dram_inst(is_dram: bool, is_read: bool, dram_addr: int, dram_wr_data: s
         inst[128 - 1 : 0] = 0
     else:
         inst[128 - 1 : 0] = int(dram_wr_data, 16)
-    inst[154 - 1 : 128] = dram_addr
-    inst[154] = int(is_read)
-    inst[155] = int(is_dram)
+    inst[155 - 1 : 128] = dram_addr
+    inst[155] = int(is_read)
+    inst[156] = int(is_dram)
 
     return format(inst.value, f"0{256//4}X")
 
@@ -54,7 +53,7 @@ def main(num_addr, sequential=True):
     for addr in range(num_addr):
         data_dict[addr] = secrets.token_hex(nbytes=(128 // 8)).upper()
 
-    with XEM7310(bitstream_path=bitstream_path) as fpga:
+    with XEM7360(bitstream_path=bitstream_path) as fpga:
         fpga.reset()
 
         time.sleep(2)
@@ -82,10 +81,10 @@ def main(num_addr, sequential=True):
                 inst = pack_dram_inst(
                     is_dram=True, is_read=False, dram_addr=addr, dram_wr_data=data
                 )
-                write_bytes = fpga.WriteToBlockPipeIn(ep_addr=0x80, data=inst)
+                fpga.WriteToBlockPipeIn(ep_addr=0x80, data=inst)
 
                 # Update progress and calculate transfer rate
-                total_bytes += write_bytes
+                total_bytes += 32  # 256 bites = 32 bytes per transfer
                 progress.update(task, completed=total_bytes)
 
         write_duration = time.perf_counter_ns() - start_time
@@ -111,7 +110,6 @@ def main(num_addr, sequential=True):
             TaskProgressColumn(),
             TimeRemainingColumn(),
             TransferSpeedColumn(),
-            console=console,
         ) as progress:
             task = progress.add_task(
                 "[bold red]DRAM READ ", total=target_bytes, stats=""
@@ -132,10 +130,10 @@ def main(num_addr, sequential=True):
                     print(f"Read: {read_data} | Answer: {data_dict[addr]}\n")
 
                 # Update progress and calculate transfer rate
-                total_bytes += read_data.transfer_byte
+                total_bytes += 16  # 128 bits = 16 bytes per transfer
                 progress.update(task, completed=total_bytes)
 
-        read_duration = time.perf_counter_ns() - start_time
+        read_duration = time.perf_counter_ns()
         read_rate = (total_bytes / read_duration) * 1e9
 
         # Create a test summary table using Rich
@@ -161,4 +159,4 @@ def main(num_addr, sequential=True):
 
 
 if __name__ == "__main__":
-    main(num_addr=10000, sequential=False)
+    main(num_addr=1000, sequential=True)

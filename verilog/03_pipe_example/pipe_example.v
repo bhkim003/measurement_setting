@@ -4,7 +4,7 @@ module pipe_example(
     inout   wire [31:0] okUHU,
     inout   wire        okAA,
 
-    output  wire [7:0]  led
+    output  wire [3:0]  led
 );
 
 // Target interface bus
@@ -19,12 +19,12 @@ wire pipe_in_valid;
 wire pipe_out_read;
 reg [32 - 1:0] pipe_out_data;
 
-function [7:0] xem7310_led;
-input [7:0] a;
+function [3:0] xem7360_led;
+input [3:0] a;
 integer i;
 begin
-    for(i = 0; i < 8; i = i + 1) begin
-        xem7310_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
+    for(i = 0; i < 4; i = i + 1) begin
+        xem7360_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
     end
 end
 endfunction
@@ -58,7 +58,7 @@ always @(posedge okClk) begin
     end
 end
 
-assign led = xem7310_led(data_store[7:0]);
+assign led = xem7360_led(data_store[3:0]);
 
 always @(posedge okClk) begin
     if(!rstn) begin

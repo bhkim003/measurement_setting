@@ -1,5 +1,5 @@
 import numpy as np
-from mms_ok import XEM7310
+from mms_ok import XEM7360
 
 
 def text_transfer(fpga, reorder_str: bool = True):
@@ -32,11 +32,11 @@ def array_transfer(fpga):
 def main():
     bitstream_path = r"../../bitstream/pipe_example.bit"
 
-    with XEM7310(bitstream_path=bitstream_path) as fpga:
+    with XEM7360(bitstream_path=bitstream_path) as fpga:
         fpga.reset()
 
         text_transfer(fpga, reorder_str=True)
-        # array_transfer(fpga)
+        array_transfer(fpga)
 
 
 if __name__ == "__main__":

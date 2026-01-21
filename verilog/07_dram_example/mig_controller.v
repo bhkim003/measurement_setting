@@ -46,16 +46,16 @@ reg     [256 - 1:0] ib_data_buf;
 
 wire                is_dram;
 wire                is_read;
-wire    [26 - 1:0]  dram_addr;
+wire    [27 - 1:0]  dram_addr;
 wire    [128 - 1:0] dram_wr_data;
 
 reg                 prev_valid; 
-reg     [26 - 1:0]  prev_dram_rd_addr;
+reg     [27 - 1:0]  prev_dram_rd_addr;
 reg     [256 - 1:0] prev_dram_rd_data;
 
 wire                skip_read;
 
-assign skip_read = (state == s_decode) && (is_dram == 1'b1) && (is_read == 1'b1) && (prev_valid == 1'b1) && (dram_addr[26 - 1:1] == prev_dram_rd_addr[26 - 1:1]);
+assign skip_read = (state == s_decode) && (is_dram == 1'b1) && (is_read == 1'b1) && (prev_valid == 1'b1) && (dram_addr[27 - 1:1] == prev_dram_rd_addr[27 - 1:1]);
 
 always @(posedge sys_clk) begin
     if(rst) begin
@@ -66,8 +66,8 @@ always @(posedge sys_clk) begin
     end
 end
 
-// 1bit, 1bit, 26bit, 128bit -> 156bit
-assign {is_dram, is_read, dram_addr, dram_wr_data} = ib_data_buf[156 - 1:0];
+// 1bit, 1bit, 27bit, 128bit -> 157bit
+assign {is_dram, is_read, dram_addr, dram_wr_data} = ib_data_buf[157 - 1:0];
 
 always @(posedge sys_clk) begin
     if(rst) begin
@@ -125,13 +125,13 @@ always @(posedge sys_clk) begin
                     if(is_read == 1'b1) begin
                         // DRAM READ
                         app_cmd <= DRAM_READ;
-                        app_addr <= {1'b0, dram_addr[26 - 1:1], 3'b0};  // 1 - 25 - 3
+                        app_addr <= {1'b0, dram_addr[27 - 1:1], 3'b0};  // 1 - 26 - 3
                         app_wdf_wren <= 1'b0;
                         app_wdf_data <= 256'b0;
                         app_wdf_end <= 1'b0;
                         app_wdf_mask <= 32'b0;
                         if(ob_count < (OUT_FIFO_SIZE - 2)) begin
-                            if((prev_valid == 1'b1) && (dram_addr[26 - 1:1] == prev_dram_rd_addr[26 - 1:1])) begin
+                            if((prev_valid == 1'b1) && (dram_addr[27 - 1:1] == prev_dram_rd_addr[27 - 1:1])) begin
                                 state <= s_idle;
 
                                 app_en <= 1'b0;
@@ -149,7 +149,7 @@ always @(posedge sys_clk) begin
                     else begin
                         // DRAM WRITE
                         app_cmd <= DRAM_WRITE;
-                        app_addr <= {1'b0, dram_addr[26 - 1:1], 3'b0};  // 1 - 25 - 3
+                        app_addr <= {1'b0, dram_addr[27 - 1:1], 3'b0};  // 1 - 26 - 3
                         app_wdf_wren <= 1'b1;
                         app_wdf_data <= (dram_addr[0] == 1'b1) ? {dram_wr_data, 128'b0} : {128'b0, dram_wr_data};
                         app_wdf_end <= 1'b1;
@@ -235,7 +235,7 @@ end
 always @(posedge sys_clk) begin
     if(rst) begin
         prev_valid <= 1'b0;
-        prev_dram_rd_addr <= 26'b0;
+        prev_dram_rd_addr <= 27'b0;
         prev_dram_rd_data <= 256'b0;
     end
     else if(app_rd_data_valid) begin

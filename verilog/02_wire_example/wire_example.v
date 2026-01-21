@@ -4,7 +4,7 @@ module wire_example(
     inout   wire [31:0] okUHU,
     inout   wire        okAA,
 
-    output  wire [7:0]  led
+    output  wire [3:0]  led
 );
 
 // Target interface bus
@@ -38,18 +38,18 @@ assign op_select = ep02wire[0];
 assign ep20wire = or_result;
 assign ep21wire = and_result;
 
-function [7:0] xem7310_led;
-input [7:0] a;
+function [3:0] xem7360_led;
+input [3:0] a;
 integer i;
 begin
-    for(i = 0; i < 8; i = i + 1) begin
-        xem7310_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
+    for(i = 0; i < 4; i = i + 1) begin
+        xem7360_led[i] = (a[i] == 1'b1) ? 1'b0 : 1'bz;
     end
 end
 endfunction
 
 // assign led = xem7310_led(ep00wire);
-assign led = op_select ? xem7310_led(or_result[7:0]) : xem7310_led(and_result[7:0]);
+assign led = op_select ? xem7360_led(or_result[3:0]) : xem7360_led(and_result[3:0]);
 
 always @(posedge okClk) begin
     or_result <= data0 | data1;
