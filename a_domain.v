@@ -170,6 +170,7 @@ module a_domain(
     reg [31:0] sample_num, n_sample_num;
     reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
     reg [31:0] sample_num_executed, n_sample_num_executed;
+    reg [31:0] sample_num_executed_partial, n_sample_num_executed_partial;
     reg [7:0] sample_stream_cnt_small, n_sample_stream_cnt_small;
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
@@ -516,7 +517,7 @@ module a_domain(
 
 
         if (sample_num != 0 && sample_num_executed != 0) begin
-            if (sample_num_executed % (sample_num>>3) == 0) begin
+            if (sample_num_executed_partial == (sample_num>>3) - 1) begin
                 if (!fifo_a2d_command_full) begin
                     fifo_a2d_command_wr_en = 1;
                     fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
@@ -546,6 +547,7 @@ module a_domain(
             streaming_wait_count <= 0;
 
             sample_num_executed <= 0;
+            sample_num_executed_partial <= 0;
             sample_stream_cnt_small <= 0;
         end
         else begin
@@ -553,6 +555,7 @@ module a_domain(
             streaming_wait_count <= n_streaming_wait_count;
 
             sample_num_executed <= n_sample_num_executed;
+            sample_num_executed_partial <= n_sample_num_executed_partial;
             sample_stream_cnt_small <= n_sample_stream_cnt_small;
         end
     end
@@ -563,6 +566,7 @@ module a_domain(
         n_streaming_wait_count = streaming_wait_count;
 
         n_sample_num_executed = sample_num_executed;
+        n_sample_num_executed_partial = sample_num_executed_partial;
         n_sample_stream_cnt_small = sample_stream_cnt_small;
 
         fifo_d2a_data_rd_en = 0;
@@ -574,6 +578,7 @@ module a_domain(
                 input_streaming_valid = 0;
                 input_streaming_data = 0;
                 n_sample_num_executed = 0;
+                n_sample_num_executed_partial = 0;
                 n_sample_stream_cnt_small = 0;
             end else begin 
                 if (1'b1) begin // if (input_streaming_ready) begin
@@ -594,23 +599,38 @@ module a_domain(
                         if (a_config_dataset == 0) begin
                             if (sample_stream_cnt_small == 15 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
+                                if (sample_num_executed_partial == (sample_num>>3) - 1) begin
+                                    n_sample_num_executed_partial = sample_num_executed_partial + 1;
+                                end else begin
+                                    n_sample_num_executed_partial = 0;
+                                end
                                 n_sample_stream_cnt_small = 0;
                             end else begin
-                                n_sample_stream_cnt_small = sample_num_executed + 1;
+                                n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
                         end else if (a_config_dataset == 1) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
+                                if (sample_num_executed_partial == (sample_num>>3) - 1) begin
+                                    n_sample_num_executed_partial = sample_num_executed_partial + 1;
+                                end else begin
+                                    n_sample_num_executed_partial = 0;
+                                end
                                 n_sample_stream_cnt_small = 0;
                             end else begin
-                                n_sample_stream_cnt_small = sample_num_executed + 1;
+                                n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
                         end else if (a_config_dataset == 2) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
+                                if (sample_num_executed_partial == (sample_num>>3) - 1) begin
+                                    n_sample_num_executed_partial = sample_num_executed_partial + 1;
+                                end else begin
+                                    n_sample_num_executed_partial = 0;
+                                end
                                 n_sample_stream_cnt_small = 0;
                             end else begin
-                                n_sample_stream_cnt_small = sample_num_executed + 1;
+                                n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
                         end
 
@@ -728,19 +748,19 @@ module a_domain(
         end
 
         if (a_config_dataset == 0) begin
-            if (data_stream_cnt_for_test == sample_num * a_config_timesteps * 15) begin 
-            // if (data_stream_cnt_for_test == 29_370_000) begin 
+            // n_data_stream_cnt_last = sample_num * a_config_timesteps * 15; // 이거 timing violation나서 걍 이렇게 한클락 미룸
+            if (data_stream_cnt_for_test == 29_370_000) begin 
                 n_asic_start_ready_for_test = 1;
             end
         end else if (a_config_dataset == 1) begin
-            if (data_stream_cnt_for_test == sample_num * a_config_timesteps * 9) begin 
-            // if (data_stream_cnt_for_test == 540_000_000) begin 
+            // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
+            if (data_stream_cnt_for_test == 540_000_000) begin 
                 n_asic_start_ready_for_test = 1;
             end
         end else if (a_config_dataset == 2) begin
-            if (data_stream_cnt_for_test == sample_num * a_config_timesteps * 9) begin 
+            // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
             // if (data_stream_cnt_for_test == 58_060_800) begin 
-            // if (data_stream_cnt_for_test == 58_032_000) begin 
+            if (data_stream_cnt_for_test == 58_032_000) begin 
                 n_asic_start_ready_for_test = 1;
             end
         end
