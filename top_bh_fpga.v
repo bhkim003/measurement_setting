@@ -214,7 +214,7 @@ module top_bh_fpga(
     // // IBUFGDS osc_clk(.O(sys_clk), .I(sys_clk_p), .IB(sys_clk_n));
     assign sys_clk = ui_clk;
     wire sys_clk2;
-    assign sys_clk2 = okClk;
+    assign sys_clk2 = ui_clk;
     // ########################## sys_clk gen instance ########################################################################################
 
 
@@ -592,6 +592,11 @@ module top_bh_fpga(
 
     reg [3:0] execute_16_division, n_execute_16_division;
 
+	reg [31:0] correct_sample_num, n_correct_sample_num;
+	reg [31:0] wrong_sample_num, n_wrong_sample_num;
+	reg [31:0] total_inference_sample_num, n_total_inference_sample_num;
+    reg [3:0] result_transition_cnt, n_result_transition_cnt;
+    
     always @(posedge okClk) begin
         if (!reset_n) begin
             ep20wireout <= 0;
@@ -713,6 +718,15 @@ module top_bh_fpga(
             end else if (ep01wirein == 12) begin
                 led = xem7360_led(sample_executed_lsb_17bit[7:0]);
                 n_ep20wireout = {15'd0, sample_executed_lsb_17bit};
+            end else if (ep01wirein == 13) begin
+                led = xem7360_led(correct_sample_num[7:0]);
+                n_ep20wireout = correct_sample_num;
+            end else if (ep01wirein == 14) begin
+                led = xem7360_led(wrong_sample_num[7:0]);
+                n_ep20wireout = wrong_sample_num;
+            end else if (ep01wirein == 15) begin
+                led = xem7360_led(total_inference_sample_num[7:0]);
+                n_ep20wireout = total_inference_sample_num;
             end
         end else if (p_state == P_STATE_09_ASIC_INFERENCE_QUEUING || p_state == P_STATE_11_ASIC_TRAINING_QUEUING) begin
             if (ep01wirein == 0) begin
@@ -802,6 +816,16 @@ module top_bh_fpga(
             sample_executed_lsb_17bit <= 0;
 
             execute_16_division <= 0;
+
+            correct_sample_num <= 0;
+            execute_16_division <= 0;
+            execute_16_division <= 0;
+            execute_16_division <= 0;
+
+			correct_sample_num <= 0;
+			wrong_sample_num <= 0;
+			total_inference_sample_num <= 0;
+			result_transition_cnt <= 0;
         end else begin
             p_state <= n_p_state;
 
@@ -844,6 +868,11 @@ module top_bh_fpga(
             sample_executed_lsb_17bit <= n_sample_executed_lsb_17bit;
             
             execute_16_division <= n_execute_16_division;
+            
+			correct_sample_num <= n_correct_sample_num;
+			wrong_sample_num <= n_wrong_sample_num;
+			total_inference_sample_num <= n_total_inference_sample_num;
+            result_transition_cnt <= n_result_transition_cnt;
         end
     end
 
@@ -911,6 +940,11 @@ module top_bh_fpga(
         n_sample_executed_lsb_17bit = sample_executed_lsb_17bit;
 
         n_execute_16_division = execute_16_division;
+
+		n_correct_sample_num = correct_sample_num;
+		n_wrong_sample_num = wrong_sample_num;
+		n_total_inference_sample_num = total_inference_sample_num;
+		n_result_transition_cnt = result_transition_cnt;
 
         
         if(ep40trigin[29]) begin
@@ -1315,6 +1349,37 @@ module top_bh_fpga(
 
 
 
+        // STEAMING N번 WAIT
+        if(ep40trigin[25]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd19};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 19) begin
+            fifo_d2p_command_rd_en = 1;
+
+            if (result_transition_cnt == 0) begin
+                n_correct_sample_num[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 1) begin
+                n_correct_sample_num[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 2) begin
+                n_wrong_sample_num[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 3) begin
+                n_wrong_sample_num[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 4) begin
+                n_total_inference_sample_num[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 5) begin
+                n_total_inference_sample_num[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
 
 
 

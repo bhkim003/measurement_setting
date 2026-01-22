@@ -134,6 +134,33 @@ module a_domain(
 
 
 
+    // ######### LABEL FIFO ###########################################################################
+    // ######### LABEL FIFO ###########################################################################
+    // ######### LABEL FIFO ###########################################################################
+    reg [3:0] label_fifo_din;
+    reg label_fifo_wr_en;
+    reg label_fifo_rd_en;
+    wire [3:0] label_fifo_dout;
+    wire label_fifo_full;
+    wire label_fifo_empty;
+    wire label_fifo_valid;
+
+    label_fifo u_label_fifo (
+        .clk(clk_a_domain),
+        .srst(~reset_n),
+        .din(label_fifo_din),
+        .wr_en(label_fifo_wr_en),
+        .rd_en(label_fifo_rd_en),
+        .dout(label_fifo_dout),
+        .full(label_fifo_full),
+        .empty(label_fifo_empty),
+        .valid(label_fifo_valid)
+    );
+    // ######### LABEL FIFO ###########################################################################
+    // ######### LABEL FIFO ###########################################################################
+    // ######### LABEL FIFO ###########################################################################
+
+
 
 
 
@@ -166,12 +193,30 @@ module a_domain(
     reg start_inference_signal_oneclk_delay;
     reg training_processing_ongoing, n_training_processing_ongoing;
     reg inference_processing_ongoing, n_inference_processing_ongoing;
+    reg collect_label, n_collect_label;
 
     reg [31:0] sample_num, n_sample_num;
+    reg [29:0] sample_num_divided4_minus1, n_sample_num_divided4_minus1;
     reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
+
+
+    reg label_comparison_time, n_label_comparison_time;
+	reg [31:0] correct_sample_num, n_correct_sample_num;
+	reg [31:0] wrong_sample_num, n_wrong_sample_num;
+	reg [31:0] total_inference_sample_num, n_total_inference_sample_num;
+	reg [2:0] inferenced_label_4bit, n_inferenced_label_4bit;
+	reg [1:0] inferenced_label_shooting_cnt, n_inferenced_label_shooting_cnt;
+	reg inferenced_label_shooting_ongoing, n_inferenced_label_shooting_ongoing;
+
+    reg [16:0] streaming_count, n_streaming_count;
+    reg [16:0] streaming_wait_count, n_streaming_wait_count;
+
     reg [31:0] sample_num_executed, n_sample_num_executed;
-    reg [31:0] sample_num_executed_partial, n_sample_num_executed_partial;
+    reg [29:0] sample_num_executed_partial, n_sample_num_executed_partial;
     reg [7:0] sample_stream_cnt_small, n_sample_stream_cnt_small;
+
+    
+    reg [3:0] result_transition_cnt, n_result_transition_cnt;
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             config_a_domain_setting_cnt <= 0;
@@ -196,9 +241,13 @@ module a_domain(
             start_inference_signal_oneclk_delay <= 0;
             training_processing_ongoing <= 0;
             inference_processing_ongoing <= 0;
+            collect_label <= 0;
 
             sample_num <= 0;
+            sample_num_divided4_minus1 <= 0;
             sample_num_transition_cnt <= 0;
+
+			result_transition_cnt <= 0;
         end
         else begin
             config_a_domain_setting_cnt <= n_config_a_domain_setting_cnt;
@@ -223,19 +272,23 @@ module a_domain(
             start_inference_signal_oneclk_delay <= start_inference_signal;
             training_processing_ongoing <= n_training_processing_ongoing;
             inference_processing_ongoing <= n_inference_processing_ongoing;
+            collect_label <= n_collect_label;
 
             sample_num <= n_sample_num;
+            sample_num_divided4_minus1 <= n_sample_num_divided4_minus1;
             sample_num_transition_cnt <= n_sample_num_transition_cnt;
+			
+            result_transition_cnt <= n_result_transition_cnt;
         end
     end
 
     always @ (*) begin
         n_config_a_domain_setting_cnt = config_a_domain_setting_cnt;
 
-        fifo_d2a_command_rd_en = 0;
-
         fifo_a2d_command_wr_en = 0;
         fifo_a2d_command_din = 0;
+
+        fifo_d2a_command_rd_en = 0;
         
         n_a_config_asic_mode = a_config_asic_mode;
         n_a_config_training_epochs = a_config_training_epochs;
@@ -257,10 +310,14 @@ module a_domain(
         start_inference_signal = 0;
         n_training_processing_ongoing = training_processing_ongoing;
         n_inference_processing_ongoing = inference_processing_ongoing;
+        n_collect_label = collect_label;
 
         n_sample_num = sample_num;
+        n_sample_num_divided4_minus1 = sample_num_divided4_minus1;
         n_sample_num_transition_cnt = sample_num_transition_cnt;
         
+
+		n_result_transition_cnt = result_transition_cnt;
 
 
 
@@ -450,11 +507,21 @@ module a_domain(
                     n_sample_num[0 +: 16] = fifo_d2a_command_dout[15 +: 16];
                 end else if (sample_num_transition_cnt == 1) begin
                     if (!fifo_a2d_command_full) begin
+                        n_sample_num_transition_cnt = 2;
+                        n_sample_num[16 +: 16] = fifo_d2a_command_dout[15 +: 16];
+                    end
+                end else if (sample_num_transition_cnt == 2) begin
+                    if (!fifo_a2d_command_full) begin
+                        n_sample_num_transition_cnt = 3;
+                        n_sample_num_divided4_minus1 = sample_num[0 +: 30];
+                    end
+                end else if (sample_num_transition_cnt == 3) begin
+                    if (!fifo_a2d_command_full) begin
                         fifo_d2a_command_rd_en = 1;
                         n_sample_num_transition_cnt = 0;
-                        n_sample_num[16 +: 16] = fifo_d2a_command_dout[15 +: 16];
                         fifo_a2d_command_wr_en = 1;
                         fifo_a2d_command_din = {17'd0, 15'd11};
+                        n_sample_num_divided4_minus1 = sample_num_divided4_minus1 - 1;
                     end
                 end
             end
@@ -485,6 +552,7 @@ module a_domain(
                 fifo_d2a_command_rd_en = 1; 
                 start_training_signal = 1;
                 n_training_processing_ongoing = 1;
+                n_collect_label = 0;
             end
         end
         if (fifo_d2a_command_valid) begin
@@ -492,6 +560,7 @@ module a_domain(
                 fifo_d2a_command_rd_en = 1; 
                 start_inference_signal = 1;
                 n_inference_processing_ongoing = 0;
+                n_collect_label = 1;
             end
         end
 
@@ -517,7 +586,7 @@ module a_domain(
 
 
         if (sample_num != 0 && sample_num_executed != 0) begin
-            if (sample_num_executed_partial == (sample_num>>4) - 1) begin
+            if (sample_num_executed_partial == sample_num_divided4_minus1) begin
                 if (!fifo_a2d_command_full) begin
                     fifo_a2d_command_wr_en = 1;
                     fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
@@ -530,6 +599,45 @@ module a_domain(
         end
 
 
+
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 19) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    if (result_transition_cnt == 0) begin
+                        fifo_a2d_command_din = {1'd0, correct_sample_num[0*16 +: 16], 15'd19};
+                        n_result_transition_cnt = result_transition_cnt + 1;
+                    end else if (result_transition_cnt == 1) begin
+                        fifo_a2d_command_din = {1'd0, correct_sample_num[1*16 +: 16], 15'd19};
+                        n_result_transition_cnt = result_transition_cnt + 1;
+                    end else if (result_transition_cnt == 2) begin
+                        fifo_a2d_command_din = {1'd0, wrong_sample_num[0*16 +: 16], 15'd19};
+                        n_result_transition_cnt = result_transition_cnt + 1;
+                    end else if (result_transition_cnt == 3) begin
+                        fifo_a2d_command_din = {1'd0, wrong_sample_num[1*16 +: 16], 15'd19};
+                        n_result_transition_cnt = result_transition_cnt + 1;
+                    end else if (result_transition_cnt == 4) begin
+                        fifo_a2d_command_din = {1'd0, total_inference_sample_num[0*16 +: 16], 15'd19};
+                        n_result_transition_cnt = result_transition_cnt + 1;
+                    end else if (result_transition_cnt == 5) begin
+                        fifo_a2d_command_din = {1'd0, total_inference_sample_num[1*16 +: 16], 15'd19};
+                        n_result_transition_cnt = 0;
+                        fifo_d2a_command_rd_en = 1;
+                    end
+                end
+            end
+        end
+
+
+
+
+
+
+
+
+
+
+
     end
 
 
@@ -539,10 +647,15 @@ module a_domain(
 
 
     // STREAMING CONTROL
-    reg [16:0] streaming_count, n_streaming_count;
-    reg [16:0] streaming_wait_count, n_streaming_wait_count;
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
+			label_comparison_time <= 0;
+			correct_sample_num <= 0;
+			wrong_sample_num <= 0;
+			total_inference_sample_num <= 0;
+			inferenced_label_4bit <= 0;
+			inferenced_label_shooting_cnt <= 0;
+			inferenced_label_shooting_ongoing <= 0;
             streaming_count <= 0;
             streaming_wait_count <= 0;
 
@@ -551,6 +664,13 @@ module a_domain(
             sample_stream_cnt_small <= 0;
         end
         else begin
+			label_comparison_time <= n_label_comparison_time;
+			correct_sample_num <= n_correct_sample_num;
+			wrong_sample_num <= n_wrong_sample_num;
+			total_inference_sample_num <= n_total_inference_sample_num;
+			inferenced_label_4bit <= n_inferenced_label_4bit;
+			inferenced_label_shooting_cnt <= n_inferenced_label_shooting_cnt;
+			inferenced_label_shooting_ongoing <= n_inferenced_label_shooting_ongoing;
             streaming_count <= n_streaming_count;
             streaming_wait_count <= n_streaming_wait_count;
 
@@ -562,6 +682,14 @@ module a_domain(
     always @ (*) begin
         input_streaming_valid = 0;
         input_streaming_data = 0;
+
+		n_label_comparison_time = label_comparison_time;
+		n_correct_sample_num = correct_sample_num;
+		n_wrong_sample_num = wrong_sample_num;
+		n_total_inference_sample_num = total_inference_sample_num;
+		n_inferenced_label_4bit = inferenced_label_4bit;
+		n_inferenced_label_shooting_cnt = inferenced_label_shooting_cnt;
+		n_inferenced_label_shooting_ongoing = inferenced_label_shooting_ongoing;
         n_streaming_count = streaming_count;
         n_streaming_wait_count = streaming_wait_count;
 
@@ -571,6 +699,9 @@ module a_domain(
 
         fifo_d2a_data_rd_en = 0;
 
+        label_fifo_wr_en = 0;
+        label_fifo_din = 0;
+        label_fifo_rd_en = 0;
 
         if (streaming_count != 7) begin
             if (queuing_ongoing) begin
@@ -599,36 +730,50 @@ module a_domain(
                         if (a_config_dataset == 0) begin
                             if (sample_stream_cnt_small == 15 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial == (sample_num>>4) - 1) begin
+                                if (sample_num_executed_partial == sample_num_divided4_minus1) begin
                                     n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                 end else begin
                                     n_sample_num_executed_partial = 0;
                                 end
                                 n_sample_stream_cnt_small = 0;
+                                if (collect_label) begin
+                                    label_fifo_wr_en = 1;
+                                    label_fifo_din = fifo_d2a_data_dout[58 +: 4];
+                                end
                             end else begin
                                 n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
                         end else if (a_config_dataset == 1) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial == (sample_num>>4) - 1) begin
+                                if (sample_num_executed_partial == sample_num_divided4_minus1) begin
                                     n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                 end else begin
                                     n_sample_num_executed_partial = 0;
                                 end
                                 n_sample_stream_cnt_small = 0;
+
+                                if (collect_label) begin
+                                    label_fifo_wr_en = 1;
+                                    label_fifo_din = fifo_d2a_data_dout[52 +: 4];
+                                end
                             end else begin
                                 n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
                         end else if (a_config_dataset == 2) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial == (sample_num>>4) - 1) begin
+                                if (sample_num_executed_partial == sample_num_divided4_minus1) begin
                                     n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                 end else begin
                                     n_sample_num_executed_partial = 0;
                                 end
                                 n_sample_stream_cnt_small = 0;
+
+                                if (collect_label) begin
+                                    label_fifo_wr_en = 1;
+                                    label_fifo_din = fifo_d2a_data_dout[52 +: 4];
+                                end
                             end else begin
                                 n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
@@ -651,6 +796,48 @@ module a_domain(
                 n_streaming_wait_count = streaming_wait_count + 1;
             end
         end
+
+
+
+
+
+
+
+
+		if (inferenced_label_shooting_ongoing == 0) begin
+            if (inferenced_label == 1) begin
+				n_inferenced_label_shooting_ongoing = 1;
+            end
+		end else begin
+            if (label_comparison_time == 0) begin
+                n_inferenced_label_4bit[inferenced_label_shooting_cnt] = inferenced_label;
+                if (inferenced_label_shooting_cnt != 3) begin
+                    n_inferenced_label_shooting_cnt = inferenced_label_shooting_cnt + 1;
+                end else begin
+                    n_inferenced_label_shooting_cnt = 0;
+                    n_label_comparison_time = 1;
+
+                end
+            end else begin
+                label_fifo_rd_en = 1;
+                n_total_inference_sample_num = total_inference_sample_num + 1;
+                if (label_fifo_dout == inferenced_label_4bit) begin
+                    n_correct_sample_num = correct_sample_num + 1;
+                end else begin
+                    n_wrong_sample_num = wrong_sample_num + 1;
+                end
+                n_inferenced_label_shooting_ongoing = 0;
+                n_label_comparison_time = 0;
+            end
+		end
+
+
+        if (start_inference_signal_oneclk_delay) begin
+            n_correct_sample_num = 0;
+            n_wrong_sample_num = 0;
+            n_total_inference_sample_num = 0;
+        end
+
 
     end
 
@@ -779,6 +966,7 @@ module a_domain(
 // nmnist streaming 총 횟수: 540_000_000 =  200epochs * 60000samples * 5 timesteps * 9trans
 // ntidigits wrod0 streaming 총 횟수: 58_060_800 =  200epochs * 4032samples * 8 timesteps * 9trans
 // ntidigits else streaming 총 횟수: 58_032_000 =  200epochs * 4030samples * 8 timesteps * 9trans
+
 
 
 
