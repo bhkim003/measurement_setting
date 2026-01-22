@@ -161,13 +161,12 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
     reg [15:0] sample_data_buffer2_cnt_small, n_sample_data_buffer2_cnt_small;
     reg sample_data_buffer2_busy, n_sample_data_buffer2_busy;
     reg [15:0] sample_data_buffer2_time_cnt, n_sample_data_buffer2_time_cnt;
-    reg [DVS_GESTURE_BITS_PER_TIME_IN_DRAM-1:0] gesture_label_and_data_one_timestep, n_gesture_label_and_data_one_timestep;
-    reg [N_MNIST_BITS_PER_TIME_IN_DRAM-1:0] nmnist_label_and_data_one_timestep, n_nmnist_label_and_data_one_timestep;
-    reg [N_MNIST_BITS_PER_TIME_IN_DRAM-1:0] ntidigits_label_and_data_one_timestep, n_ntidigits_label_and_data_one_timestep; // nmnist bit width per time also used for ntidigits
-    reg dataset_label_and_data_one_timestep_ready, n_dataset_label_and_data_one_timestep_ready;
-    // assign gesture_label_and_data_one_timestep = sample_data_buffer2[0 * DVS_GESTURE_BITS_PER_TIME_IN_DRAM +: DVS_GESTURE_BITS_PER_TIME_IN_DRAM];
-    // assign nmnist_label_and_data_one_timestep = sample_data_buffer2[0 * N_MNIST_BITS_PER_TIME_IN_DRAM +: N_MNIST_BITS_PER_TIME_IN_DRAM];
-    // assign ntidigits_label_and_data_one_timestep = {sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM + NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4 +: 4], 66'd0, sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM +: NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4]};
+    wire [DVS_GESTURE_BITS_PER_TIME_IN_DRAM-1:0] gesture_label_and_data_one_timestep;
+    wire [N_MNIST_BITS_PER_TIME_IN_DRAM-1:0] nmnist_label_and_data_one_timestep;
+    wire [N_MNIST_BITS_PER_TIME_IN_DRAM-1:0] ntidigits_label_and_data_one_timestep; // nmnist bit width per time also used for ntidigits
+    assign gesture_label_and_data_one_timestep = sample_data_buffer2[0 * DVS_GESTURE_BITS_PER_TIME_IN_DRAM +: DVS_GESTURE_BITS_PER_TIME_IN_DRAM];
+    assign nmnist_label_and_data_one_timestep = sample_data_buffer2[0 * N_MNIST_BITS_PER_TIME_IN_DRAM +: N_MNIST_BITS_PER_TIME_IN_DRAM];
+    assign ntidigits_label_and_data_one_timestep = {sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM + NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4 +: 4], 66'd0, sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM +: NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4]};
     reg [3:0] this_sample_label;
     reg this_epoch_finish;
     reg this_sample_done;
@@ -256,11 +255,6 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
             sample_data_buffer2_time_cnt <= 0;
 
             sample_num_executed <= 0;
-
-            gesture_label_and_data_one_timestep <= 0;
-            nmnist_label_and_data_one_timestep <= 0;
-            ntidigits_label_and_data_one_timestep <= 0;
-            dataset_label_and_data_one_timestep_ready <= 0;
         end else begin
             config_d_domain_setting_cnt <= n_config_d_domain_setting_cnt;
 
@@ -325,11 +319,6 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
             sample_data_buffer2_time_cnt <= n_sample_data_buffer2_time_cnt;
 
             sample_num_executed <= n_sample_num_executed;
-
-            gesture_label_and_data_one_timestep <= n_gesture_label_and_data_one_timestep;
-            nmnist_label_and_data_one_timestep <= n_nmnist_label_and_data_one_timestep;
-            ntidigits_label_and_data_one_timestep <= n_ntidigits_label_and_data_one_timestep;
-            dataset_label_and_data_one_timestep_ready <= n_dataset_label_and_data_one_timestep_ready;
         end
     end
 
@@ -425,9 +414,9 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
 
         n_sample_num_executed = sample_num_executed;
 
-        n_gesture_label_and_data_one_timestep = gesture_label_and_data_one_timestep;
-        n_nmnist_label_and_data_one_timestep = nmnist_label_and_data_one_timestep;
-        n_ntidigits_label_and_data_one_timestep = ntidigits_label_and_data_one_timestep;
+        // gesture_label_and_data_one_timestep = 0;
+        // nmnist_label_and_data_one_timestep = 0;
+        // ntidigits_label_and_data_one_timestep = 0;
         this_sample_label = 0;
         this_epoch_finish = 0;
         this_sample_done = 0;
@@ -811,37 +800,31 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                 end
 
                 if (sample_data_buffer2_busy) begin
-                    if (dataset_label_and_data_one_timestep_ready == 0) begin
-                        n_dataset_label_and_data_one_timestep_ready = 1;
-                        n_gesture_label_and_data_one_timestep = sample_data_buffer2[0 * DVS_GESTURE_BITS_PER_TIME_IN_DRAM +: DVS_GESTURE_BITS_PER_TIME_IN_DRAM];
-                    end else begin
-                        if (!fifo_d2a_data_full) begin
-                            fifo_d2a_data_wr_en = 1;
-                            // fixme
-                            // gesture_label_and_data_one_timestep = sample_data_buffer2[sample_data_buffer2_time_cnt * DVS_GESTURE_BITS_PER_TIME_IN_DRAM +: DVS_GESTURE_BITS_PER_TIME_IN_DRAM];
-                            // gesture_label_and_data_one_timestep = sample_data_buffer2[0 * DVS_GESTURE_BITS_PER_TIME_IN_DRAM +: DVS_GESTURE_BITS_PER_TIME_IN_DRAM];
-                            this_sample_label = gesture_label_and_data_one_timestep[(CLOCK_INPUT_SPIKE_COLLECT_LONG-1) * BIT_WIDTH_INPUT_STREAMING_DATA + 56 +: 4];
-                            this_epoch_finish = (sample_num_executed == sample_num - 1) && (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
-                            this_sample_done = (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
-                            
-                            if (sample_data_buffer2_cnt_small != CLOCK_INPUT_SPIKE_COLLECT_LONG - 1) begin
-                                n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small + 1;
-                                fifo_d2a_data_din = gesture_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: BIT_WIDTH_INPUT_STREAMING_DATA];
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        // fixme
+                        // gesture_label_and_data_one_timestep = sample_data_buffer2[sample_data_buffer2_time_cnt * DVS_GESTURE_BITS_PER_TIME_IN_DRAM +: DVS_GESTURE_BITS_PER_TIME_IN_DRAM];
+                        // gesture_label_and_data_one_timestep = sample_data_buffer2[0 * DVS_GESTURE_BITS_PER_TIME_IN_DRAM +: DVS_GESTURE_BITS_PER_TIME_IN_DRAM];
+                        this_sample_label = gesture_label_and_data_one_timestep[(CLOCK_INPUT_SPIKE_COLLECT_LONG-1) * BIT_WIDTH_INPUT_STREAMING_DATA + 56 +: 4];
+                        this_epoch_finish = (sample_num_executed == sample_num - 1) && (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        this_sample_done = (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        
+                        if (sample_data_buffer2_cnt_small != CLOCK_INPUT_SPIKE_COLLECT_LONG - 1) begin
+                            n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small + 1;
+                            fifo_d2a_data_din = gesture_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: BIT_WIDTH_INPUT_STREAMING_DATA];
+                        end else begin
+                            if (sample_data_buffer2_time_cnt != d_config_timesteps - 1) begin
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {4'd0, this_sample_label, this_epoch_finish, this_sample_done, gesture_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 56]};
+                                n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt + 1;
+                                n_sample_data_buffer2 = sample_data_buffer2 >> DVS_GESTURE_BITS_PER_TIME_IN_DRAM;
                             end else begin
-                                if (sample_data_buffer2_time_cnt != d_config_timesteps - 1) begin
-                                    n_sample_data_buffer2_cnt_small = 0;
-                                    fifo_d2a_data_din = {4'd0, this_sample_label, this_epoch_finish, this_sample_done, gesture_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 56]};
-                                    n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt + 1;
-                                    n_sample_data_buffer2 = sample_data_buffer2 >> DVS_GESTURE_BITS_PER_TIME_IN_DRAM;
-                                end else begin
-                                    n_sample_data_buffer2_cnt_small = 0;
-                                    fifo_d2a_data_din = {4'd0, this_sample_label, this_epoch_finish, this_sample_done, gesture_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 56]};
-                                    n_sample_data_buffer2_time_cnt = 0;
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {4'd0, this_sample_label, this_epoch_finish, this_sample_done, gesture_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 56]};
+                                n_sample_data_buffer2_time_cnt = 0;
 
-                                    n_sample_num_executed = sample_num_executed + 1;
-                                    n_dataset_label_and_data_one_timestep_ready = 0;
-                                    n_sample_data_buffer2_busy = 0;
-                                end
+                                n_sample_num_executed = sample_num_executed + 1;
+                                n_sample_data_buffer2_busy = 0;
                             end
                         end
                     end
@@ -887,37 +870,31 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                 end
 
                 if (sample_data_buffer2_busy) begin
-                    if (dataset_label_and_data_one_timestep_ready == 0) begin
-                        n_dataset_label_and_data_one_timestep_ready = 1;
-                        n_nmnist_label_and_data_one_timestep = sample_data_buffer2[0 * N_MNIST_BITS_PER_TIME_IN_DRAM +: N_MNIST_BITS_PER_TIME_IN_DRAM];
-                    end else begin
-                        if (!fifo_d2a_data_full) begin
-                            fifo_d2a_data_wr_en = 1;
-                            // fixme
-                            // nmnist_label_and_data_one_timestep = sample_data_buffer2[sample_data_buffer2_time_cnt * N_MNIST_BITS_PER_TIME_IN_DRAM +: N_MNIST_BITS_PER_TIME_IN_DRAM];
-                            // nmnist_label_and_data_one_timestep = sample_data_buffer2[0 * N_MNIST_BITS_PER_TIME_IN_DRAM +: N_MNIST_BITS_PER_TIME_IN_DRAM];
-                            this_sample_label = nmnist_label_and_data_one_timestep[(CLOCK_INPUT_SPIKE_COLLECT_SHORT-1) * BIT_WIDTH_INPUT_STREAMING_DATA + 50 +: 4];
-                            this_epoch_finish = (sample_num_executed == sample_num - 1) && (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
-                            this_sample_done = (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
-                            
-                            if (sample_data_buffer2_cnt_small != CLOCK_INPUT_SPIKE_COLLECT_SHORT - 1) begin
-                                n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small + 1;
-                                fifo_d2a_data_din = nmnist_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: BIT_WIDTH_INPUT_STREAMING_DATA];
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        // fixme
+                        // nmnist_label_and_data_one_timestep = sample_data_buffer2[sample_data_buffer2_time_cnt * N_MNIST_BITS_PER_TIME_IN_DRAM +: N_MNIST_BITS_PER_TIME_IN_DRAM];
+                        // nmnist_label_and_data_one_timestep = sample_data_buffer2[0 * N_MNIST_BITS_PER_TIME_IN_DRAM +: N_MNIST_BITS_PER_TIME_IN_DRAM];
+                        this_sample_label = nmnist_label_and_data_one_timestep[(CLOCK_INPUT_SPIKE_COLLECT_SHORT-1) * BIT_WIDTH_INPUT_STREAMING_DATA + 50 +: 4];
+                        this_epoch_finish = (sample_num_executed == sample_num - 1) && (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        this_sample_done = (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        
+                        if (sample_data_buffer2_cnt_small != CLOCK_INPUT_SPIKE_COLLECT_SHORT - 1) begin
+                            n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small + 1;
+                            fifo_d2a_data_din = nmnist_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: BIT_WIDTH_INPUT_STREAMING_DATA];
+                        end else begin
+                            if (sample_data_buffer2_time_cnt != d_config_timesteps - 1) begin
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, nmnist_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
+                                n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt + 1;
+                                n_sample_data_buffer2 = sample_data_buffer2 >> N_MNIST_BITS_PER_TIME_IN_DRAM;
                             end else begin
-                                if (sample_data_buffer2_time_cnt != d_config_timesteps - 1) begin
-                                    n_sample_data_buffer2_cnt_small = 0;
-                                    fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, nmnist_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
-                                    n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt + 1;
-                                    n_sample_data_buffer2 = sample_data_buffer2 >> N_MNIST_BITS_PER_TIME_IN_DRAM;
-                                end else begin
-                                    n_sample_data_buffer2_cnt_small = 0;
-                                    fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, nmnist_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
-                                    n_sample_data_buffer2_time_cnt = 0;
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, nmnist_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
+                                n_sample_data_buffer2_time_cnt = 0;
 
-                                    n_sample_num_executed = sample_num_executed + 1;
-                                    n_dataset_label_and_data_one_timestep_ready = 0;
-                                    n_sample_data_buffer2_busy = 0;
-                                end
+                                n_sample_num_executed = sample_num_executed + 1;
+                                n_sample_data_buffer2_busy = 0;
                             end
                         end
                     end
@@ -963,37 +940,31 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                 end
 
                 if (sample_data_buffer2_busy) begin
-                    if (dataset_label_and_data_one_timestep_ready == 0) begin
-                        n_dataset_label_and_data_one_timestep_ready = 1;
-                        n_ntidigits_label_and_data_one_timestep = {sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM + NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4 +: 4], 66'd0, sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM +: NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4]};
-                    end else begin
-                        if (!fifo_d2a_data_full) begin
-                            fifo_d2a_data_wr_en = 1;
-                            // fixme
-                            // ntidigits_label_and_data_one_timestep = {sample_data_buffer2[sample_data_buffer2_time_cnt * NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4 +: 4], 66'd0, sample_data_buffer2[sample_data_buffer2_time_cnt * NTIDIGITS_BITS_PER_TIME_IN_DRAM +: NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4]};
-                            // ntidigits_label_and_data_one_timestep = {sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM + NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4 +: 4], 66'd0, sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM +: NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4]};
-                            this_sample_label = ntidigits_label_and_data_one_timestep[(CLOCK_INPUT_SPIKE_COLLECT_SHORT-1) * BIT_WIDTH_INPUT_STREAMING_DATA + 50 +: 4];
-                            this_epoch_finish = (sample_num_executed == sample_num - 1) && (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
-                            this_sample_done = (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
-                            
-                            if (sample_data_buffer2_cnt_small != CLOCK_INPUT_SPIKE_COLLECT_SHORT - 1) begin
-                                n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small + 1;
-                                fifo_d2a_data_din = ntidigits_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: BIT_WIDTH_INPUT_STREAMING_DATA];
+                    if (!fifo_d2a_data_full) begin
+                        fifo_d2a_data_wr_en = 1;
+                        // fixme
+                        // ntidigits_label_and_data_one_timestep = {sample_data_buffer2[sample_data_buffer2_time_cnt * NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4 +: 4], 66'd0, sample_data_buffer2[sample_data_buffer2_time_cnt * NTIDIGITS_BITS_PER_TIME_IN_DRAM +: NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4]};
+                        // ntidigits_label_and_data_one_timestep = {sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM + NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4 +: 4], 66'd0, sample_data_buffer2[0 * NTIDIGITS_BITS_PER_TIME_IN_DRAM +: NTIDIGITS_BITS_PER_TIME_IN_DRAM - 4]};
+                        this_sample_label = ntidigits_label_and_data_one_timestep[(CLOCK_INPUT_SPIKE_COLLECT_SHORT-1) * BIT_WIDTH_INPUT_STREAMING_DATA + 50 +: 4];
+                        this_epoch_finish = (sample_num_executed == sample_num - 1) && (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        this_sample_done = (sample_data_buffer2_time_cnt == d_config_timesteps - 1);
+                        
+                        if (sample_data_buffer2_cnt_small != CLOCK_INPUT_SPIKE_COLLECT_SHORT - 1) begin
+                            n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small + 1;
+                            fifo_d2a_data_din = ntidigits_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: BIT_WIDTH_INPUT_STREAMING_DATA];
+                        end else begin
+                            if (sample_data_buffer2_time_cnt != d_config_timesteps - 1) begin
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, ntidigits_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
+                                n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt + 1;
+                                n_sample_data_buffer2 = sample_data_buffer2 >> NTIDIGITS_BITS_PER_TIME_IN_DRAM;
                             end else begin
-                                if (sample_data_buffer2_time_cnt != d_config_timesteps - 1) begin
-                                    n_sample_data_buffer2_cnt_small = 0;
-                                    fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, ntidigits_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
-                                    n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt + 1;
-                                    n_sample_data_buffer2 = sample_data_buffer2 >> NTIDIGITS_BITS_PER_TIME_IN_DRAM;
-                                end else begin
-                                    n_sample_data_buffer2_cnt_small = 0;
-                                    fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, ntidigits_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
-                                    n_sample_data_buffer2_time_cnt = 0;
+                                n_sample_data_buffer2_cnt_small = 0;
+                                fifo_d2a_data_din = {10'd0, this_sample_label, this_epoch_finish, this_sample_done, ntidigits_label_and_data_one_timestep[sample_data_buffer2_cnt_small * BIT_WIDTH_INPUT_STREAMING_DATA +: 50]};
+                                n_sample_data_buffer2_time_cnt = 0;
 
-                                    n_sample_num_executed = sample_num_executed + 1;
-                                    n_dataset_label_and_data_one_timestep_ready = 0;
-                                    n_sample_data_buffer2_busy = 0;
-                                end
+                                n_sample_num_executed = sample_num_executed + 1;
+                                n_sample_data_buffer2_busy = 0;
                             end
                         end
                     end
