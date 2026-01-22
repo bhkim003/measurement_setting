@@ -1,4 +1,4 @@
-// Opalkelly xem7310 75A testbench with DDR3 DRAM model
+// Opalkelly xem7360 75A testbench with DDR3 DRAM model
 // 260109 Byeonghoon Kim, MMS Korea
 `timescale 1ps/100fs
 
@@ -118,11 +118,11 @@ module top_bh_fpga_with_dram_tb;
 
                                      // # of ODT outputs to memory.
 
-   parameter ROW_WIDTH             = 15;
+   parameter ROW_WIDTH             = 16;
 
                                      // # of memory Row Address bits.
 
-   parameter ADDR_WIDTH            = 29;
+   parameter ADDR_WIDTH            = 30;
 
                                      // # = RANK_WIDTH + BANK_WIDTH
 
@@ -234,7 +234,7 @@ module top_bh_fpga_with_dram_tb;
 
    //***************************************************************************
 
-   parameter tCK                   = 2500;
+   parameter tCK                   = 1250;
 
                                      // memory tCK paramter.
 
@@ -393,6 +393,7 @@ module top_bh_fpga_with_dram_tb;
   wire                               tg_compare_error;
 
   
+  wire [(CS_WIDTH*1)-1:0] ddr3_cs_n_fpga;
 
   wire [DM_WIDTH-1:0]                ddr3_dm_fpga;
 
@@ -402,6 +403,8 @@ module top_bh_fpga_with_dram_tb;
 
     
 
+
+  reg [(CS_WIDTH*1)-1:0] ddr3_cs_n_sdram_tmp;
   
 
   
@@ -507,9 +510,11 @@ module top_bh_fpga_with_dram_tb;
     
 
 
+  always @( * )
 
-  assign ddr3_cs_n_sdram =  {(CS_WIDTH*1){1'b0}};
+    ddr3_cs_n_sdram_tmp   <=  #(TPROP_PCB_CTRL) ddr3_cs_n_fpga;
 
+  assign ddr3_cs_n_sdram =  ddr3_cs_n_sdram_tmp;
     
 
 
@@ -841,12 +846,16 @@ module top_bh_fpga_with_dram_tb;
           .ddr3_dqs_n                       (   ddr3_dqs_n_fpga                ),
           .ddr3_dqs_p                       (   ddr3_dqs_p_fpga                ),
           
+          .ddr3_cs_n                         (   ddr3_cs_n_fpga                ),
           .ddr3_odt                         (   ddr3_odt_fpga                ),
           .ddr3_dm                          (   ddr3_dm_fpga                ),
 
           .clk_clock_generator                      (                       ),
           .clk_port_spare_0                         (                          ),
           .clk_port_spare_1                         (                          ),
+
+          .margin_pin                         (                          ),
+
           .reset_n_from_fpga_to_asic                (                 ),
           .input_streaming_valid_from_fpga_to_asic  (   ),
           .input_streaming_data_from_fpga_to_asic   (    ),
