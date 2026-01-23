@@ -809,6 +809,12 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                     fifo_d2a_command_wr_en = 1;
                     fifo_d2a_command_din = fifo_p2d_command_dout;
                 end
+            end else if (fifo_p2d_command_dout[14:0] == 21) begin
+                if (!fifo_d2a_command_full) begin
+                    fifo_p2d_command_rd_en = 1;
+                    fifo_d2a_command_wr_en = 1;
+                    fifo_d2a_command_din = fifo_p2d_command_dout;
+                end
             end
         end
 
@@ -1149,6 +1155,12 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                     fifo_d2p_command_din = fifo_a2d_command_dout;
                 end
             end else if (fifo_a2d_command_dout[14:0] == 19) begin
+                if (!fifo_d2p_command_full) begin
+                    fifo_a2d_command_rd_en = 1;
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = fifo_a2d_command_dout;
+                end
+            end else if (fifo_a2d_command_dout[14:0] == 21) begin
                 if (!fifo_d2p_command_full) begin
                     fifo_a2d_command_rd_en = 1;
                     fifo_d2p_command_wr_en = 1;

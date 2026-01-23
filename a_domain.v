@@ -222,6 +222,8 @@ module a_domain(
     reg [7:0] sample_stream_cnt_small, n_sample_stream_cnt_small;
 
     reg [3:0] result_transition_cnt, n_result_transition_cnt;
+    reg [63:0] processing_time_cnt, n_processing_time_cnt;
+    reg [3:0] processing_time_cnt_transition_cnt, n_processing_time_cnt_transition_cnt;
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             config_a_domain_setting_cnt <= 0;
@@ -253,6 +255,8 @@ module a_domain(
             sample_num_transition_cnt <= 0;
 
 			result_transition_cnt <= 0;
+			processing_time_cnt <= 0;
+			processing_time_cnt_transition_cnt <= 0;
         end
         else begin
             config_a_domain_setting_cnt <= n_config_a_domain_setting_cnt;
@@ -284,6 +288,8 @@ module a_domain(
             sample_num_transition_cnt <= n_sample_num_transition_cnt;
 			
             result_transition_cnt <= n_result_transition_cnt;
+            processing_time_cnt <= n_processing_time_cnt;
+            processing_time_cnt_transition_cnt <= n_processing_time_cnt_transition_cnt;
         end
     end
 
@@ -323,7 +329,9 @@ module a_domain(
         
 
 		n_result_transition_cnt = result_transition_cnt;
-
+        
+		n_processing_time_cnt = processing_time_cnt;
+		n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt;
 
 
         if (fifo_d2a_command_valid) begin
@@ -558,6 +566,7 @@ module a_domain(
                 start_training_signal = 1;
                 n_training_processing_ongoing = 1;
                 n_collect_label = 0;
+                n_processing_time_cnt = 0;
             end
         end
         if (fifo_d2a_command_valid) begin
@@ -566,6 +575,7 @@ module a_domain(
                 start_inference_signal = 1;
                 n_inference_processing_ongoing = 0;
                 n_collect_label = 1;
+                n_processing_time_cnt = 0;
             end
         end
 
@@ -577,6 +587,7 @@ module a_domain(
 
 
         if (training_processing_ongoing) begin
+            n_processing_time_cnt = processing_time_cnt + 1;
             if(start_ready_oneclk_past == 0 && start_ready == 1) begin
                 if (!fifo_a2d_command_full) begin
                     fifo_a2d_command_wr_en = 1;
@@ -586,6 +597,7 @@ module a_domain(
             end
         end
         if (inference_processing_ongoing) begin
+            n_processing_time_cnt = processing_time_cnt + 1;
             if(start_ready_oneclk_past == 0 && start_ready == 1) begin
                 if (!fifo_a2d_command_full) begin
                     fifo_a2d_command_wr_en = 1;
@@ -640,6 +652,28 @@ module a_domain(
         end
 
 
+
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 21) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    if (processing_time_cnt_transition_cnt == 0) begin
+                        fifo_a2d_command_din = {1'd0, processing_time_cnt[0*16 +: 16], 15'd21};
+                        n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
+                    end else if (processing_time_cnt_transition_cnt == 1) begin
+                        fifo_a2d_command_din = {1'd0, processing_time_cnt[1*16 +: 16], 15'd21};
+                        n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
+                    end else if (processing_time_cnt_transition_cnt == 2) begin
+                        fifo_a2d_command_din = {1'd0, processing_time_cnt[2*16 +: 16], 15'd21};
+                        n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
+                    end else if (processing_time_cnt_transition_cnt == 3) begin
+                        fifo_a2d_command_din = {1'd0, processing_time_cnt[3*16 +: 16], 15'd21};
+                        n_processing_time_cnt_transition_cnt = 0;
+                        fifo_d2a_command_rd_en = 1;
+                    end
+                end
+            end
+        end
 
 
 

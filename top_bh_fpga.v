@@ -606,7 +606,8 @@ module top_bh_fpga(
 	reg [31:0] wrong_sample_num, n_wrong_sample_num;
 	reg [31:0] total_inference_sample_num, n_total_inference_sample_num;
     reg [3:0] result_transition_cnt, n_result_transition_cnt;
-    
+    reg [63:0] processing_time_cnt, n_processing_time_cnt;
+    reg [3:0] processing_time_cnt_transition_cnt, n_processing_time_cnt_transition_cnt;
     always @(posedge okClk) begin
         if (!reset_n) begin
             ep20wireout <= 0;
@@ -737,6 +738,12 @@ module top_bh_fpga(
             end else if (ep01wirein == 15) begin
                 led = xem7360_led(total_inference_sample_num[7:0]);
                 n_ep20wireout = total_inference_sample_num;
+            end else if (ep01wirein == 16) begin
+                led = xem7360_led(processing_time_cnt[7:0]);
+                n_ep20wireout = processing_time_cnt[0 +: 32];
+            end else if (ep01wirein == 17) begin
+                led = xem7360_led(processing_time_cnt[7+32:0+32]);
+                n_ep20wireout = processing_time_cnt[32 +: 32];
             end
         end else if (p_state == P_STATE_09_ASIC_INFERENCE_QUEUING || p_state == P_STATE_11_ASIC_TRAINING_QUEUING) begin
             if (ep01wirein == 0) begin
@@ -836,6 +843,8 @@ module top_bh_fpga(
 			wrong_sample_num <= 0;
 			total_inference_sample_num <= 0;
 			result_transition_cnt <= 0;
+			processing_time_cnt <= 0;
+			processing_time_cnt_transition_cnt <= 0;
         end else begin
             p_state <= n_p_state;
 
@@ -883,6 +892,8 @@ module top_bh_fpga(
 			wrong_sample_num <= n_wrong_sample_num;
 			total_inference_sample_num <= n_total_inference_sample_num;
             result_transition_cnt <= n_result_transition_cnt;
+            processing_time_cnt <= n_processing_time_cnt;
+            processing_time_cnt_transition_cnt <= n_processing_time_cnt_transition_cnt;
         end
     end
 
@@ -955,6 +966,8 @@ module top_bh_fpga(
 		n_wrong_sample_num = wrong_sample_num;
 		n_total_inference_sample_num = total_inference_sample_num;
 		n_result_transition_cnt = result_transition_cnt;
+		n_processing_time_cnt = processing_time_cnt;
+		n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt;
 
         
         if(ep40trigin[29]) begin
@@ -1359,7 +1372,7 @@ module top_bh_fpga(
 
 
 
-        // STEAMING N번 WAIT
+        // 결과 세팅 하기
         if(ep40trigin[25]) begin
             if (!fifo_p2d_command_full) begin
                 fifo_p2d_command_wr_en = 1;
@@ -1405,6 +1418,33 @@ module top_bh_fpga(
         end
 
 
+
+
+
+        // processing time 세팅시키기
+        if(ep40trigin[23]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd21};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 21) begin
+            fifo_d2p_command_rd_en = 1;
+            if (processing_time_cnt_transition_cnt == 0) begin
+                n_processing_time_cnt[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
+            end else if (processing_time_cnt_transition_cnt == 1) begin
+                n_processing_time_cnt[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
+            end else if (processing_time_cnt_transition_cnt == 2) begin
+                n_processing_time_cnt[2*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
+            end else if (processing_time_cnt_transition_cnt == 3) begin
+                n_processing_time_cnt[3*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_processing_time_cnt_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
 
 
 
