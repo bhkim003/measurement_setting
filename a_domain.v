@@ -1,5 +1,5 @@
 // `define NO_BUF 1
-`define TEST_SETTING 1
+// `define TEST_SETTING 1
 module a_domain(
         input clk_a_domain,
         input reset_n,
@@ -255,6 +255,7 @@ module a_domain(
             sample_num_transition_cnt <= 0;
 
 			result_transition_cnt <= 0;
+
 			processing_time_cnt <= 0;
 			processing_time_cnt_transition_cnt <= 0;
         end
@@ -288,6 +289,7 @@ module a_domain(
             sample_num_transition_cnt <= n_sample_num_transition_cnt;
 			
             result_transition_cnt <= n_result_transition_cnt;
+            
             processing_time_cnt <= n_processing_time_cnt;
             processing_time_cnt_transition_cnt <= n_processing_time_cnt_transition_cnt;
         end

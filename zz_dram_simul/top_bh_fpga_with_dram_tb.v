@@ -1,6 +1,7 @@
 // Opalkelly xem7360 75A testbench with DDR3 DRAM model
 // 260109 Byeonghoon Kim, MMS Korea
-`timescale 1ps/100fs
+// `timescale 1ps/100fs
+`timescale 1ps/1ps
 
 
 
@@ -931,10 +932,10 @@ module top_bh_fpga_with_dram_tb;
                                       //  host interface checks for ready (0-255)
     parameter PostReadyDelay = 5;     // REQUIRED: # of clocks after ready is asserted and
                                       //  check that the block transfer begins (0-255)
-    parameter pipeInSize = 1024;       // REQUIRED: byte (must be even) length of default
+    parameter pipeInSize = 16384;       // REQUIRED: byte (must be even) length of default
     // parameter pipeInSize = 10*1024*1024;       // REQUIRED: byte (must be even) length of default
                                       //  PipeIn; Integer 0-2^32
-    parameter pipeOutSize = 1024;      // REQUIRED: byte (must be even) length of default
+    parameter pipeOutSize = 16384;      // REQUIRED: byte (must be even) length of default
     // parameter pipeOutSize = 10*1024*1024;      // REQUIRED: byte (must be even) length of default
                                       // PipeOut; Integer 0-2^32
     parameter registerSetSize = 32;   // Size of array for register set commands.
@@ -1008,38 +1009,38 @@ module top_bh_fpga_with_dram_tb;
     integer i;
 
 	wire signed [31:0] l1_cuts [0:14];
-	assign l1_cuts[0]=256; 
-	assign l1_cuts[1]=17;
-	assign l1_cuts[2]=171;
-	assign l1_cuts[3]=342;
-	assign l1_cuts[4]=342;
-	assign l1_cuts[5]=342;
-	assign l1_cuts[6]=342;
-	assign l1_cuts[7]=342;
-	assign l1_cuts[8]=342;
-	assign l1_cuts[9]=342;
-	assign l1_cuts[10]=342;
-	assign l1_cuts[11]=342;
-	assign l1_cuts[12]=342;
-	assign l1_cuts[13]=342;
-	assign l1_cuts[14]=496;
+	assign l1_cuts[0]=128; 
+	assign l1_cuts[1]=-97;
+	assign l1_cuts[2]=-97;
+	assign l1_cuts[3]=-97;
+	assign l1_cuts[4]=-97;
+	assign l1_cuts[5]=-97;
+	assign l1_cuts[6]=-97;
+	assign l1_cuts[7]=-97;
+	assign l1_cuts[8]=-97;
+	assign l1_cuts[9]=-97;
+	assign l1_cuts[10]=-97;
+	assign l1_cuts[11]=-97;
+	assign l1_cuts[12]=-97;
+	assign l1_cuts[13]=-97;
+	assign l1_cuts[14]=354;
 
 	wire signed [31:0] l2_cuts [0:14];
-	assign l2_cuts[0]=256; 
-	assign l2_cuts[1]=17;
-	assign l2_cuts[2]=171;
-	assign l2_cuts[3]=342;
-	assign l2_cuts[4]=342;
-	assign l2_cuts[5]=342;
-	assign l2_cuts[6]=342;
-	assign l2_cuts[7]=342;
-	assign l2_cuts[8]=342;
-	assign l2_cuts[9]=342;
-	assign l2_cuts[10]=342;
-	assign l2_cuts[11]=342;
-	assign l2_cuts[12]=342;
-	assign l2_cuts[13]=342;
-	assign l2_cuts[14]=496;
+	assign l2_cuts[0]=128; 
+	assign l2_cuts[1]=-97;
+	assign l2_cuts[2]=-97;
+	assign l2_cuts[3]=-97;
+	assign l2_cuts[4]=-97;
+	assign l2_cuts[5]=-97;
+	assign l2_cuts[6]=-97;
+	assign l2_cuts[7]=-97;
+	assign l2_cuts[8]=-97;
+	assign l2_cuts[9]=-97;
+	assign l2_cuts[10]=-97;
+	assign l2_cuts[11]=-97;
+	assign l2_cuts[12]=-97;
+	assign l2_cuts[13]=-97;
+	assign l2_cuts[14]=354;
 	
   // task definition
 
@@ -1097,31 +1098,31 @@ module top_bh_fpga_with_dram_tb;
             #100;
 
             // 4. inference_epochs (Value: 500, Trigger: 3)
-            SetWireInValue(8'h01, 32'd500, NO_MASK);
+            SetWireInValue(8'h01, 32'd200, NO_MASK);
             UpdateWireIns;
             ActivateTriggerIn(8'h40, 3);
             #100;
 
             // 5. dataset (Value: 1, Trigger: 4)
-            SetWireInValue(8'h01, 32'd1, NO_MASK);
+            SetWireInValue(8'h01, 32'd0, NO_MASK);
             UpdateWireIns;
             ActivateTriggerIn(8'h40, 4);
             #100;
 
             // 6. timesteps (Value: 5, Trigger: 5)
-            SetWireInValue(8'h01, 32'd5, NO_MASK);
+            SetWireInValue(8'h01, 32'd10, NO_MASK);
             UpdateWireIns;
             ActivateTriggerIn(8'h40, 5);
             #100;
 
             // 7. input_size_layer1 (Value: 578, Trigger: 6)
-            SetWireInValue(8'h01, 32'd578, NO_MASK);
+            SetWireInValue(8'h01, 32'd980, NO_MASK);
             UpdateWireIns;
             ActivateTriggerIn(8'h40, 6);
             #100;
 
             // 8. long_time_input_streaming_mode (Value: 0, Trigger: 7)
-            SetWireInValue(8'h01, 32'd0, NO_MASK);
+            SetWireInValue(8'h01, 32'd1, NO_MASK);
             UpdateWireIns;
             ActivateTriggerIn(8'h40, 7);
             #100;
@@ -1178,7 +1179,9 @@ module top_bh_fpga_with_dram_tb;
 
 
 
-
+    reg [980 - 1:0] gesture_one_timestep;
+    reg [980 + 4 - 1:0] gesture_one_timestep_front_label;
+    reg [(980 + 4)*10 + 144 - 1:0] gesture_one_sample;
 
 
 
@@ -1217,6 +1220,8 @@ module top_bh_fpga_with_dram_tb;
 
 
   integer i_pi;
+  integer i_pj;
+  integer i_pk;
     // ################################## Main Testbench Process #################################################################
     // ################################## Main Testbench Process #################################################################
     // ################################## Main Testbench Process #################################################################
@@ -1228,8 +1233,12 @@ module top_bh_fpga_with_dram_tb;
         sys_rst_n = 1'b1;
 
 
-
-
+        for (i_pi = 0; i_pi < 98; i_pi = i_pi + 1) begin
+            gesture_one_timestep[i_pi*10 +: 10] = i_pi;
+        end
+        gesture_one_timestep_front_label = {4'd9, gesture_one_timestep};
+        gesture_one_sample = {144'd0, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label};
+        
         // FrontPanel 초기화
         FrontPanelReset;
 
@@ -1288,49 +1297,60 @@ module top_bh_fpga_with_dram_tb;
 
 
 
-        $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode #########");
-        $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode #########");
-        $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode #########");
-        $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode #########");
-        SetWireInValue(8'h01, 32'd3, NO_MASK);
-        UpdateWireIns;
-        ActivateTriggerIn(8'h40, 0);
-        SetWireInValue(8'h01, 32'd0, NO_MASK);
-        UpdateWireIns;
+        // $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode ######################################################################");
+        // $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode ######################################################################");
+        // $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode ######################################################################");
+        // $display("######### P_STATE_03_DRAMFILL_WEIGHT_DATA mode ######################################################################");
+        // SetWireInValue(8'h01, 32'd3, NO_MASK);
+        // UpdateWireIns;
+        // ActivateTriggerIn(8'h40, 0);
+        // SetWireInValue(8'h01, 32'd0, NO_MASK);
+        // UpdateWireIns;
 
 
-        // dram write address setting
-        SetWireInValue(8'h01, 32'd8, NO_MASK); // start address
-        UpdateWireIns;
-        ActivateTriggerIn(8'h40, 30);
-        SetWireInValue(8'h01, 32'd16, NO_MASK); // last address
-        UpdateWireIns;
-        ActivateTriggerIn(8'h40, 30);
-        SetWireInValue(8'h01, 32'd0, NO_MASK);
-        UpdateWireIns;
-        Wait_TriggerOut(8'h60, {31'd0,1'b1});
-
-
-
-
-        // dram write
-                            // 512 bit = 64 byte
-        for (i_pi = 0; i_pi < 64; i_pi = i_pi + 1) begin
-            // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
-            pipeIn[i_pi] = i_pi+1;
-        end
-        WriteToBlockPipeIn(8'h80, 32, 64);  
-
-
-        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+        // // dram write address setting
+        // SetWireInValue(8'h01, 32'd0, NO_MASK); // start address
+        // UpdateWireIns;
+        // ActivateTriggerIn(8'h40, 30);
+        // SetWireInValue(8'h01, 32'd110392, NO_MASK); // last address
+        // UpdateWireIns;
+        // ActivateTriggerIn(8'h40, 30);
+        // SetWireInValue(8'h01, 32'd0, NO_MASK);
+        // UpdateWireIns;
+        // Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
 
 
-        $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
-        $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
-        $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
-        $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
 
+        // // dram write
+        //                     // 256 bit = 64 byte
+        // for (i_pk = 0; i_pk < pipeInSize/32; i_pk = i_pk + 1) begin
+        //     for (i_pi = 0; i_pi < 32; i_pi = i_pi + 1) begin
+        //         // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
+        //         pipeIn[i_pi + i_pk*32] = i_pi+1;
+        //     end
+        // end
+
+        // // 883200 Byte weight data 넣기
+        // // 16384Byte넣기 53번
+        //     // WriteToBlockPipeIn(8'h80, 16384, 16384);  
+        // for (i_pi = 0; i_pi < 53; i_pi = i_pi + 1) begin
+        //     WriteToBlockPipeIn(8'h80, 16384, 16384);  
+        // end
+        // //꼬다리 14848Byte
+        // WriteToBlockPipeIn(8'h80, 512, 14848);  
+
+
+        // Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+        // $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
+        // $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
+        // $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
+        // $display("######### P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE mode ######################################################################");
+
+        // // 뭐 따로 안 할 거임.
 
 
 
@@ -1342,9 +1362,303 @@ module top_bh_fpga_with_dram_tb;
         SetWireInValue(8'h01, 32'd5, NO_MASK);
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 0);
-
         SetWireInValue(8'h01, 32'd0, NO_MASK);
         UpdateWireIns;
+
+
+
+        // dram write address setting
+        SetWireInValue(8'h01, 32'd110400, NO_MASK); // start address
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 30);
+        // 샘플 3개만
+        SetWireInValue(8'h01, 32'd111328, NO_MASK); // last address
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 30);
+        SetWireInValue(8'h01, 32'd0, NO_MASK);
+        UpdateWireIns;
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+
+
+
+        // gesture three sample pipe in!!!!! 같은 거 걍 3번 때려박음. 총 29952bit
+        for (i_pk = 0; i_pk < 3; i_pk = i_pk + 1) begin
+            // gesture one sample pipe in!!!!!
+            for (i_pj = 0; i_pj < 39; i_pj = i_pj + 1) begin
+                for (i_pi = 0; i_pi < 32; i_pi = i_pi + 1) begin
+                    // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
+                    pipeIn[i_pi] = gesture_one_sample[8*32*i_pj + i_pi*8 +: 8];
+                end
+                WriteToBlockPipeIn(8'h80, 32, 32);  
+            end
+        end
+
+
+
+
+
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+
+        $display("######### P_STATE_06_DRAMFILL_TRAINING_DATA mode ######################################################################");
+        $display("######### P_STATE_06_DRAMFILL_TRAINING_DATA mode ######################################################################");
+        $display("######### P_STATE_06_DRAMFILL_TRAINING_DATA mode ######################################################################");
+        $display("######### P_STATE_06_DRAMFILL_TRAINING_DATA mode ######################################################################");
+
+
+        SetWireInValue(8'h01, 32'd6, NO_MASK);
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 0);
+        SetWireInValue(8'h01, 32'd0, NO_MASK);
+        UpdateWireIns;
+
+
+
+
+        // dram write address setting
+        SetWireInValue(8'h01, 32'd1070400, NO_MASK); // start address
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 30);
+        // 샘플 3개만
+        SetWireInValue(8'h01, 32'd1071328, NO_MASK); // last address
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 30);
+        SetWireInValue(8'h01, 32'd0, NO_MASK);
+        UpdateWireIns;
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+
+
+
+        // gesture three sample pipe in!!!!! 같은 거 걍 3번 때려박음. 총 29952bit
+        for (i_pk = 0; i_pk < 3; i_pk = i_pk + 1) begin
+            // gesture one sample pipe in!!!!!
+            for (i_pj = 0; i_pj < 39; i_pj = i_pj + 1) begin
+                for (i_pi = 0; i_pi < 32; i_pi = i_pi + 1) begin
+                    // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
+                    pipeIn[i_pi] = gesture_one_sample[8*32*i_pj + i_pi*8 +: 8];
+                end
+                WriteToBlockPipeIn(8'h80, 32, 32);  
+            end
+        end
+
+
+
+
+
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+
+
+
+
+
+
+
+
+
+        // $display("######### P_STATE_07_ASIC_CONFIG mode ######################################################################");
+        // $display("######### P_STATE_07_ASIC_CONFIG mode ######################################################################");
+        // $display("######### P_STATE_07_ASIC_CONFIG mode ######################################################################");
+        // $display("######### P_STATE_07_ASIC_CONFIG mode ######################################################################");
+
+
+
+
+        // SetWireInValue(8'h01, 32'd7, NO_MASK);
+        // UpdateWireIns;
+        // ActivateTriggerIn(8'h40, 0);
+        // SetWireInValue(8'h01, 32'd0, NO_MASK);
+        // UpdateWireIns;
+
+
+        // // dram write address setting
+        // SetWireInValue(8'h01, 32'd0, NO_MASK); // start address
+        // UpdateWireIns;
+        // ActivateTriggerIn(8'h40, 30);
+        // SetWireInValue(8'h01, 32'd110392, NO_MASK); // last address
+        // UpdateWireIns;
+        // ActivateTriggerIn(8'h40, 30);
+        // SetWireInValue(8'h01, 32'd0, NO_MASK);
+        // UpdateWireIns;
+        // Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+
+        SetWireInValue(8'h01, 32'd8, NO_MASK);
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 0);
+        SetWireInValue(8'h01, 32'd0, NO_MASK);
+        UpdateWireIns;
+
+
+
+
+
+
+
+        $display("######### P_STATE_08_ASIC_CONFIG_DONE mode ######################################################################");
+        $display("######### P_STATE_08_ASIC_CONFIG_DONE mode ######################################################################");
+        $display("######### P_STATE_08_ASIC_CONFIG_DONE mode ######################################################################");
+        $display("######### P_STATE_08_ASIC_CONFIG_DONE mode ######################################################################");
+
+
+
+
+        // dram write address setting
+        SetWireInValue(8'h01, 32'd1070400, NO_MASK); // start address
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 30);
+        // 샘플 3개만
+        SetWireInValue(8'h01, 32'd1071328, NO_MASK); // last address
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 30);
+        SetWireInValue(8'h01, 32'd0, NO_MASK);
+        UpdateWireIns;
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+
+
+        // SAMPLE 수 삽입
+
+        // 3개
+        SetWireInValue(8'h01, 32'd3, NO_MASK); // start address
+        ActivateTriggerIn(8'h40, 26);
+        SetWireInValue(8'h01, 32'd0, NO_MASK); // start address
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+
+
+
+
+        $display("######### P_STATE_11_ASIC_TRAINING_QUEUING mode ######################################################################");
+        $display("######### P_STATE_11_ASIC_TRAINING_QUEUING mode ######################################################################");
+        $display("######### P_STATE_11_ASIC_TRAINING_QUEUING mode ######################################################################");
+        $display("######### P_STATE_11_ASIC_TRAINING_QUEUING mode ######################################################################");
+
+
+        // QUEUING 시작
+        ActivateTriggerIn(8'h40, 0);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+        // ASIC start ready 확인
+        ActivateTriggerIn(8'h40, 28);
+
+
+
+
+        $display("######### P_STATE_12_ASIC_TRAINING_PROCESSING mode ######################################################################");
+        $display("######### P_STATE_12_ASIC_TRAINING_PROCESSING mode ######################################################################");
+        $display("######### P_STATE_12_ASIC_TRAINING_PROCESSING mode ######################################################################");
+        $display("######### P_STATE_12_ASIC_TRAINING_PROCESSING mode ######################################################################");
+
+
+        // PROCESSING 시작
+        ActivateTriggerIn(8'h40, 0);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+        // P_STATE_08_ASIC_CONFIG_DONE
+        // PROCESSING TIME 세팅하기
+        ActivateTriggerIn(8'h40, 23);
+
+
+
+
+
+
+
+
+
+
+
+
+        $display("######### P_STATE_08_ASIC_CONFIG_DONE mode ######################################################################");
+        $display("######### P_STATE_08_ASIC_CONFIG_DONE mode ######################################################################");
+        $display("######### P_STATE_08_ASIC_CONFIG_DONE mode ######################################################################");
+        $display("######### P_STATE_08_ASIC_CONFIG_DONE mode ######################################################################");
+
+        // dram write address setting
+        SetWireInValue(8'h01, 32'd110400, NO_MASK); // start address
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 30);
+        // 샘플 3개만
+        SetWireInValue(8'h01, 32'd111328, NO_MASK); // last address
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 30);
+        SetWireInValue(8'h01, 32'd0, NO_MASK);
+        UpdateWireIns;
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+
+
+        // SAMPLE 수 삽입
+
+        // 3개
+        SetWireInValue(8'h01, 32'd3, NO_MASK); // start address
+        ActivateTriggerIn(8'h40, 26);
+        SetWireInValue(8'h01, 32'd0, NO_MASK); // start address
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+
+
+        $display("######### P_STATE_09_ASIC_INFERENCE_QUEUING mode ######################################################################");
+        $display("######### P_STATE_09_ASIC_INFERENCE_QUEUING mode ######################################################################");
+        $display("######### P_STATE_09_ASIC_INFERENCE_QUEUING mode ######################################################################");
+        $display("######### P_STATE_09_ASIC_INFERENCE_QUEUING mode ######################################################################");
+
+
+
+        // QUEUING 시작
+        ActivateTriggerIn(8'h40, 1);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+
+        // ASIC start ready 확인
+        ActivateTriggerIn(8'h40, 28);
+
+
+
+
+        $display("######### P_STATE_10_ASIC_INFERENCE_PROCESSING mode ######################################################################");
+        $display("######### P_STATE_10_ASIC_INFERENCE_PROCESSING mode ######################################################################");
+        $display("######### P_STATE_10_ASIC_INFERENCE_PROCESSING mode ######################################################################");
+        $display("######### P_STATE_10_ASIC_INFERENCE_PROCESSING mode ######################################################################");
+
+
+        // PROCESSING 시작
+        ActivateTriggerIn(8'h40, 0);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+
+        // P_STATE_08_ASIC_CONFIG_DONE
+        // 결과 세팅 하기
+        ActivateTriggerIn(8'h40, 25);
+
+        // P_STATE_08_ASIC_CONFIG_DONE
+        // PROCESSING TIME 세팅하기
+        ActivateTriggerIn(8'h40, 23);
+
+
+
+
+
 
 // $finish;
 

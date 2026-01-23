@@ -340,7 +340,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
             sample_num <= n_sample_num;
             sample_num_transition_cnt <= n_sample_num_transition_cnt;
 
-            queuing_request_send_have_been <= n_sample_num_transition_cnt;
+            queuing_request_send_have_been <= n_queuing_request_send_have_been;
 
             training_streaming_ongoing <= n_training_streaming_ongoing;
             inference_streaming_ongoing <= n_inference_streaming_ongoing;
@@ -357,6 +357,9 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
             sample_data_buffer2_gesture <= n_sample_data_buffer2_gesture;
             sample_data_buffer2_nmnist <= n_sample_data_buffer2_nmnist;
             sample_data_buffer2_ntidigits <= n_sample_data_buffer2_ntidigits;
+            sample_data_buffer2_cnt_small <= n_sample_data_buffer2_cnt_small;
+            sample_data_buffer2_busy <= n_sample_data_buffer2_busy;
+            sample_data_buffer2_time_cnt <= n_sample_data_buffer2_time_cnt;
 
             this_sample_label <= n_this_sample_label;
             this_epoch_finish <= n_this_epoch_finish;
@@ -466,6 +469,9 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
         n_sample_data_buffer2_gesture = sample_data_buffer2_gesture;
         n_sample_data_buffer2_nmnist = sample_data_buffer2_nmnist;
         n_sample_data_buffer2_ntidigits = sample_data_buffer2_ntidigits;
+        n_sample_data_buffer2_cnt_small = sample_data_buffer2_cnt_small;
+        n_sample_data_buffer2_busy = sample_data_buffer2_busy;
+        n_sample_data_buffer2_time_cnt = sample_data_buffer2_time_cnt;
 
         n_this_sample_label = this_sample_label;
         n_this_epoch_finish = this_epoch_finish;
@@ -474,6 +480,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
         n_gesture_label_and_data_one_timestep = gesture_label_and_data_one_timestep;
         n_nmnist_label_and_data_one_timestep = nmnist_label_and_data_one_timestep;
         n_ntidigits_label_and_data_one_timestep = ntidigits_label_and_data_one_timestep;
+        n_dataset_label_and_data_one_timestep_ready = dataset_label_and_data_one_timestep_ready;
 
         n_sample_num_executed = sample_num_executed;
 
@@ -822,7 +829,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
 
         if (training_streaming_ongoing || inference_streaming_ongoing) begin
             if (queuing_first_time) begin   
-                if (fifo_d2a_data_full) begin
+                if (fifo_d2a_data_full || sample_data_buffer_stop_read_request) begin
                     if (!fifo_d2p_command_full) begin
                         fifo_d2p_command_wr_en = 1;
                         if (training_streaming_ongoing) begin

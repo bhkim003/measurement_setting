@@ -1,4 +1,4 @@
-`define TEST_SETTING 1
+// `define TEST_SETTING 1
 module top_bh_fpga(
         // ########################## okHost interface ########################################################################################
         // ########################## okHost interface ########################################################################################
@@ -834,11 +834,6 @@ module top_bh_fpga(
 
             execute_16_division <= 0;
 
-            correct_sample_num <= 0;
-            execute_16_division <= 0;
-            execute_16_division <= 0;
-            execute_16_division <= 0;
-
 			correct_sample_num <= 0;
 			wrong_sample_num <= 0;
 			total_inference_sample_num <= 0;
@@ -1004,6 +999,8 @@ module top_bh_fpga(
                 if(ep40trigin[0]) begin
                     if(ep01wirein == 3) begin
                         n_p_state = P_STATE_03_DRAMFILL_WEIGHT_DATA;
+                    end else if(ep01wirein == 5) begin
+                        n_p_state = P_STATE_05_DRAMFILL_INFERENCE_DATA;
                     end else if(ep01wirein == 7) begin
                         n_p_state = P_STATE_07_ASIC_CONFIG;
                     end 
