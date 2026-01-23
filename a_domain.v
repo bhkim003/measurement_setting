@@ -234,6 +234,8 @@ module a_domain(
     reg sample_num_executed_partial_equals_sample_num_divided4_minus1, n_sample_num_executed_partial_equals_sample_num_divided4_minus1;
     
     reg [3:0] one_sample_finish, n_one_sample_finish;
+
+    reg [15:0] timestep, n_timestep;
     
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
@@ -723,6 +725,8 @@ module a_domain(
             sample_stream_cnt_small <= 0;
 
 			one_sample_finish <= 0;
+
+			timestep <= 0;
         end
         else begin
 			label_comparison_time <= n_label_comparison_time;
@@ -740,6 +744,8 @@ module a_domain(
             sample_stream_cnt_small <= n_sample_stream_cnt_small;
 
             one_sample_finish <= n_one_sample_finish;
+
+            timestep <= n_timestep;
         end
     end
     always @ (*) begin
@@ -759,6 +765,8 @@ module a_domain(
         n_sample_num_executed = sample_num_executed;
         n_sample_num_executed_partial = sample_num_executed_partial;
         n_sample_stream_cnt_small = sample_stream_cnt_small;
+
+        n_timestep = timestep;
 
 		n_one_sample_finish[3] = one_sample_finish[2];
 		n_one_sample_finish[2] = one_sample_finish[1];
@@ -805,54 +813,85 @@ module a_domain(
 
                         if (a_config_dataset == 0) begin
                             if (sample_stream_cnt_small == 15 - 1) begin
-                                n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
-                                    n_sample_num_executed_partial = sample_num_executed_partial + 1;
+                                if (timestep == a_config_timesteps - 1) begin
+                                    n_timestep = 0;
+
+                                    n_sample_num_executed = sample_num_executed + 1;
+                                    if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
+                                        n_sample_num_executed_partial = sample_num_executed_partial + 1;
+                                    end else begin
+                                        n_sample_num_executed_partial = 0;
+                                    end
+
+                                    if (collect_label) begin
+                                        label_fifo_wr_en = 1;
+                                        label_fifo_din = fifo_d2a_data_dout[58 +: 4];
+                                    end
+
+                                    n_one_sample_finish[0] = 1;
+
                                 end else begin
-                                    n_sample_num_executed_partial = 0;
+                                    n_timestep = timestep + 1;
                                 end
+
                                 n_sample_stream_cnt_small = 0;
-                                if (collect_label) begin
-                                    label_fifo_wr_en = 1;
-                                    label_fifo_din = fifo_d2a_data_dout[58 +: 4];
-                                end
-                                n_one_sample_finish[0] = 1;
+                                
                             end else begin
                                 n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
                         end else if (a_config_dataset == 1) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
-                                n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
-                                    n_sample_num_executed_partial = sample_num_executed_partial + 1;
-                                end else begin
-                                    n_sample_num_executed_partial = 0;
-                                end
-                                n_sample_stream_cnt_small = 0;
+                                if (timestep == a_config_timesteps - 1) begin
+                                    n_timestep = 0;
 
-                                if (collect_label) begin
-                                    label_fifo_wr_en = 1;
-                                    label_fifo_din = fifo_d2a_data_dout[52 +: 4];
+                                    n_sample_num_executed = sample_num_executed + 1;
+                                    if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
+                                        n_sample_num_executed_partial = sample_num_executed_partial + 1;
+                                    end else begin
+                                        n_sample_num_executed_partial = 0;
+                                    end
+
+                                    if (collect_label) begin
+                                        label_fifo_wr_en = 1;
+                                        label_fifo_din = fifo_d2a_data_dout[52 +: 4];
+                                    end
+
+                                    n_one_sample_finish[0] = 1;
+
+                                end else begin
+                                    n_timestep = timestep + 1;
                                 end
-                                n_one_sample_finish[0] = 1;
+
+                                n_sample_stream_cnt_small = 0;
+                                
                             end else begin
                                 n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
                         end else if (a_config_dataset == 2) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
-                                n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
-                                    n_sample_num_executed_partial = sample_num_executed_partial + 1;
-                                end else begin
-                                    n_sample_num_executed_partial = 0;
-                                end
-                                n_sample_stream_cnt_small = 0;
+                                if (timestep == a_config_timesteps - 1) begin
+                                    n_timestep = 0;
 
-                                if (collect_label) begin
-                                    label_fifo_wr_en = 1;
-                                    label_fifo_din = fifo_d2a_data_dout[52 +: 4];
+                                    n_sample_num_executed = sample_num_executed + 1;
+                                    if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
+                                        n_sample_num_executed_partial = sample_num_executed_partial + 1;
+                                    end else begin
+                                        n_sample_num_executed_partial = 0;
+                                    end
+
+                                    if (collect_label) begin
+                                        label_fifo_wr_en = 1;
+                                        label_fifo_din = fifo_d2a_data_dout[52 +: 4];
+                                    end
+
+                                    n_one_sample_finish[0] = 1;
+
+                                end else begin
+                                    n_timestep = timestep + 1;
                                 end
-                                n_one_sample_finish[0] = 1;
+
+                                n_sample_stream_cnt_small = 0;
+                                
                             end else begin
                                 n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end

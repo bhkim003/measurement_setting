@@ -1104,25 +1104,25 @@ module top_bh_fpga_with_dram_tb;
             #100;
 
             // 5. dataset (Value: 1, Trigger: 4)
-            SetWireInValue(8'h01, 32'd0, NO_MASK);
+            SetWireInValue(8'h01, 32'd1, NO_MASK);
             UpdateWireIns;
             ActivateTriggerIn(8'h40, 4);
             #100;
 
             // 6. timesteps (Value: 5, Trigger: 5)
-            SetWireInValue(8'h01, 32'd10, NO_MASK);
+            SetWireInValue(8'h01, 32'd5, NO_MASK);
             UpdateWireIns;
             ActivateTriggerIn(8'h40, 5);
             #100;
 
             // 7. input_size_layer1 (Value: 578, Trigger: 6)
-            SetWireInValue(8'h01, 32'd980, NO_MASK);
+            SetWireInValue(8'h01, 32'd578, NO_MASK);
             UpdateWireIns;
             ActivateTriggerIn(8'h40, 6);
             #100;
 
             // 8. long_time_input_streaming_mode (Value: 0, Trigger: 7)
-            SetWireInValue(8'h01, 32'd1, NO_MASK);
+            SetWireInValue(8'h01, 32'd0, NO_MASK);
             UpdateWireIns;
             ActivateTriggerIn(8'h40, 7);
             #100;
@@ -1295,10 +1295,16 @@ module top_bh_fpga_with_dram_tb;
         UpdateWireIns;
 
 
+
+        $display("STREAMING WAIT CYCLE 설정: 7번 넣고 4번기다리기");
+        SetWireInValue(8'h01, 32'd4, NO_MASK);
+        UpdateWireIns;
+        ActivateTriggerIn(8'h40, 27);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
+        SetWireInValue(8'h01, 32'd0, NO_MASK);
+        UpdateWireIns;
+
         $display("Configuration Finished.");
-
-
-
 
 
 
