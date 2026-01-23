@@ -1,4 +1,5 @@
 // `define NO_BUF 1
+`define TEST_SETTING 1
 module a_domain(
         input clk_a_domain,
         input reset_n,
@@ -38,21 +39,22 @@ module a_domain(
         output start_inference_signal_from_fpga_to_asic, 
         input start_ready_from_asic_to_fpga, 
 
-        input inferenced_label_from_asic_to_fpga 
+        input inferenced_label_from_asic_to_fpga,
+
+        output [9:0] margin_pin
     );
 
-
-    // ######### for VERIFICATION ###########################################################################
-    // ######### for VERIFICATION ###########################################################################
-    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     reg [31:0] config_stream_cnt, n_config_stream_cnt;
     reg asic_start_ready_for_test, n_asic_start_ready_for_test;
     reg [65:0] config_stream_catch_41421, n_config_stream_catch_41421;
     reg [65:0] config_stream_catch_41418, n_config_stream_catch_41418;
     reg [31:0] data_stream_cnt_for_test, n_data_stream_cnt_for_test;
-    // ######### for VERIFICATION ###########################################################################
-    // ######### for VERIFICATION ###########################################################################
-    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
 
 
     // ######### IN OUT ###########################################################################
@@ -78,15 +80,21 @@ module a_domain(
     wire inferenced_label;
 	`ifdef NO_BUF
         assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga;
-        // assign start_ready = start_ready_from_asic_to_fpga;
-        // assign start_ready = 1'b1;
-        assign start_ready = asic_start_ready_for_test;
+        `ifdef TEST_SETTING
+            // assign start_ready = 1'b1;
+            assign start_ready = asic_start_ready_for_test;
+        `else
+            assign start_ready = start_ready_from_asic_to_fpga;
+        `endif
         assign inferenced_label = inferenced_label_from_asic_to_fpga;
 	`else
         assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga_buf;
-        // assign start_ready = start_ready_from_asic_to_fpga_buf;
-        // assign start_ready = 1'b1;
-        assign start_ready = asic_start_ready_for_test;
+        `ifdef TEST_SETTING
+            // assign start_ready = 1'b1;
+            assign start_ready = asic_start_ready_for_test;
+        `else
+            assign start_ready = start_ready_from_asic_to_fpga_buf;
+        `endif
         assign inferenced_label = inferenced_label_from_asic_to_fpga_buf;
 	`endif
 
@@ -126,8 +134,6 @@ module a_domain(
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
-
-
 
 
 
@@ -215,7 +221,6 @@ module a_domain(
     reg [29:0] sample_num_executed_partial, n_sample_num_executed_partial;
     reg [7:0] sample_stream_cnt_small, n_sample_stream_cnt_small;
 
-    
     reg [3:0] result_transition_cnt, n_result_transition_cnt;
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
@@ -564,6 +569,12 @@ module a_domain(
             end
         end
 
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 20) begin // clk phase command
+                fifo_d2a_command_rd_en = 1; 
+            end
+        end
+
 
         if (training_processing_ongoing) begin
             if(start_ready_oneclk_past == 0 && start_ready == 1) begin
@@ -712,7 +723,14 @@ module a_domain(
                 n_sample_num_executed_partial = 0;
                 n_sample_stream_cnt_small = 0;
             end else begin 
-                if (1'b1) begin // if (input_streaming_ready) begin
+
+                
+                // if (1'b1) begin
+            `ifdef TEST_SETTING
+                if (1'b1) begin
+            `else
+                if (input_streaming_ready) begin
+            `endif
                     if (fifo_d2a_data_valid) begin
                         fifo_d2a_data_rd_en = 1;
                         input_streaming_valid = 1;
@@ -874,13 +892,36 @@ module a_domain(
 
 
 
+    // ######### MARGIN PIN MAPPING ###########################################################################
+    // ######### MARGIN PIN MAPPING ###########################################################################
+    // ######### MARGIN PIN MAPPING ###########################################################################
+    assign margin_pin[0] = reset_n_from_fpga_to_asic;
+    assign margin_pin[1] = input_streaming_valid;
+    assign margin_pin[2] = input_streaming_data[0];
+    assign margin_pin[3] = input_streaming_ready;
+    assign margin_pin[4] = start_training_signal;
+    assign margin_pin[5] = start_inference_signal;
+    assign margin_pin[6] = start_ready;
+    assign margin_pin[7] = inferenced_label;
+    assign margin_pin[8] = 0;
+    assign margin_pin[9] = 0;
+    // ######### MARGIN PIN MAPPING ###########################################################################
+    // ######### MARGIN PIN MAPPING ###########################################################################
+    // ######### MARGIN PIN MAPPING ###########################################################################
 
 
 
 
-    // ######### for VERIFICATION ###########################################################################
-    // ######### for VERIFICATION ###########################################################################
-    // ######### for VERIFICATION ###########################################################################
+
+
+
+
+
+
+
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             config_stream_cnt <= 0;
@@ -912,16 +953,16 @@ module a_domain(
         if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
             n_config_stream_cnt = config_stream_cnt + 1;
         end
-        if (config_stream_cnt == 41424) begin 
+        if (config_stream_cnt == 41424) begin // config stream finish
             n_asic_start_ready_for_test = 1;
         end
 
         
         if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
-            if (config_stream_cnt == 41424 - 3 - 3) begin 
+            if (config_stream_cnt == 41424 - 3 - 3) begin // last one ago config value
                 n_config_stream_catch_41418 = fifo_d2a_data_dout;
             end
-            if (config_stream_cnt == 41424 - 3) begin 
+            if (config_stream_cnt == 41424 - 3) begin // last config value
                 n_config_stream_catch_41421 = fifo_d2a_data_dout;
             end
         end
@@ -955,9 +996,9 @@ module a_domain(
 
 
     end
-    // ######### for VERIFICATION ###########################################################################
-    // ######### for VERIFICATION ###########################################################################
-    // ######### for VERIFICATION ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
+    // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
 
 
 

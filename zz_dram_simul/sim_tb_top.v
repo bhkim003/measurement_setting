@@ -248,11 +248,11 @@ module sim_tb_top;
 
                                      // # of ODT outputs to memory.
 
-   parameter ROW_WIDTH             = 15;
+   parameter ROW_WIDTH             = 16;
 
                                      // # of memory Row Address bits.
 
-   parameter ADDR_WIDTH            = 29;
+   parameter ADDR_WIDTH            = 30;
 
                                      // # = RANK_WIDTH + BANK_WIDTH
 
@@ -364,7 +364,7 @@ module sim_tb_top;
 
    //***************************************************************************
 
-   parameter tCK                   = 2500;
+   parameter tCK                   = 1250;
 
                                      // memory tCK paramter.
 
@@ -522,7 +522,9 @@ module sim_tb_top;
 
   wire                               tg_compare_error;
 
-  
+  wire [(CS_WIDTH*1)-1:0] ddr3_cs_n_fpga;
+
+    
 
   wire [DM_WIDTH-1:0]                ddr3_dm_fpga;
 
@@ -534,7 +536,9 @@ module sim_tb_top;
 
   
 
-  
+  reg [(CS_WIDTH*1)-1:0] ddr3_cs_n_sdram_tmp;
+
+    
 
   reg [DM_WIDTH-1:0]                 ddr3_dm_sdram_tmp;
 
@@ -583,6 +587,64 @@ module sim_tb_top;
 
 
 //**************************************************************************//
+
+
+
+  //**************************************************************************//
+
+  // Reset Generation
+
+  //**************************************************************************//
+
+  initial begin
+
+    sys_rst_n = 1'b0;
+
+    #RESET_PERIOD
+
+      sys_rst_n = 1'b1;
+
+   end
+
+
+
+   assign sys_rst = RST_ACT_LOW ? sys_rst_n : ~sys_rst_n;
+
+
+
+  //**************************************************************************//
+
+  // Clock Generation
+
+  //**************************************************************************//
+
+
+
+  initial
+
+    sys_clk_i = 1'b0;
+
+  always
+
+    sys_clk_i = #(CLKIN_PERIOD/2.0) ~sys_clk_i;
+
+
+
+  assign sys_clk_p = sys_clk_i;
+
+  assign sys_clk_n = ~sys_clk_i;
+
+
+
+  initial
+
+    clk_ref_i = 1'b0;
+
+  always
+
+    clk_ref_i = #REFCLK_PERIOD ~clk_ref_i;
+
+
 
 
 
@@ -638,7 +700,11 @@ module sim_tb_top;
 
 
 
-  assign ddr3_cs_n_sdram =  {(CS_WIDTH*1){1'b0}};
+  always @( * )
+
+    ddr3_cs_n_sdram_tmp   <=  #(TPROP_PCB_CTRL) ddr3_cs_n_fpga;
+
+  assign ddr3_cs_n_sdram =  ddr3_cs_n_sdram_tmp;
 
     
 
@@ -810,154 +876,145 @@ module sim_tb_top;
 
   //===========================================================================
 
-    wire          		ui_clk;
-    wire          		ui_clk_sync_rst;
 
 
-    wire	         	app_rdy;
-    reg	         	app_en;
-    reg	[3 - 1:0] 	app_cmd;
-    reg	[29 - 1:0]	app_addr; // 30bit address @ 7360?, 29bit @ 7310? Please Check
-    wire	[256 - 1:0] app_rd_data;
-    wire	         	app_rd_data_end;
-    wire	         	app_rd_data_valid;
-    wire	         	app_wdf_rdy;
-    reg	         	app_wdf_wren;
-    reg	[256 - 1:0] app_wdf_data;
-    reg	         	app_wdf_end;
-    reg	[32 - 1:0]  app_wdf_mask;
+  example_top #
 
-    wire app_sr_active;
-    wire app_ref_ack;
-    wire app_zq_ack;
+    (
 
-  mig_7series_0 u_mig_7series_0
-      (
-// Memory interface ports
 
 
-       .ddr3_addr                      (ddr3_addr_fpga),
+     .SIMULATION                (SIMULATION),
 
+     .PORT_MODE                 (PORT_MODE),
 
-       .ddr3_ba                        (ddr3_ba_fpga),
+     .DATA_MODE                 (DATA_MODE),
 
+     .TST_MEM_INSTR_MODE        (TST_MEM_INSTR_MODE),
 
-       .ddr3_cas_n                     (ddr3_cas_n_fpga),
+     .EYE_TEST                  (EYE_TEST),
 
+     .DATA_PATTERN              (DATA_PATTERN),
 
-       .ddr3_ck_n                      (ddr3_ck_n_fpga),
+     .CMD_PATTERN               (CMD_PATTERN),
 
+     .BEGIN_ADDRESS             (BEGIN_ADDRESS),
 
-       .ddr3_ck_p                      (ddr3_ck_p_fpga),
+     .END_ADDRESS               (END_ADDRESS),
 
+     .PRBS_EADDR_MASK_POS       (PRBS_EADDR_MASK_POS),
 
-       .ddr3_cke                       (ddr3_cke_fpga),
 
 
-       .ddr3_ras_n                     (ddr3_ras_n_fpga),
+     .COL_WIDTH                 (COL_WIDTH),
 
+     .CS_WIDTH                  (CS_WIDTH),
 
-       .ddr3_we_n                      (ddr3_we_n_fpga),
+     .DM_WIDTH                  (DM_WIDTH),
 
+    
 
-       .ddr3_dq                        (ddr3_dq_fpga),
+     .DQ_WIDTH                  (DQ_WIDTH),
 
+     .DQS_CNT_WIDTH             (DQS_CNT_WIDTH),
 
-       .ddr3_dqs_n                     (ddr3_dqs_n_fpga),
+     .DRAM_WIDTH                (DRAM_WIDTH),
 
+     .ECC_TEST                  (ECC_TEST),
 
-       .ddr3_dqs_p                     (ddr3_dqs_p_fpga),
+     .RANKS                     (RANKS),
 
+     .ROW_WIDTH                 (ROW_WIDTH),
 
-       .ddr3_reset_n                   (ddr3_reset_n),
+     .ADDR_WIDTH                (ADDR_WIDTH),
 
+     .BURST_MODE                (BURST_MODE),
 
-       .init_calib_complete            (init_calib_complete),
+     .TCQ                       (TCQ),
 
 
-      
 
+     
 
-       
+    .DRAM_TYPE                 (DRAM_TYPE),
 
+    
 
-       .ddr3_dm                        (ddr3_dm_fpga),
+     
 
+    .nCK_PER_CLK               (nCK_PER_CLK),
 
-       .ddr3_odt                       (ddr3_odt_fpga),
+    
 
+     
 
-// Application interface ports
+     .DEBUG_PORT                (DEBUG_PORT),
 
+    
 
-       .app_addr                       (app_addr),
+     .RST_ACT_LOW               (RST_ACT_LOW)
 
+    )
 
-       .app_cmd                        (app_cmd),
+   u_ip_top
 
+     (
 
-       .app_en                         (app_en),
 
 
-       .app_wdf_data                   (app_wdf_data),
+     .ddr3_dq              (ddr3_dq_fpga),
 
+     .ddr3_dqs_n           (ddr3_dqs_n_fpga),
 
-       .app_wdf_end                    (app_wdf_end),
+     .ddr3_dqs_p           (ddr3_dqs_p_fpga),
 
 
-       .app_wdf_wren                   (app_wdf_wren),
 
+     .ddr3_addr            (ddr3_addr_fpga),
 
-       .app_rd_data                    (app_rd_data),
+     .ddr3_ba              (ddr3_ba_fpga),
 
+     .ddr3_ras_n           (ddr3_ras_n_fpga),
 
-       .app_rd_data_end                (app_rd_data_end),
+     .ddr3_cas_n           (ddr3_cas_n_fpga),
 
+     .ddr3_we_n            (ddr3_we_n_fpga),
 
-       .app_rd_data_valid              (app_rd_data_valid),
+     .ddr3_reset_n         (ddr3_reset_n),
 
+     .ddr3_ck_p            (ddr3_ck_p_fpga),
 
-       .app_rdy                        (app_rdy),
+     .ddr3_ck_n            (ddr3_ck_n_fpga),
 
+     .ddr3_cke             (ddr3_cke_fpga),
 
-       .app_wdf_rdy                    (app_wdf_rdy),
+     .ddr3_cs_n            (ddr3_cs_n_fpga),
 
+    
 
-       .app_sr_req                     (1'b0),
+     .ddr3_dm              (ddr3_dm_fpga),
 
+    
 
-       .app_ref_req                    (1'b0),
+     .ddr3_odt             (ddr3_odt_fpga),
 
+    
 
-       .app_zq_req                     (1'b0),
+     
 
+     .sys_clk_p            (sys_clk_p),
 
-       .app_sr_active                  (app_sr_active),
+     .sys_clk_n            (sys_clk_n),
 
+    
 
-       .app_ref_ack                    (app_ref_ack),
+      .init_calib_complete (init_calib_complete),
 
+      .tg_compare_error    (tg_compare_error),
 
-       .app_zq_ack                     (app_zq_ack),
+      .sys_rst             (sys_rst)
 
-
-       .ui_clk                         (ui_clk),
-
-
-       .ui_clk_sync_rst                (ui_clk_sync_rst),
-
-
-      
-
-
-       .app_wdf_mask                   (app_wdf_mask),
-
-// System Clock Ports
-       .sys_clk_p                       (sys_clk_p),
-       .sys_clk_n                       (sys_clk_n),
-       .device_temp            (),
-       .sys_rst                        (sys_rst)
-       );
+     );
 
 
 
@@ -1024,88 +1081,84 @@ module sim_tb_top;
     
 
     
-  //**************************************************************************//
-
-  // Reset Generation
-
-  //**************************************************************************//
 
 
 
 
 
+  //***************************************************************************
 
+  // Reporting the test case status
 
+  // Status reporting logic exists both in simulation test bench (sim_tb_top)
 
+  // and sim.do file for ModelSim. Any update in simulation run time or time out
 
+  // in this file need to be updated in sim.do file as well.
 
-
-
-
-
-   assign sys_rst = RST_ACT_LOW ? sys_rst_n : ~sys_rst_n;
-
-
-
-  //**************************************************************************//
-
-  // Clock Generation
-
-  //**************************************************************************//
-
-
-
+  //***************************************************************************
 
   initial
 
-    sys_clk_i = 1'b0;
+  begin : Logging
 
-  always
+     fork
 
-    sys_clk_i = #(CLKIN_PERIOD/2.0) ~sys_clk_i;
+        begin : calibration_done
 
+           wait (init_calib_complete);
 
+           $display("Calibration Done");
 
-  assign sys_clk_p = sys_clk_i;
+           #50000000.0;
 
-  assign sys_clk_n = ~sys_clk_i;
+           if (!tg_compare_error) begin
 
+              $display("TEST PASSED");
 
+           end
 
-  initial
+           else begin
 
-    clk_ref_i = 1'b0;
+              $display("TEST FAILED: DATA ERROR");
 
-  always
+           end
 
-    clk_ref_i = #REFCLK_PERIOD ~clk_ref_i;
+           disable calib_not_done;
 
+            $finish;
 
-
-
-    initial begin
-        sys_rst_n = 1'b0;
-        # (RESET_PERIOD);
-        sys_rst_n = 1'b1;
-    end
-    initial begin
-        app_wdf_mask = 32'b0;
-
-        # (RESET_PERIOD);
-        // # (RESET_PERIOD * 3);
-
-        app_en = 1'b0;
-        app_cmd = 3'b000;
-        app_addr = 29'b0;
-        app_wdf_wren = 1'b0;
-        app_wdf_data = 256'b0;
-        app_wdf_end = 1'b0;
-
-    end
+        end
 
 
 
+        begin : calib_not_done
 
+           if (SIM_BYPASS_INIT_CAL == "SIM_INIT_CAL_FULL")
+
+             #2500000000.0;
+
+           else
+
+             #1000000000.0;
+
+           if (!init_calib_complete) begin
+
+              $display("TEST FAILED: INITIALIZATION DID NOT COMPLETE");
+
+           end
+
+           disable calibration_done;
+
+            $finish;
+
+        end
+
+     join
+
+  end
+
+    
 
 endmodule
 

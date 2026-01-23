@@ -1,3 +1,4 @@
+`define TEST_SETTING 1
 module top_bh_fpga(
         // ########################## okHost interface ########################################################################################
         // ########################## okHost interface ########################################################################################
@@ -214,9 +215,16 @@ module top_bh_fpga(
     // // IBUFGDS osc_clk(.O(sys_clk), .I(sys_clk_p), .IB(sys_clk_n));
     assign sys_clk = ui_clk;
     wire sys_clk2;
-    assign sys_clk2 = ui_clk;
-    // ########################## sys_clk gen instance ########################################################################################
 
+    `ifdef TEST_SETTING
+        assign sys_clk2 = ui_clk;
+    `else
+        assign sys_clk2 = clk_clock_generator;
+    `endif
+
+    assign clk_port_spare_1 = ui_clk;
+    // ########################## sys_clk gen instance ########################################################################################
+ 
 
 
     localparam P_STATE_00_IDLE = 0;
@@ -514,7 +522,7 @@ module top_bh_fpga(
     // ########################## A DOMAIN ########################################################################################
     a_domain u_a_domain(
         .clk_a_domain                    ( sys_clk2                    ),
-        .reset_n                ( reset_n                ),
+        .reset_n                ( !(reset_n == 0 || ui_clk_sync_rst)                ),
 
         .fifo_d2a_command_rd_en ( fifo_d2a_command_rd_en ),
         .fifo_d2a_command_dout  ( fifo_d2a_command_dout  ),
@@ -542,7 +550,9 @@ module top_bh_fpga(
         .start_inference_signal_from_fpga_to_asic  ( start_inference_signal_from_fpga_to_asic  ),
         .start_ready_from_asic_to_fpga  ( start_ready_from_asic_to_fpga  ),
 
-        .inferenced_label_from_asic_to_fpga  ( inferenced_label_from_asic_to_fpga  )
+        .inferenced_label_from_asic_to_fpga  ( inferenced_label_from_asic_to_fpga  ),
+
+        .margin_pin (margin_pin)
     );
     // ########################## A DOMAIN ########################################################################################
 
@@ -1383,6 +1393,16 @@ module top_bh_fpga(
 
 
 
+
+
+
+        // clk phase 조절 커맨드
+        if(ep40trigin[24]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {ep01wirein[16:0], 15'd20};
+            end
+        end
 
 
 

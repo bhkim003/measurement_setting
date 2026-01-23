@@ -803,6 +803,12 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                     fifo_d2a_command_wr_en = 1;
                     fifo_d2a_command_din = fifo_p2d_command_dout;
                 end
+            end else if (fifo_p2d_command_dout[14:0] == 20) begin
+                if (!fifo_d2a_command_full) begin
+                    fifo_p2d_command_rd_en = 1;
+                    fifo_d2a_command_wr_en = 1;
+                    fifo_d2a_command_din = fifo_p2d_command_dout;
+                end
             end
         end
 

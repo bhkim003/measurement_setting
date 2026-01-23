@@ -1,5 +1,5 @@
 # 원본 bitstream 경로
-set src_bit "C:/Users/User/xem7360_K160T_test3/xem7360_K160T_test1.runs/impl_1/top_bh_fpga.bit"
+set src_bit "C:/Users/User/xem7360_K160T_test1/xem7360_K160T_test1.runs/impl_1/top_bh_fpga.bit"
 
 # 목적지 경로
 set dst_bit "C:/Users/User/measurement_setting/bitstream/top_bh_fpga.bit"

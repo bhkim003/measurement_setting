@@ -824,6 +824,24 @@ module top_bh_fpga_with_dram_tb;
 	wire          okAA;
 	wire  [7:0]   led;
 
+
+		wire clk_port_spare_1_at_testbench;
+
+
+		wire clk_clock_generator_at_testbench;
+		wire reset_at_testbench;
+
+		wire input_streaming_valid_at_testbench;
+		wire [65:0] input_streaming_data_at_testbench;
+		wire input_streaming_ready_at_testbench;
+
+		wire start_training_signal_at_testbench; 
+		wire start_inference_signal_at_testbench; 
+		wire start_ready_at_testbench; 
+
+		wire inferenced_label_at_testbench; 
+
+
       top_bh_fpga u_top_bh_fpga(
           .okUH                                     ( okUH                                     ),
           .okHU                                     ( okHU                                     ),
@@ -850,21 +868,46 @@ module top_bh_fpga_with_dram_tb;
           .ddr3_odt                         (   ddr3_odt_fpga                ),
           .ddr3_dm                          (   ddr3_dm_fpga                ),
 
-          .clk_clock_generator                      (                       ),
+          .clk_clock_generator                      (    clk_clock_generator_at_testbench                   ),
           .clk_port_spare_0                         (                          ),
-          .clk_port_spare_1                         (                          ),
+          .clk_port_spare_1                         (  clk_port_spare_1_at_testbench                        ),
 
           .margin_pin                         (                          ),
 
-          .reset_n_from_fpga_to_asic                (                 ),
-          .input_streaming_valid_from_fpga_to_asic  (   ),
-          .input_streaming_data_from_fpga_to_asic   (    ),
-          .input_streaming_ready_from_asic_to_fpga  (   ),
-          .start_training_signal_from_fpga_to_asic  (   ),
-          .start_inference_signal_from_fpga_to_asic (  ),
-          .start_ready_from_asic_to_fpga            (             ),
-          .inferenced_label_from_asic_to_fpga       (        )
+          .reset_n_from_fpga_to_asic                (  reset_at_testbench               ),
+          .input_streaming_valid_from_fpga_to_asic  ( input_streaming_valid_at_testbench  ),
+          .input_streaming_data_from_fpga_to_asic   ( input_streaming_data_at_testbench   ),
+          .input_streaming_ready_from_asic_to_fpga  ( input_streaming_ready_at_testbench  ),
+          .start_training_signal_from_fpga_to_asic  (start_training_signal_at_testbench   ),
+          .start_inference_signal_from_fpga_to_asic (start_inference_signal_at_testbench  ),
+          .start_ready_from_asic_to_fpga            (  start_ready_at_testbench           ),
+          .inferenced_label_from_asic_to_fpga       (inferenced_label_at_testbench)
       );
+
+
+
+        top_bh u_top_bh(
+            .clk                             ( clk_clock_generator_at_testbench                             ),
+            .reset_n                         ( reset_at_testbench                         ),
+            .input_streaming_valid_i         ( input_streaming_valid_at_testbench         ),
+            .input_streaming_data_i          ( input_streaming_data_at_testbench          ),
+            .input_streaming_ready_o         ( input_streaming_ready_at_testbench         ),
+            .start_training_signal_i         ( start_training_signal_at_testbench         ),
+            .start_inference_signal_i        ( start_inference_signal_at_testbench        ),
+            .start_ready_o                   ( start_ready_at_testbench                   ),
+            .inferenced_label_o              ( inferenced_label_at_testbench              )
+        );
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1156,7 +1199,7 @@ module top_bh_fpga_with_dram_tb;
 
     sys_clk_i = #(CLKIN_PERIOD/2.0) ~sys_clk_i;
 
-
+  assign #(CLKIN_PERIOD/6.0) clk_clock_generator_at_testbench = sys_clk_i;
 
   assign sys_clk_p = sys_clk_i;
 
@@ -1296,14 +1339,14 @@ module top_bh_fpga_with_dram_tb;
         $display("######### P_STATE_05_DRAMFILL_INFERENCE_DATA mode ######################################################################");
         $display("######### P_STATE_05_DRAMFILL_INFERENCE_DATA mode ######################################################################");
 
-        SetWireInValue(8'h01, 32'd5, NO_MASK); // start address
+        SetWireInValue(8'h01, 32'd5, NO_MASK);
         UpdateWireIns;
-        ActivateTriggerIn(8'h40, 30);
+        ActivateTriggerIn(8'h40, 0);
 
-        SetWireInValue(8'h01, 32'd0, NO_MASK); // start address
+        SetWireInValue(8'h01, 32'd0, NO_MASK);
         UpdateWireIns;
 
-$finish;
+// $finish;
 
 
 
