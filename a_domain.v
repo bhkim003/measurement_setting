@@ -350,7 +350,7 @@ module a_domain(
 		n_processing_time_cnt = processing_time_cnt;
 		n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt;
 
-		n_sample_num_executed_partial_equals_sample_num_divided4_minus1 = sample_num_executed_partial_equals_sample_num_divided4_minus1;
+		n_sample_num_executed_partial_equals_sample_num_divided4_minus1 = sample_num_executed_partial == sample_num_divided4_minus1;
 
         if (fifo_d2a_command_valid) begin
             if (fifo_d2a_command_dout[14:0] == 1) begin
