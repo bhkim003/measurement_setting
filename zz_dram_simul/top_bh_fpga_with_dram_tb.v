@@ -1179,9 +1179,13 @@ module top_bh_fpga_with_dram_tb;
 
 
 
-    reg [980 - 1:0] gesture_one_timestep;
-    reg [980 + 4 - 1:0] gesture_one_timestep_front_label;
-    reg [(980 + 4)*10 + 144 - 1:0] gesture_one_sample;
+    // reg [980 - 1:0] gesture_one_timestep;
+    // reg [980 + 4 - 1:0] gesture_one_timestep_front_label;
+    // reg [(980 + 4)*10 + 144 - 1:0] gesture_one_sample;
+
+    reg [578 - 1:0] nmnist_one_timestep;
+    reg [578 + 4 - 1:0] nmnist_one_timestep_front_label;
+    reg [(578 + 4)*10 + 162 - 1:0] nmnist_one_sample;
 
 
 
@@ -1233,11 +1237,13 @@ module top_bh_fpga_with_dram_tb;
         sys_rst_n = 1'b1;
 
 
-        for (i_pi = 0; i_pi < 98; i_pi = i_pi + 1) begin
-            gesture_one_timestep[i_pi*10 +: 10] = i_pi;
+        for (i_pi = 0; i_pi < 57; i_pi = i_pi + 1) begin
+            nmnist_one_timestep[i_pi*10 +: 10] = i_pi;
         end
-        gesture_one_timestep_front_label = {4'd9, gesture_one_timestep};
-        gesture_one_sample = {144'd0, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label, gesture_one_timestep_front_label};
+        nmnist_one_timestep[57*10 +: 8] = 57;
+
+        nmnist_one_timestep_front_label = {4'd9, nmnist_one_timestep};
+        nmnist_one_sample = {162'd0, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label};
         
         // FrontPanel 초기화
         FrontPanelReset;
@@ -1372,7 +1378,7 @@ module top_bh_fpga_with_dram_tb;
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 30);
         // 샘플 3개만
-        SetWireInValue(8'h01, 32'd111328, NO_MASK); // last address
+        SetWireInValue(8'h01, 32'd110680, NO_MASK); // last address
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 30);
         SetWireInValue(8'h01, 32'd0, NO_MASK);
@@ -1387,10 +1393,10 @@ module top_bh_fpga_with_dram_tb;
         // gesture three sample pipe in!!!!! 같은 거 걍 3번 때려박음. 총 29952bit
         for (i_pk = 0; i_pk < 3; i_pk = i_pk + 1) begin
             // gesture one sample pipe in!!!!!
-            for (i_pj = 0; i_pj < 39; i_pj = i_pj + 1) begin
+            for (i_pj = 0; i_pj < 12; i_pj = i_pj + 1) begin
                 for (i_pi = 0; i_pi < 32; i_pi = i_pi + 1) begin
                     // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
-                    pipeIn[i_pi] = gesture_one_sample[8*32*i_pj + i_pi*8 +: 8];
+                    pipeIn[i_pi] = nmnist_one_sample[8*32*i_pj + i_pi*8 +: 8];
                 end
                 WriteToBlockPipeIn(8'h80, 32, 32);  
             end
@@ -1425,7 +1431,7 @@ module top_bh_fpga_with_dram_tb;
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 30);
         // 샘플 3개만
-        SetWireInValue(8'h01, 32'd1071328, NO_MASK); // last address
+        SetWireInValue(8'h01, 32'd1070680, NO_MASK); // last address
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 30);
         SetWireInValue(8'h01, 32'd0, NO_MASK);
@@ -1440,10 +1446,10 @@ module top_bh_fpga_with_dram_tb;
         // gesture three sample pipe in!!!!! 같은 거 걍 3번 때려박음. 총 29952bit
         for (i_pk = 0; i_pk < 3; i_pk = i_pk + 1) begin
             // gesture one sample pipe in!!!!!
-            for (i_pj = 0; i_pj < 39; i_pj = i_pj + 1) begin
+            for (i_pj = 0; i_pj < 12; i_pj = i_pj + 1) begin
                 for (i_pi = 0; i_pi < 32; i_pi = i_pi + 1) begin
                     // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
-                    pipeIn[i_pi] = gesture_one_sample[8*32*i_pj + i_pi*8 +: 8];
+                    pipeIn[i_pi] = nmnist_one_sample[8*32*i_pj + i_pi*8 +: 8];
                 end
                 WriteToBlockPipeIn(8'h80, 32, 32);  
             end
@@ -1520,7 +1526,7 @@ module top_bh_fpga_with_dram_tb;
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 30);
         // 샘플 3개만
-        SetWireInValue(8'h01, 32'd1071328, NO_MASK); // last address
+        SetWireInValue(8'h01, 32'd1070680, NO_MASK); // last address
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 30);
         SetWireInValue(8'h01, 32'd0, NO_MASK);
@@ -1534,9 +1540,11 @@ module top_bh_fpga_with_dram_tb;
         // SAMPLE 수 삽입
 
         // 3개
-        SetWireInValue(8'h01, 32'd3, NO_MASK); // start address
+        SetWireInValue(8'h01, 32'd3, NO_MASK); 
+        UpdateWireIns;
         ActivateTriggerIn(8'h40, 26);
-        SetWireInValue(8'h01, 32'd0, NO_MASK); // start address
+        SetWireInValue(8'h01, 32'd0, NO_MASK);
+        UpdateWireIns;
         Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
 
@@ -1597,7 +1605,7 @@ module top_bh_fpga_with_dram_tb;
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 30);
         // 샘플 3개만
-        SetWireInValue(8'h01, 32'd111328, NO_MASK); // last address
+        SetWireInValue(8'h01, 32'd110680, NO_MASK); // last address
         UpdateWireIns;
         ActivateTriggerIn(8'h40, 30);
         SetWireInValue(8'h01, 32'd0, NO_MASK);
@@ -1612,8 +1620,10 @@ module top_bh_fpga_with_dram_tb;
 
         // 3개
         SetWireInValue(8'h01, 32'd3, NO_MASK); // start address
+        UpdateWireIns;
         ActivateTriggerIn(8'h40, 26);
         SetWireInValue(8'h01, 32'd0, NO_MASK); // start address
+        UpdateWireIns;
         Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
 

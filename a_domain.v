@@ -49,9 +49,13 @@ module a_domain(
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     reg [31:0] config_stream_cnt, n_config_stream_cnt;
     reg asic_start_ready_for_test, n_asic_start_ready_for_test;
+    reg asic_inferenced_label_for_test, n_asic_inferenced_label_for_test;
     reg [65:0] config_stream_catch_41421, n_config_stream_catch_41421;
     reg [65:0] config_stream_catch_41418, n_config_stream_catch_41418;
     reg [31:0] data_stream_cnt_for_test, n_data_stream_cnt_for_test;
+    reg [3:0] asic_inferenced_label_for_test_cnt, n_asic_inferenced_label_for_test_cnt;
+    wire [3:0] asic_example_label_for_test;
+    assign asic_example_label_for_test = 4'd9;
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
@@ -83,19 +87,21 @@ module a_domain(
         `ifdef TEST_SETTING
             // assign start_ready = 1'b1;
             assign start_ready = asic_start_ready_for_test;
+            assign inferenced_label = asic_inferenced_label_for_test;
         `else
             assign start_ready = start_ready_from_asic_to_fpga;
+            assign inferenced_label = inferenced_label_from_asic_to_fpga;
         `endif
-        assign inferenced_label = inferenced_label_from_asic_to_fpga;
 	`else
         assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga_buf;
         `ifdef TEST_SETTING
             // assign start_ready = 1'b1;
             assign start_ready = asic_start_ready_for_test;
+            assign inferenced_label = asic_inferenced_label_for_test;
         `else
             assign start_ready = start_ready_from_asic_to_fpga_buf;
+            assign inferenced_label = inferenced_label_from_asic_to_fpga;
         `endif
-        assign inferenced_label = inferenced_label_from_asic_to_fpga_buf;
 	`endif
 
 
@@ -224,6 +230,11 @@ module a_domain(
     reg [3:0] result_transition_cnt, n_result_transition_cnt;
     reg [63:0] processing_time_cnt, n_processing_time_cnt;
     reg [3:0] processing_time_cnt_transition_cnt, n_processing_time_cnt_transition_cnt;
+
+    reg sample_num_executed_partial_equals_sample_num_divided4_minus1, n_sample_num_executed_partial_equals_sample_num_divided4_minus1;
+    
+    reg [3:0] one_sample_finish, n_one_sample_finish;
+    
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             config_a_domain_setting_cnt <= 0;
@@ -258,6 +269,8 @@ module a_domain(
 
 			processing_time_cnt <= 0;
 			processing_time_cnt_transition_cnt <= 0;
+
+			sample_num_executed_partial_equals_sample_num_divided4_minus1 <= 0;
         end
         else begin
             config_a_domain_setting_cnt <= n_config_a_domain_setting_cnt;
@@ -289,9 +302,11 @@ module a_domain(
             sample_num_transition_cnt <= n_sample_num_transition_cnt;
 			
             result_transition_cnt <= n_result_transition_cnt;
-            
+
             processing_time_cnt <= n_processing_time_cnt;
             processing_time_cnt_transition_cnt <= n_processing_time_cnt_transition_cnt;
+
+            sample_num_executed_partial_equals_sample_num_divided4_minus1 <= n_sample_num_executed_partial_equals_sample_num_divided4_minus1;
         end
     end
 
@@ -335,6 +350,7 @@ module a_domain(
 		n_processing_time_cnt = processing_time_cnt;
 		n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt;
 
+		n_sample_num_executed_partial_equals_sample_num_divided4_minus1 = sample_num_executed_partial_equals_sample_num_divided4_minus1;
 
         if (fifo_d2a_command_valid) begin
             if (fifo_d2a_command_dout[14:0] == 1) begin
@@ -611,7 +627,7 @@ module a_domain(
 
 
         if (sample_num != 0 && sample_num_executed != 0) begin
-            if (sample_num_executed_partial == sample_num_divided4_minus1) begin
+            if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
                 if (!fifo_a2d_command_full) begin
                     fifo_a2d_command_wr_en = 1;
                     fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
@@ -681,10 +697,6 @@ module a_domain(
 
 
 
-
-
-
-
     end
 
 
@@ -709,6 +721,8 @@ module a_domain(
             sample_num_executed <= 0;
             sample_num_executed_partial <= 0;
             sample_stream_cnt_small <= 0;
+
+			one_sample_finish <= 0;
         end
         else begin
 			label_comparison_time <= n_label_comparison_time;
@@ -724,6 +738,8 @@ module a_domain(
             sample_num_executed <= n_sample_num_executed;
             sample_num_executed_partial <= n_sample_num_executed_partial;
             sample_stream_cnt_small <= n_sample_stream_cnt_small;
+
+            one_sample_finish <= n_one_sample_finish;
         end
     end
     always @ (*) begin
@@ -744,11 +760,17 @@ module a_domain(
         n_sample_num_executed_partial = sample_num_executed_partial;
         n_sample_stream_cnt_small = sample_stream_cnt_small;
 
+		n_one_sample_finish[3] = one_sample_finish[2];
+		n_one_sample_finish[2] = one_sample_finish[1];
+		n_one_sample_finish[1] = one_sample_finish[0];
+		n_one_sample_finish[0] = 0;
+
         fifo_d2a_data_rd_en = 0;
 
         label_fifo_wr_en = 0;
         label_fifo_din = 0;
         label_fifo_rd_en = 0;
+
 
         if (streaming_count != 7) begin
             if (queuing_ongoing) begin
@@ -784,7 +806,7 @@ module a_domain(
                         if (a_config_dataset == 0) begin
                             if (sample_stream_cnt_small == 15 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial == sample_num_divided4_minus1) begin
+                                if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
                                     n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                 end else begin
                                     n_sample_num_executed_partial = 0;
@@ -794,13 +816,14 @@ module a_domain(
                                     label_fifo_wr_en = 1;
                                     label_fifo_din = fifo_d2a_data_dout[58 +: 4];
                                 end
+                                n_one_sample_finish[0] = 1;
                             end else begin
                                 n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
                         end else if (a_config_dataset == 1) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial == sample_num_divided4_minus1) begin
+                                if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
                                     n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                 end else begin
                                     n_sample_num_executed_partial = 0;
@@ -811,13 +834,14 @@ module a_domain(
                                     label_fifo_wr_en = 1;
                                     label_fifo_din = fifo_d2a_data_dout[52 +: 4];
                                 end
+                                n_one_sample_finish[0] = 1;
                             end else begin
                                 n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
                         end else if (a_config_dataset == 2) begin
                             if (sample_stream_cnt_small == 9 - 1) begin
                                 n_sample_num_executed = sample_num_executed + 1;
-                                if (sample_num_executed_partial == sample_num_divided4_minus1) begin
+                                if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
                                     n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                 end else begin
                                     n_sample_num_executed_partial = 0;
@@ -828,6 +852,7 @@ module a_domain(
                                     label_fifo_wr_en = 1;
                                     label_fifo_din = fifo_d2a_data_dout[52 +: 4];
                                 end
+                                n_one_sample_finish[0] = 1;
                             end else begin
                                 n_sample_stream_cnt_small = sample_stream_cnt_small + 1;
                             end
@@ -951,7 +976,7 @@ module a_domain(
 
 
 
-
+// one_sample_finish[3]
 
 
 
@@ -965,13 +990,16 @@ module a_domain(
             config_stream_catch_41421 <= 0;
             config_stream_catch_41418 <= 0;
             data_stream_cnt_for_test <= 0;
-        end
-        else begin
+            asic_inferenced_label_for_test <= 0;
+            asic_inferenced_label_for_test_cnt <= 0;
+        end else begin
             config_stream_cnt <= n_config_stream_cnt;
             asic_start_ready_for_test <= n_asic_start_ready_for_test;
             config_stream_catch_41421 <= n_config_stream_catch_41421;
             config_stream_catch_41418 <= n_config_stream_catch_41418;
             data_stream_cnt_for_test <= n_data_stream_cnt_for_test;
+            asic_inferenced_label_for_test <= n_asic_inferenced_label_for_test;
+            asic_inferenced_label_for_test_cnt <= n_asic_inferenced_label_for_test_cnt;
         end
     end
     always @ (*) begin
@@ -980,6 +1008,27 @@ module a_domain(
         n_config_stream_catch_41421 = config_stream_catch_41421;
         n_config_stream_catch_41418 = config_stream_catch_41418;
         n_data_stream_cnt_for_test = data_stream_cnt_for_test;
+        n_asic_inferenced_label_for_test = 0;
+        n_asic_inferenced_label_for_test_cnt = asic_inferenced_label_for_test_cnt;
+
+
+        if (asic_inferenced_label_for_test_cnt == 0 && one_sample_finish[3]) begin
+            n_asic_inferenced_label_for_test = 0;
+            n_asic_inferenced_label_for_test_cnt = asic_inferenced_label_for_test_cnt + 1;
+        end
+        if (asic_inferenced_label_for_test_cnt == 1) begin
+            n_asic_inferenced_label_for_test = asic_example_label_for_test[0];
+            n_asic_inferenced_label_for_test_cnt = asic_inferenced_label_for_test_cnt + 1;
+        end else if (asic_inferenced_label_for_test_cnt == 2) begin
+            n_asic_inferenced_label_for_test = asic_example_label_for_test[1];
+            n_asic_inferenced_label_for_test_cnt = asic_inferenced_label_for_test_cnt + 1;
+        end else if (asic_inferenced_label_for_test_cnt == 3) begin
+            n_asic_inferenced_label_for_test = asic_example_label_for_test[2];
+            n_asic_inferenced_label_for_test_cnt = asic_inferenced_label_for_test_cnt + 1;
+        end else if (asic_inferenced_label_for_test_cnt == 4) begin
+            n_asic_inferenced_label_for_test = asic_example_label_for_test[3];
+            n_asic_inferenced_label_for_test_cnt = 0;
+        end
 
 
         if (config_stream_cnt == 1) begin 
