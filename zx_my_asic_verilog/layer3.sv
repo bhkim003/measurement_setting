@@ -414,7 +414,7 @@ module layer3 #(
 		go_to_config_state = 0;
 		n_epoch_first_step = epoch_first_step;
 
-		n_neuron_this_sample_done = neuron_this_sample_done;
+		// n_neuron_this_sample_done = neuron_this_sample_done;
 
 		n_this_sample_label = this_sample_label;
 

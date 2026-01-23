@@ -1,4 +1,5 @@
 // `define TEST_SETTING 1
+`define ASIC_IN_FPGA 1
 module top_bh_fpga(
         // ########################## okHost interface ########################################################################################
         // ########################## okHost interface ########################################################################################
@@ -216,7 +217,9 @@ module top_bh_fpga(
     assign sys_clk = ui_clk;
     wire sys_clk2;
 
-    `ifdef TEST_SETTING
+    `ifdef ASIC_IN_FPGA 
+        assign sys_clk2 = ui_clk;
+    `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
     `else
         assign sys_clk2 = clk_clock_generator;

@@ -1,5 +1,5 @@
-// `define NO_BUF 1
 // `define TEST_SETTING 1
+`define ASIC_IN_FPGA 1
 module a_domain(
         input clk_a_domain,
         input reset_n,
@@ -61,6 +61,35 @@ module a_domain(
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
 
 
+
+
+
+
+    // ######### ASIC IN FPGA TEST ###########################################################################
+    // ######### ASIC IN FPGA TEST ###########################################################################
+    // ######### ASIC IN FPGA TEST ###########################################################################
+    `ifdef ASIC_IN_FPGA
+        wire input_streaming_ready_asicinfpga;
+        wire start_ready_asicinfpga;
+        wire inferenced_label_asicinfpga;
+        top_bh u_top_bh(
+            .clk                             ( clk_a_domain                             ),
+            .reset_n                         ( reset_n                         ),
+            .input_streaming_valid_i         ( input_streaming_valid_from_fpga_to_asic         ),
+            .input_streaming_data_i          ( input_streaming_data_from_fpga_to_asic          ),
+            .input_streaming_ready_o         ( input_streaming_ready_asicinfpga         ),
+            .start_training_signal_i         ( start_training_signal_from_fpga_to_asic         ),
+            .start_inference_signal_i        ( start_inference_signal_from_fpga_to_asic        ),
+            .start_ready_o                   ( start_ready_asicinfpga                   ),
+            .inferenced_label_o              ( inferenced_label_asicinfpga              )
+        );
+    `endif
+    // ######### ASIC IN FPGA TEST ###########################################################################
+    // ######### ASIC IN FPGA TEST ###########################################################################
+    // ######### ASIC IN FPGA TEST ###########################################################################
+
+
+
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
@@ -74,35 +103,27 @@ module a_domain(
             inferenced_label_from_asic_to_fpga_buf <= 0;
         end
         else begin
-            input_streaming_ready_from_asic_to_fpga_buf <= input_streaming_ready_from_asic_to_fpga;
-            start_ready_from_asic_to_fpga_buf <= start_ready_from_asic_to_fpga;
-            inferenced_label_from_asic_to_fpga_buf <= inferenced_label_from_asic_to_fpga;
+            `ifdef ASIC_IN_FPGA
+                input_streaming_ready_from_asic_to_fpga_buf <= input_streaming_ready_asicinfpga;
+                start_ready_from_asic_to_fpga_buf <= start_ready_asicinfpga;
+                inferenced_label_from_asic_to_fpga_buf <= inferenced_label_asicinfpga;
+            `elsif TEST_SETTING
+                input_streaming_ready_from_asic_to_fpga_buf <= input_streaming_ready_from_asic_to_fpga;
+                start_ready_from_asic_to_fpga_buf <= asic_start_ready_for_test;
+                inferenced_label_from_asic_to_fpga_buf <= asic_inferenced_label_for_test;
+            `else
+                input_streaming_ready_from_asic_to_fpga_buf <= input_streaming_ready_from_asic_to_fpga;
+                start_ready_from_asic_to_fpga_buf <= start_ready_from_asic_to_fpga;
+                inferenced_label_from_asic_to_fpga_buf <= inferenced_label_from_asic_to_fpga;
+            `endif
         end
     end
     wire input_streaming_ready;
     wire start_ready;
     wire inferenced_label;
-	`ifdef NO_BUF
-        assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga;
-        `ifdef TEST_SETTING
-            // assign start_ready = 1'b1;
-            assign start_ready = asic_start_ready_for_test;
-            assign inferenced_label = asic_inferenced_label_for_test;
-        `else
-            assign start_ready = start_ready_from_asic_to_fpga;
-            assign inferenced_label = inferenced_label_from_asic_to_fpga;
-        `endif
-	`else
-        assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga_buf;
-        `ifdef TEST_SETTING
-            // assign start_ready = 1'b1;
-            assign start_ready = asic_start_ready_for_test;
-            assign inferenced_label = asic_inferenced_label_for_test;
-        `else
-            assign start_ready = start_ready_from_asic_to_fpga_buf;
-            assign inferenced_label = inferenced_label_from_asic_to_fpga;
-        `endif
-	`endif
+    assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga_buf;
+    assign start_ready = start_ready_from_asic_to_fpga_buf;
+    assign inferenced_label = inferenced_label_from_asic_to_fpga_buf;
 
 
 
@@ -126,17 +147,10 @@ module a_domain(
         end
     end
     assign reset_n_from_fpga_to_asic = reset_n; // RESET SIGNAL NO NEES BUFFER !!!
-	`ifdef NO_BUF
-        assign input_streaming_valid_from_fpga_to_asic = input_streaming_valid;
-        assign input_streaming_data_from_fpga_to_asic = input_streaming_data;
-        assign start_training_signal_from_fpga_to_asic = start_training_signal;
-        assign start_inference_signal_from_fpga_to_asic = start_inference_signal;
-	`else
-        assign input_streaming_valid_from_fpga_to_asic = input_streaming_valid_from_fpga_to_asic_buf;
-        assign input_streaming_data_from_fpga_to_asic = input_streaming_data_from_fpga_to_asic_buf;
-        assign start_training_signal_from_fpga_to_asic = start_training_signal_from_fpga_to_asic_buf;
-        assign start_inference_signal_from_fpga_to_asic = start_inference_signal_from_fpga_to_asic_buf;
-	`endif
+    assign input_streaming_valid_from_fpga_to_asic = input_streaming_valid_from_fpga_to_asic_buf;
+    assign input_streaming_data_from_fpga_to_asic = input_streaming_data_from_fpga_to_asic_buf;
+    assign start_training_signal_from_fpga_to_asic = start_training_signal_from_fpga_to_asic_buf;
+    assign start_inference_signal_from_fpga_to_asic = start_inference_signal_from_fpga_to_asic_buf;
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################

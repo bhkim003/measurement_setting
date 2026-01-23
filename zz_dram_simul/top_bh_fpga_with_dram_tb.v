@@ -823,7 +823,7 @@ module top_bh_fpga_with_dram_tb;
 	wire  [2:0]   okHU;
 	wire  [31:0]  okUHU;
 	wire          okAA;
-	wire  [7:0]   led;
+	wire  [3:0]   led;
 
 
 		wire clk_port_spare_1_at_testbench;
@@ -1237,10 +1237,10 @@ module top_bh_fpga_with_dram_tb;
         sys_rst_n = 1'b1;
 
 
-        for (i_pi = 0; i_pi < 57; i_pi = i_pi + 1) begin
-            nmnist_one_timestep[i_pi*10 +: 10] = i_pi;
+        for (i_pi = 0; i_pi < 72; i_pi = i_pi + 1) begin
+            nmnist_one_timestep[i_pi*8 +: 8] = i_pi;
         end
-        nmnist_one_timestep[57*10 +: 8] = 57;
+        nmnist_one_timestep[72*8 +: 2] = 2'd0;
 
         nmnist_one_timestep_front_label = {4'd9, nmnist_one_timestep};
         nmnist_one_sample = {162'd0, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label};
@@ -1402,7 +1402,7 @@ module top_bh_fpga_with_dram_tb;
             for (i_pj = 0; i_pj < 12; i_pj = i_pj + 1) begin
                 for (i_pi = 0; i_pi < 32; i_pi = i_pi + 1) begin
                     // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
-                    pipeIn[i_pi] = nmnist_one_sample[8*32*i_pj + i_pi*8 +: 8];
+                    pipeIn[31 - (   (((i_pi)/4)   * 4) + (3-(i_pi%4)))] = nmnist_one_sample[8*32*i_pj + i_pi*8 +: 8];
                 end
                 WriteToBlockPipeIn(8'h80, 32, 32);  
             end
@@ -1455,7 +1455,7 @@ module top_bh_fpga_with_dram_tb;
             for (i_pj = 0; i_pj < 12; i_pj = i_pj + 1) begin
                 for (i_pi = 0; i_pi < 32; i_pi = i_pi + 1) begin
                     // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
-                    pipeIn[i_pi] = nmnist_one_sample[8*32*i_pj + i_pi*8 +: 8];
+                    pipeIn[31 - (   (((i_pi)/4)   * 4) + (3-(i_pi%4)))] = nmnist_one_sample[8*32*i_pj + i_pi*8 +: 8];
                 end
                 WriteToBlockPipeIn(8'h80, 32, 32);  
             end
