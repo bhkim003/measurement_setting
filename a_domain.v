@@ -593,7 +593,7 @@ module a_domain(
             if (fifo_d2a_command_dout[14:0] == 17) begin // inference start
                 fifo_d2a_command_rd_en = 1; 
                 start_inference_signal = 1;
-                n_inference_processing_ongoing = 0;
+                n_inference_processing_ongoing = 1;
                 n_collect_label = 1;
                 n_processing_time_cnt = 0;
             end

@@ -956,7 +956,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                 if (sample_data_buffer_cnt != N_MNIST_READ_REQUEST_PER_SAMPLE) begin
                     if (app_rd_data_valid) begin
                         // n_sample_data_buffer[sample_data_buffer_cnt*256 +: 256] = app_rd_data;
-                        n_sample_data_buffer = {sample_data_buffer[0 +: DVS_GESTURE_BITS_PER_SAMPLE-256], app_rd_data};
+                        n_sample_data_buffer = {sample_data_buffer[0 +: N_MNIST_BITS_PER_SAMPLE-256], app_rd_data};
                         n_sample_data_buffer_cnt = sample_data_buffer_cnt + 1;
                     end
                 end else begin
@@ -1041,7 +1041,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                 if (sample_data_buffer_cnt != NTIDIGITS_READ_REQUEST_PER_SAMPLE) begin
                     if (app_rd_data_valid) begin
                         // n_sample_data_buffer[sample_data_buffer_cnt*256 +: 256] = app_rd_data;
-                        n_sample_data_buffer = {sample_data_buffer[0 +: DVS_GESTURE_BITS_PER_SAMPLE-256], app_rd_data};
+                        n_sample_data_buffer = {sample_data_buffer[0 +: NTIDIGITS_BITS_PER_SAMPLE-256], app_rd_data};
                         n_sample_data_buffer_cnt = sample_data_buffer_cnt + 1;
                     end
                 end else begin
