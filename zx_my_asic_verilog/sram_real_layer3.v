@@ -41,6 +41,7 @@ ln28fds_mc_ra1_hdr_rvt_208x8m4b1c1 u_ln28fds_mc_ra1_hdr_rvt_208x8m4b1c1(
     .clka     ( clk     ),
     .addra      ( A      ),
     .dina     ( D     ),
+    .ena    ( !CEB    ),
     .wea    ( !WEB    ),
     .douta   ( Q   )
 );
