@@ -217,18 +217,13 @@ module top_bh_fpga(
     assign sys_clk = ui_clk;
     wire sys_clk2;
 
-    `ifdef TEST_SETTING 
+    `ifdef ASIC_IN_FPGA 
+        assign sys_clk2 = ui_clk;
+    `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
     `else
         assign sys_clk2 = clk_clock_generator;
     `endif
-    // `ifdef ASIC_IN_FPGA 
-    //     assign sys_clk2 = ui_clk;
-    // `elsif TEST_SETTING 
-    //     assign sys_clk2 = ui_clk;
-    // `else
-    //     assign sys_clk2 = clk_clock_generator;
-    // `endif
 
     assign clk_port_spare_1 = ui_clk;
     // ########################## sys_clk gen instance ########################################################################################
@@ -983,6 +978,7 @@ module top_bh_fpga(
             fifo_d2p_command_rd_en = 1;
             // n_dram_write_cnt = dram_write_cnt + 1;
             n_dram_write_cnt = fifo_d2p_command_dout[15 +: 17];
+            ep60trigout = {31'd0, 1'b1};
         end
 
 
@@ -1359,6 +1355,7 @@ module top_bh_fpga(
         if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 7) begin
             fifo_d2p_command_rd_en = 1;
             n_asic_start_ready = fifo_d2p_command_dout[15];
+            ep60trigout = {31'd0, 1'b1};
         end
 
 
