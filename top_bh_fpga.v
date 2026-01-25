@@ -629,6 +629,8 @@ module top_bh_fpga(
     reg [17 - 1:0] app_rd_data_check, n_app_rd_data_check;
     reg asic_start_ready, n_asic_start_ready;
     reg asic_config_ongoing, n_asic_config_ongoing;
+
+    reg [16:0] captured_sample_num_executed, n_captured_sample_num_executed;
     always @ (*) begin
         n_ep20wireout = ep01wirein;
         n_ep21wireout = p_state;
@@ -790,6 +792,10 @@ module top_bh_fpga(
                 led = xem7360_led({4'd0, execute_16_division} & {8{blink_100ms}});
                 n_ep20wireout = execute_16_division;
             end
+
+            if (ep01wirein == 1) begin
+                n_ep20wireout = {15'd0, captured_sample_num_executed};
+            end
         end
 
         if (!reset_n) begin
@@ -850,6 +856,8 @@ module top_bh_fpga(
 			result_transition_cnt <= 0;
 			processing_time_cnt <= 0;
 			processing_time_cnt_transition_cnt <= 0;
+
+            captured_sample_num_executed <= 0;
         end else begin
             p_state <= n_p_state;
 
@@ -899,6 +907,8 @@ module top_bh_fpga(
             result_transition_cnt <= n_result_transition_cnt;
             processing_time_cnt <= n_processing_time_cnt;
             processing_time_cnt_transition_cnt <= n_processing_time_cnt_transition_cnt;
+
+            captured_sample_num_executed <= n_captured_sample_num_executed;
         end
     end
 
@@ -973,6 +983,8 @@ module top_bh_fpga(
 		n_result_transition_cnt = result_transition_cnt;
 		n_processing_time_cnt = processing_time_cnt;
 		n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt;
+
+		n_captured_sample_num_executed = captured_sample_num_executed;
 
         
         if(ep40trigin[29]) begin
@@ -1454,6 +1466,7 @@ module top_bh_fpga(
         if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 18) begin
             fifo_d2p_command_rd_en = 1;
             n_execute_16_division = execute_16_division + 1;
+            n_captured_sample_num_executed = fifo_d2p_command_dout[15 +: 17];
         end
 
 

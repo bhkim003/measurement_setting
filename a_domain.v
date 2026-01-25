@@ -1162,8 +1162,8 @@ module a_domain(
             end
         end else if (a_config_dataset == 2) begin
             // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
-            // if (data_stream_cnt_for_test == 58_060_800) begin 
-            if (data_stream_cnt_for_test == 58_032_000) begin 
+            // if (data_stream_cnt_for_test == 58_060_800) begin // target 0
+            if (data_stream_cnt_for_test == 58_032_000) begin // target else
                 n_asic_start_ready_for_test = 1;
             end
         end
