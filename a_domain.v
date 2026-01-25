@@ -64,6 +64,15 @@ module a_domain(
 
 
 
+    wire [14:0] a2d_command_only;
+    assign a2d_command_only = fifo_a2d_command_din[14:0];
+
+    wire [14:0] d2a_command_only;
+    assign d2a_command_only = fifo_d2a_command_dout[14:0];
+
+
+
+
 
     // ######### ASIC IN FPGA TEST ###########################################################################
     // ######### ASIC IN FPGA TEST ###########################################################################
@@ -1104,6 +1113,11 @@ module a_domain(
 
         if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
             n_config_stream_cnt = config_stream_cnt + 1;
+            n_data_stream_cnt_for_test = data_stream_cnt_for_test + 1;
+        end
+        if (queuing_ongoing) begin
+            n_config_stream_cnt = 0;
+            n_data_stream_cnt_for_test = 0;
         end
         if (config_stream_cnt == 41424) begin // config stream finish
             n_asic_start_ready_for_test = 1;

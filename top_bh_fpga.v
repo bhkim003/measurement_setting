@@ -621,6 +621,10 @@ module top_bh_fpga(
         end
     end
 
+    wire [14:0] d2p_cammand_only;
+    wire [14:0] p2d_command_only;
+    assign d2p_cammand_only = fifo_d2p_command_dout[14:0];
+    assign p2d_command_only = fifo_p2d_command_din[14:0];
 
     reg [17 - 1:0] app_rd_data_check, n_app_rd_data_check;
     reg asic_start_ready, n_asic_start_ready;

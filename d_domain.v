@@ -100,6 +100,22 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
     localparam       LAYER3_BIT_WIDTH_MEMBRANE      = 16;
 
 
+
+    wire [14:0] p2d_command_only;
+    assign p2d_command_only = fifo_p2d_command_dout[14:0];
+
+    wire [14:0] d2p_command_only;
+    assign d2p_command_only = fifo_d2p_command_din[14:0];
+
+    wire [14:0] a2d_command_only;
+    assign a2d_command_only = fifo_a2d_command_dout[14:0];
+
+    wire [14:0] d2a_command_only;
+    assign d2a_command_only = fifo_d2a_command_din[14:0];
+
+
+
+
     reg [15:0] config_d_domain_setting_cnt, n_config_d_domain_setting_cnt;
 
     reg [1:0] d_config_asic_mode, n_d_config_asic_mode; // 0 training_only, 1 train_inf_sweep, 2 inference_only 
