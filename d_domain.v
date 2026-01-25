@@ -838,6 +838,12 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                     fifo_d2a_command_wr_en = 1;
                     fifo_d2a_command_din = fifo_p2d_command_dout;
                 end
+            end else if (fifo_p2d_command_dout[14:0] == 22) begin
+                if (!fifo_d2a_command_full) begin
+                    fifo_p2d_command_rd_en = 1;
+                    fifo_d2a_command_wr_en = 1;
+                    fifo_d2a_command_din = fifo_p2d_command_dout;
+                end
             end
         end
 
@@ -870,14 +876,14 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                             app_cmd = DRAM_READ;
                             app_addr = read_address_for_data;
                             n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
-                            if (read_address_for_data == dram_address_last) begin
-                                if (sample_data_buffer_num == sample_num - 1) begin
-                                    n_sample_data_buffer_stop_read_request = 1;
-                                end else begin
-                                    n_read_address_for_data = dram_address;
-                                end
+                            if (sample_data_buffer_num == sample_num - 1) begin
+                                n_sample_data_buffer_stop_read_request = 1;
                             end else begin
-                                n_read_address_for_data = read_address_for_data + 8;
+                                if (read_address_for_data == dram_address_last) begin
+                                    n_read_address_for_data = dram_address;
+                                end else begin
+                                    n_read_address_for_data = read_address_for_data + 8;
+                                end
                             end
                         end
                     end
@@ -953,14 +959,14 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                             app_cmd = DRAM_READ;
                             app_addr = read_address_for_data;
                             n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
-                            if (read_address_for_data == dram_address_last) begin
-                                if (sample_data_buffer_num == sample_num - 1) begin
-                                    n_sample_data_buffer_stop_read_request = 1;
-                                end else begin
-                                    n_read_address_for_data = dram_address;
-                                end
+                            if (sample_data_buffer_num == sample_num - 1) begin
+                                n_sample_data_buffer_stop_read_request = 1;
                             end else begin
-                                n_read_address_for_data = read_address_for_data + 8;
+                                if (read_address_for_data == dram_address_last) begin
+                                    n_read_address_for_data = dram_address;
+                                end else begin
+                                    n_read_address_for_data = read_address_for_data + 8;
+                                end
                             end
                         end
                     end
@@ -1036,14 +1042,14 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                             app_cmd = DRAM_READ;
                             app_addr = read_address_for_data;
                             n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
-                            if (read_address_for_data == dram_address_last) begin
-                                if (sample_data_buffer_num == sample_num - 1) begin
-                                    n_sample_data_buffer_stop_read_request = 1;
-                                end else begin
-                                    n_read_address_for_data = dram_address;
-                                end
+                            if (sample_data_buffer_num == sample_num - 1) begin
+                                n_sample_data_buffer_stop_read_request = 1;
                             end else begin
-                                n_read_address_for_data = read_address_for_data + 8;
+                                if (read_address_for_data == dram_address_last) begin
+                                    n_read_address_for_data = dram_address;
+                                end else begin
+                                    n_read_address_for_data = read_address_for_data + 8;
+                                end
                             end
                         end
                     end
@@ -1177,6 +1183,12 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                     fifo_d2p_command_din = fifo_a2d_command_dout;
                 end
             end else if (fifo_a2d_command_dout[14:0] == 21) begin
+                if (!fifo_d2p_command_full) begin
+                    fifo_a2d_command_rd_en = 1;
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = fifo_a2d_command_dout;
+                end
+            end else if (fifo_a2d_command_dout[14:0] == 22) begin
                 if (!fifo_d2p_command_full) begin
                     fifo_a2d_command_rd_en = 1;
                     fifo_d2p_command_wr_en = 1;

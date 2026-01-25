@@ -117,7 +117,7 @@ module a_domain(
                 start_ready_from_asic_to_fpga_buf <= start_ready_asicinfpga;
                 inferenced_label_from_asic_to_fpga_buf <= inferenced_label_asicinfpga;
             `elsif TEST_SETTING
-                input_streaming_ready_from_asic_to_fpga_buf <= input_streaming_ready_from_asic_to_fpga;
+                input_streaming_ready_from_asic_to_fpga_buf <= 1'd1;
                 start_ready_from_asic_to_fpga_buf <= asic_start_ready_for_test;
                 inferenced_label_from_asic_to_fpga_buf <= asic_inferenced_label_for_test;
             `else
@@ -231,7 +231,7 @@ module a_domain(
     reg collect_label, n_collect_label;
 
     reg [31:0] sample_num, n_sample_num;
-    reg [29:0] sample_num_divided4_minus1, n_sample_num_divided4_minus1;
+    reg [29:0] sample_num_divided4, n_sample_num_divided4;
     reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
 
 
@@ -251,17 +251,18 @@ module a_domain(
     reg [7:0] sample_stream_cnt_small, n_sample_stream_cnt_small;
     reg sample_num_executed_update_flag;
     reg sample_num_executed_update_flag_oneclk_delay;
-    reg sample_num_executed_update_flag_twoclk_delay;
 
     reg [3:0] result_transition_cnt, n_result_transition_cnt;
     reg [63:0] processing_time_cnt, n_processing_time_cnt;
     reg [3:0] processing_time_cnt_transition_cnt, n_processing_time_cnt_transition_cnt;
 
-    reg sample_num_executed_partial_equals_sample_num_divided4_minus1, n_sample_num_executed_partial_equals_sample_num_divided4_minus1;
+    reg sample_num_executed_partial_equals_sample_num_divided4, n_sample_num_executed_partial_equals_sample_num_divided4;
     
     reg [3:0] one_sample_finish, n_one_sample_finish;
 
     reg [15:0] timestep, n_timestep;
+
+    reg [3:0] sample_num_executed_transition_cnt, n_sample_num_executed_transition_cnt;
     
     always @(posedge clk_a_domain) begin
         if(!reset_n) begin
@@ -290,7 +291,7 @@ module a_domain(
             collect_label <= 0;
 
             sample_num <= 0;
-            sample_num_divided4_minus1 <= 0;
+            sample_num_divided4 <= 0;
             sample_num_transition_cnt <= 0;
 
 			result_transition_cnt <= 0;
@@ -298,7 +299,8 @@ module a_domain(
 			processing_time_cnt <= 0;
 			processing_time_cnt_transition_cnt <= 0;
 
-			sample_num_executed_partial_equals_sample_num_divided4_minus1 <= 0;
+
+            sample_num_executed_transition_cnt <= 0;
         end
         else begin
             config_a_domain_setting_cnt <= n_config_a_domain_setting_cnt;
@@ -326,7 +328,7 @@ module a_domain(
             collect_label <= n_collect_label;
 
             sample_num <= n_sample_num;
-            sample_num_divided4_minus1 <= n_sample_num_divided4_minus1;
+            sample_num_divided4 <= n_sample_num_divided4;
             sample_num_transition_cnt <= n_sample_num_transition_cnt;
 			
             result_transition_cnt <= n_result_transition_cnt;
@@ -334,7 +336,8 @@ module a_domain(
             processing_time_cnt <= n_processing_time_cnt;
             processing_time_cnt_transition_cnt <= n_processing_time_cnt_transition_cnt;
 
-            sample_num_executed_partial_equals_sample_num_divided4_minus1 <= n_sample_num_executed_partial_equals_sample_num_divided4_minus1;
+
+            sample_num_executed_transition_cnt <= n_sample_num_executed_transition_cnt;
         end
     end
 
@@ -369,7 +372,7 @@ module a_domain(
         n_collect_label = collect_label;
 
         n_sample_num = sample_num;
-        n_sample_num_divided4_minus1 = sample_num_divided4_minus1;
+        n_sample_num_divided4 = sample_num_divided4;
         n_sample_num_transition_cnt = sample_num_transition_cnt;
         
 
@@ -378,7 +381,8 @@ module a_domain(
 		n_processing_time_cnt = processing_time_cnt;
 		n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt;
 
-		n_sample_num_executed_partial_equals_sample_num_divided4_minus1 = (sample_num_executed_partial == sample_num_divided4_minus1);
+
+		n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt;
 
         if (fifo_d2a_command_valid) begin
             if (fifo_d2a_command_dout[14:0] == 1) begin
@@ -572,7 +576,7 @@ module a_domain(
                 end else if (sample_num_transition_cnt == 2) begin
                     if (!fifo_a2d_command_full) begin
                         n_sample_num_transition_cnt = 3;
-                        n_sample_num_divided4_minus1 = sample_num[2 +: 30];
+                        n_sample_num_divided4 = sample_num[2 +: 30];
                     end
                 end else if (sample_num_transition_cnt == 3) begin
                     if (!fifo_a2d_command_full) begin
@@ -580,7 +584,6 @@ module a_domain(
                         n_sample_num_transition_cnt = 0;
                         fifo_a2d_command_wr_en = 1;
                         fifo_a2d_command_din = {17'd0, 15'd11};
-                        n_sample_num_divided4_minus1 = sample_num_divided4_minus1 - 1;
                     end
                 end
             end
@@ -656,7 +659,7 @@ module a_domain(
 
         if (inference_processing_ongoing || training_processing_ongoing) begin
             if (sample_num != 0 && sample_num_executed != 0) begin
-                if (sample_num_executed_update_flag_twoclk_delay && sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
+                if (sample_num_executed_update_flag_oneclk_delay) begin
                     if (!fifo_a2d_command_full) begin
                         fifo_a2d_command_wr_en = 1;
                         fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
@@ -724,6 +727,35 @@ module a_domain(
         end
 
 
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 22) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    if (sample_num_executed_transition_cnt == 0) begin
+                        fifo_a2d_command_din = {1'd0, sample_num_executed[0*16 +: 16], 15'd22};
+                        n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
+                    end else if (sample_num_executed_transition_cnt == 1) begin
+                        fifo_a2d_command_din = {1'd0, sample_num_executed[1*16 +: 16], 15'd22};
+                        n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
+                    end else if (sample_num_executed_transition_cnt == 2) begin
+                        fifo_a2d_command_din = {1'd0, data_stream_cnt_for_test[0*16 +: 16], 15'd22};
+                        n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
+                    end else if (sample_num_executed_transition_cnt == 3) begin
+                        fifo_a2d_command_din = {1'd0, data_stream_cnt_for_test[1*16 +: 16], 15'd22};
+                        n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
+                    end else if (sample_num_executed_transition_cnt == 4) begin
+                        fifo_a2d_command_din = {1'd0, timestep, 15'd22};
+                        n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
+                    end else if (sample_num_executed_transition_cnt == 5) begin
+                        fifo_a2d_command_din = {9'd0, sample_stream_cnt_small, 15'd22};
+                        n_sample_num_executed_transition_cnt = 0;
+                        fifo_d2a_command_rd_en = 1;
+                    end
+                end
+            end
+        end
+
+
 
 
 
@@ -757,7 +789,8 @@ module a_domain(
 			timestep <= 0;
 
 			sample_num_executed_update_flag_oneclk_delay <= 0;
-			sample_num_executed_update_flag_twoclk_delay <= 0;
+            
+			sample_num_executed_partial_equals_sample_num_divided4 <= 0;
         end else begin
 			label_comparison_time <= n_label_comparison_time;
 			correct_sample_num <= n_correct_sample_num;
@@ -778,7 +811,8 @@ module a_domain(
             timestep <= n_timestep;
             
             sample_num_executed_update_flag_oneclk_delay <= sample_num_executed_update_flag;
-            sample_num_executed_update_flag_twoclk_delay <= sample_num_executed_update_flag_oneclk_delay;
+
+            sample_num_executed_partial_equals_sample_num_divided4 <= n_sample_num_executed_partial_equals_sample_num_divided4;
         end
     end
     always @ (*) begin
@@ -814,6 +848,8 @@ module a_domain(
 
         sample_num_executed_update_flag = 0;
 
+		n_sample_num_executed_partial_equals_sample_num_divided4 = (sample_num_executed_partial == sample_num_divided4);
+
         if (streaming_count != 7) begin
             if (queuing_ongoing) begin
                 fifo_d2a_data_rd_en = 0;
@@ -825,12 +861,7 @@ module a_domain(
             end else begin 
 
                 
-                // if (1'b1) begin
-            `ifdef TEST_SETTING
-                if (1'b1) begin
-            `else
                 if (input_streaming_ready) begin
-            `endif
                     if (fifo_d2a_data_valid) begin
                         fifo_d2a_data_rd_en = 1;
                         input_streaming_valid = 1;
@@ -852,7 +883,7 @@ module a_domain(
 
                                     sample_num_executed_update_flag = 1;
                                     n_sample_num_executed = sample_num_executed + 1;
-                                    if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
+                                    if (sample_num_executed_partial_equals_sample_num_divided4) begin
                                         n_sample_num_executed_partial = 0;
                                     end else begin
                                         n_sample_num_executed_partial = sample_num_executed_partial + 1;
@@ -881,7 +912,7 @@ module a_domain(
 
                                     sample_num_executed_update_flag = 1;
                                     n_sample_num_executed = sample_num_executed + 1;
-                                    if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
+                                    if (sample_num_executed_partial_equals_sample_num_divided4) begin
                                         n_sample_num_executed_partial = 0;
                                     end else begin
                                         n_sample_num_executed_partial = sample_num_executed_partial + 1;
@@ -910,7 +941,7 @@ module a_domain(
 
                                     sample_num_executed_update_flag = 1;
                                     n_sample_num_executed = sample_num_executed + 1;
-                                    if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
+                                    if (sample_num_executed_partial_equals_sample_num_divided4) begin
                                         n_sample_num_executed_partial = 0;
                                     end else begin
                                         n_sample_num_executed_partial = sample_num_executed_partial + 1;
@@ -1145,29 +1176,30 @@ module a_domain(
                 n_asic_start_ready_for_test = 0;
             end
 
-            if (a_config_dataset == 0) begin
-                // n_data_stream_cnt_last = sample_num * a_config_timesteps * 15; // 이거 timing violation나서 걍 이렇게 한클락 미룸
-                if (data_stream_cnt_for_test == 29_370_000) begin 
-                    n_asic_start_ready_for_test = 1;
-                end
-            end else if (a_config_dataset == 1) begin
-                // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
-                if (data_stream_cnt_for_test == 540_000_000) begin 
-                    n_asic_start_ready_for_test = 1;
-                end
-            end else if (a_config_dataset == 2) begin
-                // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
-                // if (data_stream_cnt_for_test == 58_060_800) begin // target 0
-                if (data_stream_cnt_for_test == 58_032_000) begin // target else
-                    n_asic_start_ready_for_test = 1;
-                end
-            end
-
+            // if (a_config_dataset == 0) begin
+            //     // n_data_stream_cnt_last = sample_num * a_config_timesteps * 15; // 이거 timing violation나서 걍 이렇게 한클락 미룸
+            //     if (data_stream_cnt_for_test == 29_370_000) begin 
+            //         n_asic_start_ready_for_test = 1;
+            //     end
+            // end else if (a_config_dataset == 1) begin
+            //     // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
+            //     if (data_stream_cnt_for_test == 540_000_000) begin 
+            //         n_asic_start_ready_for_test = 1;
+            //     end
+            // end else if (a_config_dataset == 2) begin
+            //     // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
+            //     // if (data_stream_cnt_for_test == 58_060_800) begin // target 0
+            //     if (data_stream_cnt_for_test == 58_032_000) begin // target else
+            //         n_asic_start_ready_for_test = 1;
+            //     end
+            // end
 
         end
 
 
         
+
+
 
 
 
