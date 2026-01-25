@@ -217,13 +217,18 @@ module top_bh_fpga(
     assign sys_clk = ui_clk;
     wire sys_clk2;
 
-    `ifdef ASIC_IN_FPGA 
-        assign sys_clk2 = ui_clk;
-    `elsif TEST_SETTING 
+    `ifdef TEST_SETTING 
         assign sys_clk2 = ui_clk;
     `else
         assign sys_clk2 = clk_clock_generator;
     `endif
+    // `ifdef ASIC_IN_FPGA 
+    //     assign sys_clk2 = ui_clk;
+    // `elsif TEST_SETTING 
+    //     assign sys_clk2 = ui_clk;
+    // `else
+    //     assign sys_clk2 = clk_clock_generator;
+    // `endif
 
     assign clk_port_spare_1 = ui_clk;
     // ########################## sys_clk gen instance ########################################################################################

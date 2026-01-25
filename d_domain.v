@@ -1043,7 +1043,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                 end else begin
                     if (!sample_data_buffer2_busy) begin
                         n_sample_data_buffer2_busy = 1;
-                        n_sample_data_buffer2_nmnist = sample_data_buffer[0 + (DVS_GESTURE_BITS_PER_SAMPLE-NTIDIGITS_BITS_PER_SAMPLE) +: NTIDIGITS_BITS_PER_SAMPLE];
+                        n_sample_data_buffer2_ntidigits = sample_data_buffer[0 + (DVS_GESTURE_BITS_PER_SAMPLE-NTIDIGITS_BITS_PER_SAMPLE) +: NTIDIGITS_BITS_PER_SAMPLE];
                         n_sample_data_buffer_read_request_cnt = 0;
                         n_sample_data_buffer_cnt = 0;
                         if (sample_data_buffer_num != sample_num - 1) begin
