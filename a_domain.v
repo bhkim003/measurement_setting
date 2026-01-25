@@ -240,6 +240,9 @@ module a_domain(
     reg [31:0] sample_num_executed, n_sample_num_executed;
     reg [29:0] sample_num_executed_partial, n_sample_num_executed_partial;
     reg [7:0] sample_stream_cnt_small, n_sample_stream_cnt_small;
+    reg sample_num_executed_update_flag;
+    reg sample_num_executed_update_flag_oneclk_delay;
+    reg sample_num_executed_update_flag_twoclk_delay;
 
     reg [3:0] result_transition_cnt, n_result_transition_cnt;
     reg [63:0] processing_time_cnt, n_processing_time_cnt;
@@ -366,7 +369,7 @@ module a_domain(
 		n_processing_time_cnt = processing_time_cnt;
 		n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt;
 
-		n_sample_num_executed_partial_equals_sample_num_divided4_minus1 = sample_num_executed_partial == sample_num_divided4_minus1;
+		n_sample_num_executed_partial_equals_sample_num_divided4_minus1 = (sample_num_executed_partial == sample_num_divided4_minus1);
 
         if (fifo_d2a_command_valid) begin
             if (fifo_d2a_command_dout[14:0] == 1) begin
@@ -560,7 +563,7 @@ module a_domain(
                 end else if (sample_num_transition_cnt == 2) begin
                     if (!fifo_a2d_command_full) begin
                         n_sample_num_transition_cnt = 3;
-                        n_sample_num_divided4_minus1 = sample_num[0 +: 30];
+                        n_sample_num_divided4_minus1 = sample_num[2 +: 30];
                     end
                 end else if (sample_num_transition_cnt == 3) begin
                     if (!fifo_a2d_command_full) begin
@@ -642,11 +645,13 @@ module a_domain(
         end
 
 
-        if (sample_num != 0 && sample_num_executed != 0) begin
-            if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
-                if (!fifo_a2d_command_full) begin
-                    fifo_a2d_command_wr_en = 1;
-                    fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
+        if (inference_processing_ongoing || training_processing_ongoing) begin
+            if (sample_num != 0 && sample_num_executed != 0) begin
+                if (sample_num_executed_update_flag_twoclk_delay && sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
+                    if (!fifo_a2d_command_full) begin
+                        fifo_a2d_command_wr_en = 1;
+                        fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
+                    end
                 end
             end
         end
@@ -741,8 +746,10 @@ module a_domain(
 			one_sample_finish <= 0;
 
 			timestep <= 0;
-        end
-        else begin
+
+			sample_num_executed_update_flag_oneclk_delay <= 0;
+			sample_num_executed_update_flag_twoclk_delay <= 0;
+        end else begin
 			label_comparison_time <= n_label_comparison_time;
 			correct_sample_num <= n_correct_sample_num;
 			wrong_sample_num <= n_wrong_sample_num;
@@ -760,6 +767,9 @@ module a_domain(
             one_sample_finish <= n_one_sample_finish;
 
             timestep <= n_timestep;
+            
+            sample_num_executed_update_flag_oneclk_delay <= sample_num_executed_update_flag;
+            sample_num_executed_update_flag_twoclk_delay <= sample_num_executed_update_flag_oneclk_delay;
         end
     end
     always @ (*) begin
@@ -793,6 +803,7 @@ module a_domain(
         label_fifo_din = 0;
         label_fifo_rd_en = 0;
 
+        sample_num_executed_update_flag = 0;
 
         if (streaming_count != 7) begin
             if (queuing_ongoing) begin
@@ -830,11 +841,12 @@ module a_domain(
                                 if (timestep == a_config_timesteps - 1) begin
                                     n_timestep = 0;
 
+                                    sample_num_executed_update_flag = 1;
                                     n_sample_num_executed = sample_num_executed + 1;
                                     if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
-                                        n_sample_num_executed_partial = sample_num_executed_partial + 1;
-                                    end else begin
                                         n_sample_num_executed_partial = 0;
+                                    end else begin
+                                        n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                     end
 
                                     if (collect_label) begin
@@ -858,11 +870,12 @@ module a_domain(
                                 if (timestep == a_config_timesteps - 1) begin
                                     n_timestep = 0;
 
+                                    sample_num_executed_update_flag = 1;
                                     n_sample_num_executed = sample_num_executed + 1;
                                     if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
-                                        n_sample_num_executed_partial = sample_num_executed_partial + 1;
-                                    end else begin
                                         n_sample_num_executed_partial = 0;
+                                    end else begin
+                                        n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                     end
 
                                     if (collect_label) begin
@@ -886,11 +899,12 @@ module a_domain(
                                 if (timestep == a_config_timesteps - 1) begin
                                     n_timestep = 0;
 
+                                    sample_num_executed_update_flag = 1;
                                     n_sample_num_executed = sample_num_executed + 1;
                                     if (sample_num_executed_partial_equals_sample_num_divided4_minus1) begin
-                                        n_sample_num_executed_partial = sample_num_executed_partial + 1;
-                                    end else begin
                                         n_sample_num_executed_partial = 0;
+                                    end else begin
+                                        n_sample_num_executed_partial = sample_num_executed_partial + 1;
                                     end
 
                                     if (collect_label) begin
@@ -1094,6 +1108,15 @@ module a_domain(
         if (config_stream_cnt == 41424) begin // config stream finish
             n_asic_start_ready_for_test = 1;
         end
+
+
+
+        if (training_processing_ongoing || inference_processing_ongoing) begin
+            if (sample_num_executed == sample_num) begin
+                n_asic_start_ready_for_test = 1;
+            end
+        end
+
 
         
         if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin

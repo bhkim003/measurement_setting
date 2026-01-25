@@ -747,6 +747,9 @@ module top_bh_fpga(
             end else if (ep01wirein == 17) begin
                 led = xem7360_led(processing_time_cnt[7+32:0+32]);
                 n_ep20wireout = processing_time_cnt[32 +: 32];
+            end else if (ep01wirein == 18) begin
+                led = xem7360_led({4'd0, sample_num_transition_cnt});
+                n_ep20wireout = {11'd0, fifo_d2p_command_valid, fifo_d2p_command_dout[14:0], fifo_p2d_command_full, sample_num_transition_cnt};
             end
         end else if (p_state == P_STATE_09_ASIC_INFERENCE_QUEUING || p_state == P_STATE_11_ASIC_TRAINING_QUEUING) begin
             if (ep01wirein == 0) begin
@@ -1129,13 +1132,10 @@ module top_bh_fpga(
                 if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 15) begin
                     fifo_d2p_command_rd_en = 1;
                     ep60trigout = {31'd0, 1'b1};
+                    n_queuing_complete = 0;
                     n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
                     n_sample_executed_lsb_17bit = fifo_d2p_command_dout[15 +: 17];
                     n_execute_16_division = 0;
-                end
-                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 18) begin
-                    fifo_d2p_command_rd_en = 1;
-                    n_execute_16_division = execute_16_division + 1;
                 end
             end
             P_STATE_11_ASIC_TRAINING_QUEUING: begin
@@ -1164,10 +1164,6 @@ module top_bh_fpga(
                     n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
                     n_sample_executed_lsb_17bit = fifo_d2p_command_dout[15 +: 17];
                     n_execute_16_division = 0;
-                end
-                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 18) begin
-                    fifo_d2p_command_rd_en = 1;
-                    n_execute_16_division = execute_16_division + 1;
                 end
             end
         endcase
@@ -1451,6 +1447,10 @@ module top_bh_fpga(
 
 
 
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 18) begin
+            fifo_d2p_command_rd_en = 1;
+            n_execute_16_division = execute_16_division + 1;
+        end
 
 
 
