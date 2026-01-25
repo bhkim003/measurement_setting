@@ -858,6 +858,7 @@ module a_domain(
                 n_sample_num_executed = 0;
                 n_sample_num_executed_partial = 0;
                 n_sample_stream_cnt_small = 0;
+                n_timestep = 0;
             end else begin 
 
                 
