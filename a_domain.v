@@ -1106,10 +1106,24 @@ module a_domain(
             n_asic_inferenced_label_for_test_cnt = 0;
         end
 
+        if (config_on_real) begin 
+            if (config_stream_cnt == 1) begin 
+                n_asic_start_ready_for_test = 0;
+            end
+            if (config_stream_cnt == 41424) begin // config stream finish
+                n_asic_start_ready_for_test = 1;
+            end
 
-        if (config_stream_cnt == 1) begin 
-            n_asic_start_ready_for_test = 0;
+            if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
+                if (config_stream_cnt == 41424 - 3 - 3) begin // last one ago config value
+                    n_config_stream_catch_41418 = fifo_d2a_data_dout;
+                end
+                if (config_stream_cnt == 41424 - 3) begin // last config value
+                    n_config_stream_catch_41421 = fifo_d2a_data_dout;
+                end
+            end
         end
+
 
         if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
             n_config_stream_cnt = config_stream_cnt + 1;
@@ -1119,9 +1133,6 @@ module a_domain(
             n_config_stream_cnt = 0;
             n_data_stream_cnt_for_test = 0;
         end
-        if (config_stream_cnt == 41424) begin // config stream finish
-            n_asic_start_ready_for_test = 1;
-        end
 
 
 
@@ -1129,44 +1140,36 @@ module a_domain(
             if (sample_num_executed == sample_num) begin
                 n_asic_start_ready_for_test = 1;
             end
+
+            if (data_stream_cnt_for_test == 1) begin 
+                n_asic_start_ready_for_test = 0;
+            end
+
+            if (a_config_dataset == 0) begin
+                // n_data_stream_cnt_last = sample_num * a_config_timesteps * 15; // 이거 timing violation나서 걍 이렇게 한클락 미룸
+                if (data_stream_cnt_for_test == 29_370_000) begin 
+                    n_asic_start_ready_for_test = 1;
+                end
+            end else if (a_config_dataset == 1) begin
+                // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
+                if (data_stream_cnt_for_test == 540_000_000) begin 
+                    n_asic_start_ready_for_test = 1;
+                end
+            end else if (a_config_dataset == 2) begin
+                // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
+                // if (data_stream_cnt_for_test == 58_060_800) begin // target 0
+                if (data_stream_cnt_for_test == 58_032_000) begin // target else
+                    n_asic_start_ready_for_test = 1;
+                end
+            end
+
+
         end
 
 
         
-        if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
-            if (config_stream_cnt == 41424 - 3 - 3) begin // last one ago config value
-                n_config_stream_catch_41418 = fifo_d2a_data_dout;
-            end
-            if (config_stream_cnt == 41424 - 3) begin // last config value
-                n_config_stream_catch_41421 = fifo_d2a_data_dout;
-            end
-        end
 
 
-
-
-
-        if (data_stream_cnt_for_test == 1) begin 
-            n_asic_start_ready_for_test = 0;
-        end
-
-        if (a_config_dataset == 0) begin
-            // n_data_stream_cnt_last = sample_num * a_config_timesteps * 15; // 이거 timing violation나서 걍 이렇게 한클락 미룸
-            if (data_stream_cnt_for_test == 29_370_000) begin 
-                n_asic_start_ready_for_test = 1;
-            end
-        end else if (a_config_dataset == 1) begin
-            // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
-            if (data_stream_cnt_for_test == 540_000_000) begin 
-                n_asic_start_ready_for_test = 1;
-            end
-        end else if (a_config_dataset == 2) begin
-            // n_data_stream_cnt_last = sample_num * a_config_timesteps * 9; // 이거 timing violation나서 걍 이렇게 한클락 미룸
-            // if (data_stream_cnt_for_test == 58_060_800) begin // target 0
-            if (data_stream_cnt_for_test == 58_032_000) begin // target else
-                n_asic_start_ready_for_test = 1;
-            end
-        end
 
 
 
