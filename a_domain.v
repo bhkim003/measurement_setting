@@ -267,7 +267,7 @@ module a_domain(
 	reg [31:0] correct_sample_num, n_correct_sample_num;
 	reg [31:0] wrong_sample_num, n_wrong_sample_num;
 	reg [31:0] total_inference_sample_num, n_total_inference_sample_num;
-	reg [2:0] inferenced_label_4bit, n_inferenced_label_4bit;
+	reg [3:0] inferenced_label_4bit, n_inferenced_label_4bit;
 	reg [1:0] inferenced_label_shooting_cnt, n_inferenced_label_shooting_cnt;
 	reg inferenced_label_shooting_ongoing, n_inferenced_label_shooting_ongoing;
 
@@ -286,7 +286,8 @@ module a_domain(
 
     reg sample_num_executed_partial_equals_sample_num_divided4, n_sample_num_executed_partial_equals_sample_num_divided4;
     
-    reg [3:0] one_sample_finish, n_one_sample_finish;
+    localparam ONE_SAMPLE_FINISH_END_INFERENCE_DELAY = 50;
+    reg [ONE_SAMPLE_FINISH_END_INFERENCE_DELAY-1:0] one_sample_finish, n_one_sample_finish;
 
     reg [15:0] timestep, n_timestep;
 
@@ -855,6 +856,7 @@ module a_domain(
             sample_num_executed_partial_equals_sample_num_divided4 <= n_sample_num_executed_partial_equals_sample_num_divided4;
         end
     end
+    integer i;
     always @ (*) begin
         input_streaming_valid = 0;
         input_streaming_data = 0;
@@ -875,10 +877,7 @@ module a_domain(
 
         n_timestep = timestep;
 
-		n_one_sample_finish[3] = one_sample_finish[2];
-		n_one_sample_finish[2] = one_sample_finish[1];
-		n_one_sample_finish[1] = one_sample_finish[0];
-		n_one_sample_finish[0] = 0;
+        n_one_sample_finish = {one_sample_finish[0 +: ONE_SAMPLE_FINISH_END_INFERENCE_DELAY-1], 1'd0};
 
         fifo_d2a_data_rd_en = 0;
 
@@ -1037,7 +1036,7 @@ module a_domain(
             end
 		end else begin
             if (label_comparison_time == 0) begin
-                n_inferenced_label_4bit[inferenced_label_shooting_cnt] = inferenced_label;
+                n_inferenced_label_4bit = {inferenced_label, inferenced_label_4bit[3:1]};
                 if (inferenced_label_shooting_cnt != 3) begin
                     n_inferenced_label_shooting_cnt = inferenced_label_shooting_cnt + 1;
                 end else begin
@@ -1123,11 +1122,6 @@ module a_domain(
 
 
 
-
-// one_sample_finish[3]
-
-
-
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
@@ -1160,7 +1154,7 @@ module a_domain(
         n_asic_inferenced_label_for_test_cnt = asic_inferenced_label_for_test_cnt;
 
 
-        if (asic_inferenced_label_for_test_cnt == 0 && one_sample_finish[3]) begin
+        if (asic_inferenced_label_for_test_cnt == 0 && one_sample_finish[ONE_SAMPLE_FINISH_END_INFERENCE_DELAY-1]) begin
             n_asic_inferenced_label_for_test = 1;
             n_asic_inferenced_label_for_test_cnt = asic_inferenced_label_for_test_cnt + 1;
         end
