@@ -218,7 +218,7 @@ module top_bh_fpga(
     wire sys_clk2;
 
     `ifdef ASIC_IN_FPGA 
-        assign sys_clk2 = ui_clk;
+        assign sys_clk2 = okClk;
     `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
     `else
