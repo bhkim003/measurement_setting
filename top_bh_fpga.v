@@ -1,5 +1,5 @@
-// `define TEST_SETTING 1
-`define ASIC_IN_FPGA 1
+`define TEST_SETTING 1
+// `define ASIC_IN_FPGA 1
 module top_bh_fpga(
         // ########################## okHost interface ########################################################################################
         // ########################## okHost interface ########################################################################################
@@ -1198,6 +1198,8 @@ module top_bh_fpga(
                         n_queuing_complete = 0;
                         n_p_state = P_STATE_09_ASIC_INFERENCE_QUEUING;
                     end
+                end else if(ep40trigin[19]) begin
+                    n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
                 end
             end
             P_STATE_09_ASIC_INFERENCE_QUEUING: begin

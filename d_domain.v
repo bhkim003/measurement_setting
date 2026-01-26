@@ -982,42 +982,42 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                                     n_sample_data_buffer2_busy = 0;
                                 end
 
-                                if (this_sample_label == 0) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*0 +: 32]= samplefinish_num_epochfinish_num_label_num[32*0 +: 32] + 1;
-                                end
-                                if (this_sample_label == 1) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*1 +: 32]= samplefinish_num_epochfinish_num_label_num[32*1 +: 32] + 1;
-                                end
-                                if (this_sample_label == 2) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*2 +: 32]= samplefinish_num_epochfinish_num_label_num[32*2 +: 32] + 1;
-                                end
-                                if (this_sample_label == 3) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*3 +: 32]= samplefinish_num_epochfinish_num_label_num[32*3 +: 32] + 1;
-                                end
-                                if (this_sample_label == 4) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*4 +: 32]= samplefinish_num_epochfinish_num_label_num[32*4 +: 32] + 1;
-                                end
-                                if (this_sample_label == 5) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*5 +: 32]= samplefinish_num_epochfinish_num_label_num[32*5 +: 32] + 1;
-                                end
-                                if (this_sample_label == 6) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*6 +: 32]= samplefinish_num_epochfinish_num_label_num[32*6 +: 32] + 1;
-                                end
-                                if (this_sample_label == 7) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*7 +: 32]= samplefinish_num_epochfinish_num_label_num[32*7 +: 32] + 1;
-                                end
-                                if (this_sample_label == 8) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*8 +: 32]= samplefinish_num_epochfinish_num_label_num[32*8 +: 32] + 1;
-                                end
-                                if (this_sample_label == 9) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*9 +: 32]= samplefinish_num_epochfinish_num_label_num[32*9 +: 32] + 1;
-                                end
-                                if (this_epoch_finish) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*10 +: 32]= samplefinish_num_epochfinish_num_label_num[32*10 +: 32] + 1;
-                                end
-                                if (this_sample_done) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*11 +: 32]= samplefinish_num_epochfinish_num_label_num[32*11 +: 32] + 1;
-                                end
+                                // if (this_sample_label == 0) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*0 +: 32]= samplefinish_num_epochfinish_num_label_num[32*0 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 1) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*1 +: 32]= samplefinish_num_epochfinish_num_label_num[32*1 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 2) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*2 +: 32]= samplefinish_num_epochfinish_num_label_num[32*2 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 3) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*3 +: 32]= samplefinish_num_epochfinish_num_label_num[32*3 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 4) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*4 +: 32]= samplefinish_num_epochfinish_num_label_num[32*4 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 5) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*5 +: 32]= samplefinish_num_epochfinish_num_label_num[32*5 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 6) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*6 +: 32]= samplefinish_num_epochfinish_num_label_num[32*6 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 7) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*7 +: 32]= samplefinish_num_epochfinish_num_label_num[32*7 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 8) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*8 +: 32]= samplefinish_num_epochfinish_num_label_num[32*8 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 9) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*9 +: 32]= samplefinish_num_epochfinish_num_label_num[32*9 +: 32] + 1;
+                                // end
+                                // if (this_epoch_finish) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*10 +: 32]= samplefinish_num_epochfinish_num_label_num[32*10 +: 32] + 1;
+                                // end
+                                // if (this_sample_done) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*11 +: 32]= samplefinish_num_epochfinish_num_label_num[32*11 +: 32] + 1;
+                                // end
                             end
                         end
                     end
@@ -1103,42 +1103,42 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                                     n_sample_data_buffer2_busy = 0;
                                 end
 
-                                if (this_sample_label == 0) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*0 +: 32]= samplefinish_num_epochfinish_num_label_num[32*0 +: 32] + 1;
-                                end
-                                if (this_sample_label == 1) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*1 +: 32]= samplefinish_num_epochfinish_num_label_num[32*1 +: 32] + 1;
-                                end
-                                if (this_sample_label == 2) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*2 +: 32]= samplefinish_num_epochfinish_num_label_num[32*2 +: 32] + 1;
-                                end
-                                if (this_sample_label == 3) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*3 +: 32]= samplefinish_num_epochfinish_num_label_num[32*3 +: 32] + 1;
-                                end
-                                if (this_sample_label == 4) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*4 +: 32]= samplefinish_num_epochfinish_num_label_num[32*4 +: 32] + 1;
-                                end
-                                if (this_sample_label == 5) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*5 +: 32]= samplefinish_num_epochfinish_num_label_num[32*5 +: 32] + 1;
-                                end
-                                if (this_sample_label == 6) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*6 +: 32]= samplefinish_num_epochfinish_num_label_num[32*6 +: 32] + 1;
-                                end
-                                if (this_sample_label == 7) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*7 +: 32]= samplefinish_num_epochfinish_num_label_num[32*7 +: 32] + 1;
-                                end
-                                if (this_sample_label == 8) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*8 +: 32]= samplefinish_num_epochfinish_num_label_num[32*8 +: 32] + 1;
-                                end
-                                if (this_sample_label == 9) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*9 +: 32]= samplefinish_num_epochfinish_num_label_num[32*9 +: 32] + 1;
-                                end
-                                if (this_epoch_finish) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*10 +: 32]= samplefinish_num_epochfinish_num_label_num[32*10 +: 32] + 1;
-                                end
-                                if (this_sample_done) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*11 +: 32]= samplefinish_num_epochfinish_num_label_num[32*11 +: 32] + 1;
-                                end
+                                // if (this_sample_label == 0) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*0 +: 32]= samplefinish_num_epochfinish_num_label_num[32*0 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 1) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*1 +: 32]= samplefinish_num_epochfinish_num_label_num[32*1 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 2) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*2 +: 32]= samplefinish_num_epochfinish_num_label_num[32*2 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 3) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*3 +: 32]= samplefinish_num_epochfinish_num_label_num[32*3 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 4) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*4 +: 32]= samplefinish_num_epochfinish_num_label_num[32*4 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 5) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*5 +: 32]= samplefinish_num_epochfinish_num_label_num[32*5 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 6) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*6 +: 32]= samplefinish_num_epochfinish_num_label_num[32*6 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 7) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*7 +: 32]= samplefinish_num_epochfinish_num_label_num[32*7 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 8) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*8 +: 32]= samplefinish_num_epochfinish_num_label_num[32*8 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 9) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*9 +: 32]= samplefinish_num_epochfinish_num_label_num[32*9 +: 32] + 1;
+                                // end
+                                // if (this_epoch_finish) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*10 +: 32]= samplefinish_num_epochfinish_num_label_num[32*10 +: 32] + 1;
+                                // end
+                                // if (this_sample_done) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*11 +: 32]= samplefinish_num_epochfinish_num_label_num[32*11 +: 32] + 1;
+                                // end
                             end
                         end
                     end
@@ -1224,42 +1224,42 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                                     n_sample_data_buffer2_busy = 0;
                                 end
 
-                                if (this_sample_label == 0) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*0 +: 32]= samplefinish_num_epochfinish_num_label_num[32*0 +: 32] + 1;
-                                end
-                                if (this_sample_label == 1) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*1 +: 32]= samplefinish_num_epochfinish_num_label_num[32*1 +: 32] + 1;
-                                end
-                                if (this_sample_label == 2) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*2 +: 32]= samplefinish_num_epochfinish_num_label_num[32*2 +: 32] + 1;
-                                end
-                                if (this_sample_label == 3) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*3 +: 32]= samplefinish_num_epochfinish_num_label_num[32*3 +: 32] + 1;
-                                end
-                                if (this_sample_label == 4) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*4 +: 32]= samplefinish_num_epochfinish_num_label_num[32*4 +: 32] + 1;
-                                end
-                                if (this_sample_label == 5) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*5 +: 32]= samplefinish_num_epochfinish_num_label_num[32*5 +: 32] + 1;
-                                end
-                                if (this_sample_label == 6) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*6 +: 32]= samplefinish_num_epochfinish_num_label_num[32*6 +: 32] + 1;
-                                end
-                                if (this_sample_label == 7) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*7 +: 32]= samplefinish_num_epochfinish_num_label_num[32*7 +: 32] + 1;
-                                end
-                                if (this_sample_label == 8) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*8 +: 32]= samplefinish_num_epochfinish_num_label_num[32*8 +: 32] + 1;
-                                end
-                                if (this_sample_label == 9) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*9 +: 32]= samplefinish_num_epochfinish_num_label_num[32*9 +: 32] + 1;
-                                end
-                                if (this_epoch_finish) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*10 +: 32]= samplefinish_num_epochfinish_num_label_num[32*10 +: 32] + 1;
-                                end
-                                if (this_sample_done) begin
-                                    n_samplefinish_num_epochfinish_num_label_num[32*11 +: 32]= samplefinish_num_epochfinish_num_label_num[32*11 +: 32] + 1;
-                                end
+                                // if (this_sample_label == 0) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*0 +: 32]= samplefinish_num_epochfinish_num_label_num[32*0 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 1) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*1 +: 32]= samplefinish_num_epochfinish_num_label_num[32*1 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 2) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*2 +: 32]= samplefinish_num_epochfinish_num_label_num[32*2 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 3) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*3 +: 32]= samplefinish_num_epochfinish_num_label_num[32*3 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 4) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*4 +: 32]= samplefinish_num_epochfinish_num_label_num[32*4 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 5) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*5 +: 32]= samplefinish_num_epochfinish_num_label_num[32*5 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 6) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*6 +: 32]= samplefinish_num_epochfinish_num_label_num[32*6 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 7) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*7 +: 32]= samplefinish_num_epochfinish_num_label_num[32*7 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 8) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*8 +: 32]= samplefinish_num_epochfinish_num_label_num[32*8 +: 32] + 1;
+                                // end
+                                // if (this_sample_label == 9) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*9 +: 32]= samplefinish_num_epochfinish_num_label_num[32*9 +: 32] + 1;
+                                // end
+                                // if (this_epoch_finish) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*10 +: 32]= samplefinish_num_epochfinish_num_label_num[32*10 +: 32] + 1;
+                                // end
+                                // if (this_sample_done) begin
+                                //     n_samplefinish_num_epochfinish_num_label_num[32*11 +: 32]= samplefinish_num_epochfinish_num_label_num[32*11 +: 32] + 1;
+                                // end
                             end
                         end
                     end
