@@ -876,7 +876,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                             app_cmd = DRAM_READ;
                             app_addr = read_address_for_data;
                             n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
-                            if (sample_data_buffer_num == sample_num - 1) begin
+                            if (sample_data_buffer_num == sample_num - 1 && sample_data_buffer_read_request_cnt == DVS_GESTURE_READ_REQUEST_PER_SAMPLE - 1) begin
                                 n_sample_data_buffer_stop_read_request = 1;
                             end else begin
                                 if (read_address_for_data == dram_address_last) begin
@@ -959,7 +959,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                             app_cmd = DRAM_READ;
                             app_addr = read_address_for_data;
                             n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
-                            if (sample_data_buffer_num == sample_num - 1) begin
+                            if (sample_data_buffer_num == sample_num - 1 && sample_data_buffer_read_request_cnt == N_MNIST_READ_REQUEST_PER_SAMPLE - 1) begin
                                 n_sample_data_buffer_stop_read_request = 1;
                             end else begin
                                 if (read_address_for_data == dram_address_last) begin
@@ -1042,7 +1042,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                             app_cmd = DRAM_READ;
                             app_addr = read_address_for_data;
                             n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
-                            if (sample_data_buffer_num == sample_num - 1) begin
+                            if (sample_data_buffer_num == sample_num - 1 && sample_data_buffer_read_request_cnt == NTIDIGITS_READ_REQUEST_PER_SAMPLE - 1) begin
                                 n_sample_data_buffer_stop_read_request = 1;
                             end else begin
                                 if (read_address_for_data == dram_address_last) begin

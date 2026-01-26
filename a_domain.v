@@ -249,8 +249,8 @@ module a_domain(
     reg [31:0] sample_num_executed, n_sample_num_executed;
     reg [29:0] sample_num_executed_partial, n_sample_num_executed_partial;
     reg [7:0] sample_stream_cnt_small, n_sample_stream_cnt_small;
-    reg sample_num_executed_update_flag;
-    reg sample_num_executed_update_flag_oneclk_delay;
+    reg sample_num_executed_partial_reset_flag;
+    reg sample_num_executed_partial_reset_flag_oneclk_delay;
 
     reg [3:0] result_transition_cnt, n_result_transition_cnt;
     reg [63:0] processing_time_cnt, n_processing_time_cnt;
@@ -659,7 +659,7 @@ module a_domain(
 
         if (inference_processing_ongoing || training_processing_ongoing) begin
             if (sample_num != 0 && sample_num_executed != 0) begin
-                if (sample_num_executed_update_flag_oneclk_delay) begin
+                if (sample_num_executed_partial_reset_flag_oneclk_delay) begin
                     if (!fifo_a2d_command_full) begin
                         fifo_a2d_command_wr_en = 1;
                         fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
@@ -788,7 +788,7 @@ module a_domain(
 
 			timestep <= 0;
 
-			sample_num_executed_update_flag_oneclk_delay <= 0;
+			sample_num_executed_partial_reset_flag_oneclk_delay <= 0;
             
 			sample_num_executed_partial_equals_sample_num_divided4 <= 0;
         end else begin
@@ -810,7 +810,7 @@ module a_domain(
 
             timestep <= n_timestep;
             
-            sample_num_executed_update_flag_oneclk_delay <= sample_num_executed_update_flag;
+            sample_num_executed_partial_reset_flag_oneclk_delay <= sample_num_executed_partial_reset_flag;
 
             sample_num_executed_partial_equals_sample_num_divided4 <= n_sample_num_executed_partial_equals_sample_num_divided4;
         end
@@ -846,7 +846,7 @@ module a_domain(
         label_fifo_din = 0;
         label_fifo_rd_en = 0;
 
-        sample_num_executed_update_flag = 0;
+        sample_num_executed_partial_reset_flag = 0;
 
 		n_sample_num_executed_partial_equals_sample_num_divided4 = (sample_num_executed_partial == sample_num_divided4);
 
@@ -882,9 +882,9 @@ module a_domain(
                                 if (timestep == a_config_timesteps - 1) begin
                                     n_timestep = 0;
 
-                                    sample_num_executed_update_flag = 1;
                                     n_sample_num_executed = sample_num_executed + 1;
                                     if (sample_num_executed_partial_equals_sample_num_divided4) begin
+                                        sample_num_executed_partial_reset_flag = 1;
                                         n_sample_num_executed_partial = 0;
                                     end else begin
                                         n_sample_num_executed_partial = sample_num_executed_partial + 1;
@@ -911,9 +911,9 @@ module a_domain(
                                 if (timestep == a_config_timesteps - 1) begin
                                     n_timestep = 0;
 
-                                    sample_num_executed_update_flag = 1;
                                     n_sample_num_executed = sample_num_executed + 1;
                                     if (sample_num_executed_partial_equals_sample_num_divided4) begin
+                                        sample_num_executed_partial_reset_flag = 1;
                                         n_sample_num_executed_partial = 0;
                                     end else begin
                                         n_sample_num_executed_partial = sample_num_executed_partial + 1;
@@ -940,9 +940,9 @@ module a_domain(
                                 if (timestep == a_config_timesteps - 1) begin
                                     n_timestep = 0;
 
-                                    sample_num_executed_update_flag = 1;
                                     n_sample_num_executed = sample_num_executed + 1;
                                     if (sample_num_executed_partial_equals_sample_num_divided4) begin
+                                        sample_num_executed_partial_reset_flag = 1;
                                         n_sample_num_executed_partial = 0;
                                     end else begin
                                         n_sample_num_executed_partial = sample_num_executed_partial + 1;
