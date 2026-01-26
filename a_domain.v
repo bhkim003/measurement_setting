@@ -1,5 +1,5 @@
-`define TEST_SETTING 1
-// `define ASIC_IN_FPGA 1
+// `define TEST_SETTING 1
+`define ASIC_IN_FPGA 1
 // `define CLK_WIZARD_FOR_DYNAMIC_PHASE_USED 1
 module a_domain(
         input clk_a_domain,
@@ -54,15 +54,36 @@ module a_domain(
     reg psen;
     reg psincdec;
     wire psdone;
+    wire phase_command_fifo_full;
+    reg phase_command_fifo_rd_en;
+    wire phase_command_fifo_dout;
+    wire phase_command_fifo_empty;
+    wire phase_command_fifo_valid;
     `ifdef CLK_WIZARD_FOR_DYNAMIC_PHASE_USED
         clk_wiz_1 u_clk_wiz_1(
             .clk_out1 ( clk_out1 ),
-            .psclk    ( clk_out1 ),
-            .psen     ( psen     ),
-            .psincdec ( psincdec ),
+            .psclk    ( clk_a_domain ),
+            .psen     ( fifo_d2a_data_valid     ),
+            .psincdec ( phase_command_fifo_dout ),
             .psdone   ( psdone   ),
             .clk_in1  ( clk_a_domain  )
         );
+        phase_command_fifo u_phase_command_fifo(
+        // write
+        .wr_clk(clk_out1),
+        .wr_en(psen),
+        .din(psincdec),
+        .full(phase_command_fifo_full),
+        // read
+        .rd_clk(clk_a_domain),
+        .rd_en(phase_command_fifo_rd_en),
+        .dout(phase_command_fifo_dout),
+        .empty(fifo_d2a_data_empty),
+        .valid(fifo_d2a_data_valid)
+        );
+        always @ (*) begin
+            phase_command_fifo_rd_en = fifo_d2a_data_valid;
+        end
     `else
         assign clk_out1 = clk_a_domain;
     `endif

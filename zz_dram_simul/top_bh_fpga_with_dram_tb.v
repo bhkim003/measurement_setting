@@ -887,17 +887,17 @@ module top_bh_fpga_with_dram_tb;
 
 
 
-        // top_bh u_top_bh(
-        //     .clk                             ( clk_clock_generator_at_testbench                             ),
-        //     .reset_n                         ( reset_at_testbench                         ),
-        //     .input_streaming_valid_i         ( input_streaming_valid_at_testbench         ),
-        //     .input_streaming_data_i          ( input_streaming_data_at_testbench          ),
-        //     .input_streaming_ready_o         ( input_streaming_ready_at_testbench         ),
-        //     .start_training_signal_i         ( start_training_signal_at_testbench         ),
-        //     .start_inference_signal_i        ( start_inference_signal_at_testbench        ),
-        //     .start_ready_o                   ( start_ready_at_testbench                   ),
-        //     .inferenced_label_o              ( inferenced_label_at_testbench              )
-        // );
+        top_bh u_top_bh(
+            .clk                             ( clk_clock_generator_at_testbench                             ),
+            .reset_n                         ( reset_at_testbench                         ),
+            .input_streaming_valid_i         ( input_streaming_valid_at_testbench         ),
+            .input_streaming_data_i          ( input_streaming_data_at_testbench          ),
+            .input_streaming_ready_o         ( input_streaming_ready_at_testbench         ),
+            .start_training_signal_i         ( start_training_signal_at_testbench         ),
+            .start_inference_signal_i        ( start_inference_signal_at_testbench        ),
+            .start_ready_o                   ( start_ready_at_testbench                   ),
+            .inferenced_label_o              ( inferenced_label_at_testbench              )
+        );
 
 
 
@@ -1402,7 +1402,7 @@ module top_bh_fpga_with_dram_tb;
             for (i_pj = 0; i_pj < 12; i_pj = i_pj + 1) begin
                 for (i_pi = 0; i_pi < 32; i_pi = i_pi + 1) begin
                     // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
-                    pipeIn[31 - (   (((i_pi)/4)   * 4) + (3-(i_pi%4)))] = nmnist_one_sample[8*32*i_pj + i_pi*8 +: 8];
+                    pipeIn[31 - (   (((i_pi)/4)   * 4) + (3-(i_pi%4)))] = nmnist_one_sample[8*32*(11-i_pj) + i_pi*8 +: 8];
                 end
                 WriteToBlockPipeIn(8'h80, 32, 32);  
             end
@@ -1455,7 +1455,7 @@ module top_bh_fpga_with_dram_tb;
             for (i_pj = 0; i_pj < 12; i_pj = i_pj + 1) begin
                 for (i_pi = 0; i_pi < 32; i_pi = i_pi + 1) begin
                     // 파이썬에서랑 다름 여기서 msb쪽이 파이썬에선 LSB로 들어감.
-                    pipeIn[31 - (   (((i_pi)/4)   * 4) + (3-(i_pi%4)))] = nmnist_one_sample[8*32*i_pj + i_pi*8 +: 8];
+                    pipeIn[31 - (   (((i_pi)/4)   * 4) + (3-(i_pi%4)))] = nmnist_one_sample[8*32*(11-i_pj) + i_pi*8 +: 8];
                 end
                 WriteToBlockPipeIn(8'h80, 32, 32);  
             end
@@ -1679,6 +1679,51 @@ module top_bh_fpga_with_dram_tb;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+
+        // 클락 페이즈 조절 -
+        ActivateTriggerIn(8'h40, 24);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 -
+        ActivateTriggerIn(8'h40, 24);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 -
+        ActivateTriggerIn(8'h40, 24);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 -
+        ActivateTriggerIn(8'h40, 24);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+
+
+        // 클락 페이즈 조절 +
+        ActivateTriggerIn(8'h40, 21);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 +
+        ActivateTriggerIn(8'h40, 21);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 +
+        ActivateTriggerIn(8'h40, 21);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 +
+        ActivateTriggerIn(8'h40, 21);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
 
 
 // $finish;
