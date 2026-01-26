@@ -218,6 +218,7 @@ module top_bh_fpga(
 
     `ifdef ASIC_IN_FPGA 
         // assign sys_clk2 = okClk;
+        // assign sys_clk2 = ui_clk;
 
         wire ui_clk_buf;
         IBUFG u_IBUFG(.O(ui_clk_buf), .I(ui_clk));

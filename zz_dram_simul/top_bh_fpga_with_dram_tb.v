@@ -887,17 +887,17 @@ module top_bh_fpga_with_dram_tb;
 
 
 
-        top_bh u_top_bh(
-            .clk                             ( clk_clock_generator_at_testbench                             ),
-            .reset_n                         ( reset_at_testbench                         ),
-            .input_streaming_valid_i         ( input_streaming_valid_at_testbench         ),
-            .input_streaming_data_i          ( input_streaming_data_at_testbench          ),
-            .input_streaming_ready_o         ( input_streaming_ready_at_testbench         ),
-            .start_training_signal_i         ( start_training_signal_at_testbench         ),
-            .start_inference_signal_i        ( start_inference_signal_at_testbench        ),
-            .start_ready_o                   ( start_ready_at_testbench                   ),
-            .inferenced_label_o              ( inferenced_label_at_testbench              )
-        );
+        // top_bh u_top_bh(
+        //     .clk                             ( clk_clock_generator_at_testbench                             ),
+        //     .reset_n                         ( reset_at_testbench                         ),
+        //     .input_streaming_valid_i         ( input_streaming_valid_at_testbench         ),
+        //     .input_streaming_data_i          ( input_streaming_data_at_testbench          ),
+        //     .input_streaming_ready_o         ( input_streaming_ready_at_testbench         ),
+        //     .start_training_signal_i         ( start_training_signal_at_testbench         ),
+        //     .start_inference_signal_i        ( start_inference_signal_at_testbench        ),
+        //     .start_ready_o                   ( start_ready_at_testbench                   ),
+        //     .inferenced_label_o              ( inferenced_label_at_testbench              )
+        // );
 
 
 
@@ -1572,6 +1572,7 @@ module top_bh_fpga_with_dram_tb;
 
         // ASIC start ready 확인
         ActivateTriggerIn(8'h40, 28);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
 
 
@@ -1589,6 +1590,7 @@ module top_bh_fpga_with_dram_tb;
         // P_STATE_08_ASIC_CONFIG_DONE
         // PROCESSING TIME 세팅하기
         ActivateTriggerIn(8'h40, 23);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
 
 
@@ -1649,6 +1651,7 @@ module top_bh_fpga_with_dram_tb;
 
         // ASIC start ready 확인
         ActivateTriggerIn(8'h40, 28);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
 
 
@@ -1666,10 +1669,12 @@ module top_bh_fpga_with_dram_tb;
         // P_STATE_08_ASIC_CONFIG_DONE
         // 결과 세팅 하기
         ActivateTriggerIn(8'h40, 25);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
         // P_STATE_08_ASIC_CONFIG_DONE
         // PROCESSING TIME 세팅하기
         ActivateTriggerIn(8'h40, 23);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
 
 
 
