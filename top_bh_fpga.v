@@ -116,8 +116,6 @@ module top_bh_fpga(
         // ########################## fpga to asic, asic to fpga ########################################################################################
     );
 
-
-
 	// ########################## End Point Connet ########################################################################################
     wire            okClk;
     wire [112:0]    okHE;
@@ -213,12 +211,21 @@ module top_bh_fpga(
 
     // ########################## sys_clk gen instance ########################################################################################
     wire sys_clk;
-    // // IBUFGDS osc_clk(.O(sys_clk), .I(sys_clk_p), .IB(sys_clk_n));
+    // IBUFGDS osc_clk(.O(sys_clk), .I(sys_clk_p), .IB(sys_clk_n));
+
     assign sys_clk = ui_clk;
     wire sys_clk2;
 
     `ifdef ASIC_IN_FPGA 
-        assign sys_clk2 = okClk;
+        // assign sys_clk2 = okClk;
+
+        wire ui_clk_buf;
+        IBUFG u_IBUFG(.O(ui_clk_buf), .I(ui_clk));
+        clk_wiz_0 u_clk_wiz_0(
+            .clk_in1(ui_clk_buf),
+            .clk_out1(), // 100MHz
+            .clk_out2(sys_clk2) // 20MHz
+        );
     `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
     `else
@@ -1484,6 +1491,13 @@ module top_bh_fpga(
             if (!fifo_p2d_command_full) begin
                 fifo_p2d_command_wr_en = 1;
                 fifo_p2d_command_din = {ep01wirein[16:0], 15'd20};
+            end
+        end
+        // clk phase plus 조절 커맨드
+        if(ep40trigin[21]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {ep01wirein[16:0], 15'd23};
             end
         end
 
