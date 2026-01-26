@@ -223,7 +223,9 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
         wire	         	app_wdf_rdy;
 
 
-
+    reg sample_data_buffer_num_equals_sample_num_minus_1;
+    reg [32*12 - 1:0] samplefinish_num_epochfinish_num_label_num, n_samplefinish_num_epochfinish_num_label_num;
+    reg [5:0] samplefinish_num_epochfinish_num_label_num_transition_cnt, n_samplefinish_num_epochfinish_num_label_num_transition_cnt;
     always @(posedge ui_clk) begin
         if(reset_n == 0 || ui_clk_sync_rst) begin
             config_d_domain_setting_cnt <= 0;
@@ -309,6 +311,10 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
             config_value_layer2 <= 0;
             config_value_layer3 <= 0;
             config_value_ready <= 0;
+
+            sample_data_buffer_num_equals_sample_num_minus_1 <= 0;
+            samplefinish_num_epochfinish_num_label_num <= 0;
+            samplefinish_num_epochfinish_num_label_num_transition_cnt <= 0;
         end else begin
             config_d_domain_setting_cnt <= n_config_d_domain_setting_cnt;
 
@@ -393,6 +399,10 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
             config_value_layer2 <= n_config_value_layer2;
             config_value_layer3 <= n_config_value_layer3;
             config_value_ready <= n_config_value_ready;
+
+            sample_data_buffer_num_equals_sample_num_minus_1 <= (sample_data_buffer_num == sample_num - 1);
+            samplefinish_num_epochfinish_num_label_num <= n_samplefinish_num_epochfinish_num_label_num;
+            samplefinish_num_epochfinish_num_label_num_transition_cnt <= n_samplefinish_num_epochfinish_num_label_num_transition_cnt;
         end
     end
 
@@ -522,6 +532,8 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
         
         fifo_p2d_data_rd_en = 0;
 
+        n_samplefinish_num_epochfinish_num_label_num = samplefinish_num_epochfinish_num_label_num;
+        n_samplefinish_num_epochfinish_num_label_num_transition_cnt = samplefinish_num_epochfinish_num_label_num_transition_cnt;
 
 
 
@@ -786,6 +798,8 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                         n_queuing_first_time = 1;
 
                         n_read_address_for_data = dram_address;
+
+                        n_samplefinish_num_epochfinish_num_label_num = 0;
                     end
                 end
             end else if (fifo_p2d_command_dout[14:0] == 13) begin
@@ -806,6 +820,8 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                         n_queuing_first_time = 1;
 
                         n_read_address_for_data = dram_address;
+
+                        n_samplefinish_num_epochfinish_num_label_num = 0;
                     end
                 end
             end else if (fifo_p2d_command_dout[14:0] == 16) begin
@@ -850,6 +866,17 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                     fifo_d2a_command_wr_en = 1;
                     fifo_d2a_command_din = fifo_p2d_command_dout;
                 end
+            end else if (fifo_p2d_command_dout[14:0] == 24) begin
+                if (!fifo_d2p_command_full) begin
+                    fifo_d2p_command_wr_en = 1;
+                    fifo_d2p_command_din = {1'd0, samplefinish_num_epochfinish_num_label_num[16*samplefinish_num_epochfinish_num_label_num_transition_cnt +: 16],15'd24};
+                    if (samplefinish_num_epochfinish_num_label_num_transition_cnt != 23) begin
+                        n_samplefinish_num_epochfinish_num_label_num_transition_cnt = samplefinish_num_epochfinish_num_label_num_transition_cnt + 1;
+                    end else begin
+                        n_samplefinish_num_epochfinish_num_label_num_transition_cnt = 0;
+                        fifo_p2d_command_rd_en = 1;
+                    end
+                end
             end
         end
 
@@ -882,7 +909,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                             app_cmd = DRAM_READ;
                             app_addr = read_address_for_data;
                             n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
-                            if (sample_data_buffer_num == sample_num - 1 && sample_data_buffer_read_request_cnt == DVS_GESTURE_READ_REQUEST_PER_SAMPLE - 1) begin
+                            if (sample_data_buffer_num_equals_sample_num_minus_1 && sample_data_buffer_read_request_cnt == DVS_GESTURE_READ_REQUEST_PER_SAMPLE - 1) begin
                                 n_sample_data_buffer_stop_read_request = 1;
                             end else begin
                                 if (read_address_for_data == dram_address_last) begin
@@ -897,7 +924,8 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
 
                 if (sample_data_buffer_cnt != DVS_GESTURE_READ_REQUEST_PER_SAMPLE) begin
                     if (app_rd_data_valid) begin
-                        n_sample_data_buffer = {app_rd_data, sample_data_buffer[256 +: DVS_GESTURE_BITS_PER_SAMPLE-256]};
+                        // n_sample_data_buffer = {app_rd_data, sample_data_buffer[256 +: DVS_GESTURE_BITS_PER_SAMPLE-256]};
+                        n_sample_data_buffer = {sample_data_buffer[0 +: DVS_GESTURE_BITS_PER_SAMPLE-256], app_rd_data};
                         n_sample_data_buffer_cnt = sample_data_buffer_cnt + 1;
                     end
                 end else begin
@@ -906,7 +934,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                         n_sample_data_buffer2_gesture = sample_data_buffer[0 +: DVS_GESTURE_BITS_PER_SAMPLE];
                         n_sample_data_buffer_read_request_cnt = 0;
                         n_sample_data_buffer_cnt = 0;
-                        if (sample_data_buffer_num != sample_num - 1) begin
+                        if (!sample_data_buffer_num_equals_sample_num_minus_1) begin
                             n_sample_data_buffer_num = sample_data_buffer_num + 1;
                         end else begin
                             n_sample_data_buffer_num = 0;
@@ -953,6 +981,43 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                                     n_sample_num_executed = sample_num_executed + 1;
                                     n_sample_data_buffer2_busy = 0;
                                 end
+
+                                if (this_sample_label == 0) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*0 +: 32]= samplefinish_num_epochfinish_num_label_num[32*0 +: 32] + 1;
+                                end
+                                if (this_sample_label == 1) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*1 +: 32]= samplefinish_num_epochfinish_num_label_num[32*1 +: 32] + 1;
+                                end
+                                if (this_sample_label == 2) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*2 +: 32]= samplefinish_num_epochfinish_num_label_num[32*2 +: 32] + 1;
+                                end
+                                if (this_sample_label == 3) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*3 +: 32]= samplefinish_num_epochfinish_num_label_num[32*3 +: 32] + 1;
+                                end
+                                if (this_sample_label == 4) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*4 +: 32]= samplefinish_num_epochfinish_num_label_num[32*4 +: 32] + 1;
+                                end
+                                if (this_sample_label == 5) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*5 +: 32]= samplefinish_num_epochfinish_num_label_num[32*5 +: 32] + 1;
+                                end
+                                if (this_sample_label == 6) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*6 +: 32]= samplefinish_num_epochfinish_num_label_num[32*6 +: 32] + 1;
+                                end
+                                if (this_sample_label == 7) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*7 +: 32]= samplefinish_num_epochfinish_num_label_num[32*7 +: 32] + 1;
+                                end
+                                if (this_sample_label == 8) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*8 +: 32]= samplefinish_num_epochfinish_num_label_num[32*8 +: 32] + 1;
+                                end
+                                if (this_sample_label == 9) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*9 +: 32]= samplefinish_num_epochfinish_num_label_num[32*9 +: 32] + 1;
+                                end
+                                if (this_epoch_finish) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*10 +: 32]= samplefinish_num_epochfinish_num_label_num[32*10 +: 32] + 1;
+                                end
+                                if (this_sample_done) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*11 +: 32]= samplefinish_num_epochfinish_num_label_num[32*11 +: 32] + 1;
+                                end
                             end
                         end
                     end
@@ -965,7 +1030,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                             app_cmd = DRAM_READ;
                             app_addr = read_address_for_data;
                             n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
-                            if (sample_data_buffer_num == sample_num - 1 && sample_data_buffer_read_request_cnt == N_MNIST_READ_REQUEST_PER_SAMPLE - 1) begin
+                            if (sample_data_buffer_num_equals_sample_num_minus_1 && sample_data_buffer_read_request_cnt == N_MNIST_READ_REQUEST_PER_SAMPLE - 1) begin
                                 n_sample_data_buffer_stop_read_request = 1;
                             end else begin
                                 if (read_address_for_data == dram_address_last) begin
@@ -980,16 +1045,17 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
 
                 if (sample_data_buffer_cnt != N_MNIST_READ_REQUEST_PER_SAMPLE) begin
                     if (app_rd_data_valid) begin
-                        n_sample_data_buffer = {app_rd_data, sample_data_buffer[256 +: DVS_GESTURE_BITS_PER_SAMPLE-256]};
+                        // n_sample_data_buffer = {app_rd_data, sample_data_buffer[256 +: DVS_GESTURE_BITS_PER_SAMPLE-256]};
+                        n_sample_data_buffer = {sample_data_buffer[0 +: DVS_GESTURE_BITS_PER_SAMPLE-256], app_rd_data};
                         n_sample_data_buffer_cnt = sample_data_buffer_cnt + 1;
                     end
                 end else begin
                     if (!sample_data_buffer2_busy) begin
                         n_sample_data_buffer2_busy = 1;
-                        n_sample_data_buffer2_nmnist = sample_data_buffer[0 + (DVS_GESTURE_BITS_PER_SAMPLE-N_MNIST_BITS_PER_SAMPLE) +: N_MNIST_BITS_PER_SAMPLE];
+                        n_sample_data_buffer2_nmnist = sample_data_buffer[0 +: N_MNIST_BITS_PER_SAMPLE];
                         n_sample_data_buffer_read_request_cnt = 0;
                         n_sample_data_buffer_cnt = 0;
-                        if (sample_data_buffer_num != sample_num - 1) begin
+                        if (!sample_data_buffer_num_equals_sample_num_minus_1) begin
                             n_sample_data_buffer_num = sample_data_buffer_num + 1;
                         end else begin
                             n_sample_data_buffer_num = 0;
@@ -1036,6 +1102,43 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                                     n_sample_num_executed = sample_num_executed + 1;
                                     n_sample_data_buffer2_busy = 0;
                                 end
+
+                                if (this_sample_label == 0) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*0 +: 32]= samplefinish_num_epochfinish_num_label_num[32*0 +: 32] + 1;
+                                end
+                                if (this_sample_label == 1) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*1 +: 32]= samplefinish_num_epochfinish_num_label_num[32*1 +: 32] + 1;
+                                end
+                                if (this_sample_label == 2) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*2 +: 32]= samplefinish_num_epochfinish_num_label_num[32*2 +: 32] + 1;
+                                end
+                                if (this_sample_label == 3) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*3 +: 32]= samplefinish_num_epochfinish_num_label_num[32*3 +: 32] + 1;
+                                end
+                                if (this_sample_label == 4) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*4 +: 32]= samplefinish_num_epochfinish_num_label_num[32*4 +: 32] + 1;
+                                end
+                                if (this_sample_label == 5) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*5 +: 32]= samplefinish_num_epochfinish_num_label_num[32*5 +: 32] + 1;
+                                end
+                                if (this_sample_label == 6) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*6 +: 32]= samplefinish_num_epochfinish_num_label_num[32*6 +: 32] + 1;
+                                end
+                                if (this_sample_label == 7) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*7 +: 32]= samplefinish_num_epochfinish_num_label_num[32*7 +: 32] + 1;
+                                end
+                                if (this_sample_label == 8) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*8 +: 32]= samplefinish_num_epochfinish_num_label_num[32*8 +: 32] + 1;
+                                end
+                                if (this_sample_label == 9) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*9 +: 32]= samplefinish_num_epochfinish_num_label_num[32*9 +: 32] + 1;
+                                end
+                                if (this_epoch_finish) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*10 +: 32]= samplefinish_num_epochfinish_num_label_num[32*10 +: 32] + 1;
+                                end
+                                if (this_sample_done) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*11 +: 32]= samplefinish_num_epochfinish_num_label_num[32*11 +: 32] + 1;
+                                end
                             end
                         end
                     end
@@ -1048,7 +1151,7 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                             app_cmd = DRAM_READ;
                             app_addr = read_address_for_data;
                             n_sample_data_buffer_read_request_cnt = sample_data_buffer_read_request_cnt + 1;
-                            if (sample_data_buffer_num == sample_num - 1 && sample_data_buffer_read_request_cnt == NTIDIGITS_READ_REQUEST_PER_SAMPLE - 1) begin
+                            if (sample_data_buffer_num_equals_sample_num_minus_1 && sample_data_buffer_read_request_cnt == NTIDIGITS_READ_REQUEST_PER_SAMPLE - 1) begin
                                 n_sample_data_buffer_stop_read_request = 1;
                             end else begin
                                 if (read_address_for_data == dram_address_last) begin
@@ -1063,16 +1166,17 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
 
                 if (sample_data_buffer_cnt != NTIDIGITS_READ_REQUEST_PER_SAMPLE) begin
                     if (app_rd_data_valid) begin
-                        n_sample_data_buffer = {app_rd_data, sample_data_buffer[256 +: DVS_GESTURE_BITS_PER_SAMPLE-256]};
+                        // n_sample_data_buffer = {app_rd_data, sample_data_buffer[256 +: DVS_GESTURE_BITS_PER_SAMPLE-256]};
+                        n_sample_data_buffer = {sample_data_buffer[0 +: DVS_GESTURE_BITS_PER_SAMPLE-256], app_rd_data};
                         n_sample_data_buffer_cnt = sample_data_buffer_cnt + 1;
                     end
                 end else begin
                     if (!sample_data_buffer2_busy) begin
                         n_sample_data_buffer2_busy = 1;
-                        n_sample_data_buffer2_ntidigits = sample_data_buffer[0 + (DVS_GESTURE_BITS_PER_SAMPLE-NTIDIGITS_BITS_PER_SAMPLE) +: NTIDIGITS_BITS_PER_SAMPLE];
+                        n_sample_data_buffer2_ntidigits = sample_data_buffer[0 +: NTIDIGITS_BITS_PER_SAMPLE];
                         n_sample_data_buffer_read_request_cnt = 0;
                         n_sample_data_buffer_cnt = 0;
-                        if (sample_data_buffer_num != sample_num - 1) begin
+                        if (!sample_data_buffer_num_equals_sample_num_minus_1) begin
                             n_sample_data_buffer_num = sample_data_buffer_num + 1;
                         end else begin
                             n_sample_data_buffer_num = 0;
@@ -1118,6 +1222,43 @@ localparam CLOCK_INPUT_SPIKE_COLLECT_SHORT = 9;
                                     n_dataset_label_and_data_one_timestep_ready = 0;
                                     n_sample_num_executed = sample_num_executed + 1;
                                     n_sample_data_buffer2_busy = 0;
+                                end
+
+                                if (this_sample_label == 0) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*0 +: 32]= samplefinish_num_epochfinish_num_label_num[32*0 +: 32] + 1;
+                                end
+                                if (this_sample_label == 1) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*1 +: 32]= samplefinish_num_epochfinish_num_label_num[32*1 +: 32] + 1;
+                                end
+                                if (this_sample_label == 2) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*2 +: 32]= samplefinish_num_epochfinish_num_label_num[32*2 +: 32] + 1;
+                                end
+                                if (this_sample_label == 3) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*3 +: 32]= samplefinish_num_epochfinish_num_label_num[32*3 +: 32] + 1;
+                                end
+                                if (this_sample_label == 4) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*4 +: 32]= samplefinish_num_epochfinish_num_label_num[32*4 +: 32] + 1;
+                                end
+                                if (this_sample_label == 5) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*5 +: 32]= samplefinish_num_epochfinish_num_label_num[32*5 +: 32] + 1;
+                                end
+                                if (this_sample_label == 6) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*6 +: 32]= samplefinish_num_epochfinish_num_label_num[32*6 +: 32] + 1;
+                                end
+                                if (this_sample_label == 7) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*7 +: 32]= samplefinish_num_epochfinish_num_label_num[32*7 +: 32] + 1;
+                                end
+                                if (this_sample_label == 8) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*8 +: 32]= samplefinish_num_epochfinish_num_label_num[32*8 +: 32] + 1;
+                                end
+                                if (this_sample_label == 9) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*9 +: 32]= samplefinish_num_epochfinish_num_label_num[32*9 +: 32] + 1;
+                                end
+                                if (this_epoch_finish) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*10 +: 32]= samplefinish_num_epochfinish_num_label_num[32*10 +: 32] + 1;
+                                end
+                                if (this_sample_done) begin
+                                    n_samplefinish_num_epochfinish_num_label_num[32*11 +: 32]= samplefinish_num_epochfinish_num_label_num[32*11 +: 32] + 1;
                                 end
                             end
                         end

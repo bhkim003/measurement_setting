@@ -620,7 +620,7 @@ module top_bh_fpga(
     reg [63:0] processing_time_cnt, n_processing_time_cnt;
     reg [3:0] processing_time_cnt_transition_cnt, n_processing_time_cnt_transition_cnt;
     reg [31:0] sample_num_executed_from_a, n_sample_num_executed_from_a;
-    reg [3:0] sample_num_executed_from_a_transition_cnt, n_sample_num_executed_from_a_transition_cnt;
+    reg [5:0] sample_num_executed_from_a_transition_cnt, n_sample_num_executed_from_a_transition_cnt;
 
     reg [31:0] data_stream_cnt_for_test_from_a, n_data_stream_cnt_for_test_from_a;
     reg [15:0] timestep_from_a, n_timestep_from_a;
@@ -646,6 +646,7 @@ module top_bh_fpga(
     reg asic_config_ongoing, n_asic_config_ongoing;
 
     reg [16:0] captured_sample_num_executed, n_captured_sample_num_executed;
+    reg [32*12:0] samplefinish_num_epochfinish_num_label_num, n_samplefinish_num_epochfinish_num_label_num;
     always @ (*) begin
         n_ep20wireout = ep01wirein;
         n_ep21wireout = p_state;
@@ -774,7 +775,10 @@ module top_bh_fpga(
             end else if (ep01wirein == 19) begin
                 led = xem7360_led(sample_num_executed_from_a[7:0]);
                 n_ep20wireout = sample_num_executed_from_a;
-            end
+            end else if (ep01wirein >= 20 && ep01wirein <= 31) begin
+                led = xem7360_led(samplefinish_num_epochfinish_num_label_num[32*(ep01wirein-20)+:8]);
+                n_ep20wireout = samplefinish_num_epochfinish_num_label_num[32*(ep01wirein-20)+:32];
+            end 
         end else if (p_state == P_STATE_09_ASIC_INFERENCE_QUEUING || p_state == P_STATE_11_ASIC_TRAINING_QUEUING) begin
             if (ep01wirein == 0) begin
                 if (asic_start_ready == 1) begin
@@ -909,6 +913,8 @@ module top_bh_fpga(
             data_stream_cnt_for_test_from_a <= 0;
             timestep_from_a <= 0;
             sample_stream_cnt_small_from_a <= 0;
+
+            samplefinish_num_epochfinish_num_label_num <= 0;
         end else begin
             p_state <= n_p_state;
 
@@ -967,6 +973,8 @@ module top_bh_fpga(
             data_stream_cnt_for_test_from_a <= n_data_stream_cnt_for_test_from_a;
             timestep_from_a <= n_timestep_from_a;
             sample_stream_cnt_small_from_a <= n_sample_stream_cnt_small_from_a;
+
+            samplefinish_num_epochfinish_num_label_num <= n_samplefinish_num_epochfinish_num_label_num;
         end
     end
 
@@ -1050,6 +1058,8 @@ module top_bh_fpga(
 		n_data_stream_cnt_for_test_from_a = data_stream_cnt_for_test_from_a;
 		n_timestep_from_a = timestep_from_a;
 		n_sample_stream_cnt_small_from_a = sample_stream_cnt_small_from_a;
+
+		n_samplefinish_num_epochfinish_num_label_num = samplefinish_num_epochfinish_num_label_num;
         
         if(ep40trigin[29]) begin
             if (!fifo_p2d_data_full) begin
@@ -1575,6 +1585,26 @@ module top_bh_fpga(
                 n_sample_num_executed_from_a_transition_cnt = sample_num_executed_from_a_transition_cnt + 1;
             end else if (sample_num_executed_from_a_transition_cnt == 5) begin
                 n_sample_stream_cnt_small_from_a = fifo_d2p_command_dout[15 +: 8];
+                n_sample_num_executed_from_a_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
+
+
+
+
+        // d domain 정보보기
+        if(ep40trigin[20]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd24};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 24) begin
+            fifo_d2p_command_rd_en = 1;
+            n_samplefinish_num_epochfinish_num_label_num[sample_num_executed_from_a_transition_cnt*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+            n_sample_num_executed_from_a_transition_cnt = sample_num_executed_from_a_transition_cnt + 1;
+            if (sample_num_executed_from_a_transition_cnt == 23) begin
                 n_sample_num_executed_from_a_transition_cnt = 0;
                 ep60trigout = {31'd0, 1'b1};
             end

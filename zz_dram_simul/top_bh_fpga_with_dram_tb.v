@@ -1185,7 +1185,7 @@ module top_bh_fpga_with_dram_tb;
 
     reg [578 - 1:0] nmnist_one_timestep;
     reg [578 + 4 - 1:0] nmnist_one_timestep_front_label;
-    reg [(578 + 4)*10 + 162 - 1:0] nmnist_one_sample;
+    reg [(578 + 4)*5 + 162 - 1:0] nmnist_one_sample;
 
 
 
@@ -1243,7 +1243,7 @@ module top_bh_fpga_with_dram_tb;
         nmnist_one_timestep[72*8 +: 2] = 2'd0;
 
         nmnist_one_timestep_front_label = {4'd9, nmnist_one_timestep};
-        nmnist_one_sample = {162'd0, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label};
+        nmnist_one_sample = {162'd0, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label, nmnist_one_timestep_front_label};
         
         // FrontPanel 초기화
         FrontPanelReset;

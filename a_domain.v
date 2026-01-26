@@ -1046,17 +1046,27 @@ module a_domain(
                 end
             end else begin
                 label_fifo_rd_en = 1;
-                // n_total_inference_sample_num = total_inference_sample_num + 1;
-                // if (label_fifo_dout == inferenced_label_4bit) begin
-                //     n_correct_sample_num = correct_sample_num + 1;
-                // end else begin
-                //     n_wrong_sample_num = wrong_sample_num + 1;
-                // end
+
+
+
                 n_total_inference_sample_num = total_inference_sample_num + 1;
-                if (label_fifo_dout == 9)
+                if (label_fifo_dout == inferenced_label_4bit) begin
                     n_correct_sample_num = correct_sample_num + 1;
-                if (inferenced_label_4bit == 9)
+                end else begin
                     n_wrong_sample_num = wrong_sample_num + 1;
+                end
+
+
+
+                // n_total_inference_sample_num = total_inference_sample_num + 1;
+                // if (label_fifo_dout == 9)
+                //     n_correct_sample_num = correct_sample_num + 1;
+                // if (inferenced_label_4bit == 9)
+                //     n_wrong_sample_num = wrong_sample_num + 1;
+
+
+
+
                 n_inferenced_label_shooting_ongoing = 0;
                 n_label_comparison_time = 0;
             end
