@@ -1161,7 +1161,7 @@ module a_domain(
 
 
         if (asic_inferenced_label_for_test_cnt == 0 && one_sample_finish[3]) begin
-            n_asic_inferenced_label_for_test = 0;
+            n_asic_inferenced_label_for_test = 1;
             n_asic_inferenced_label_for_test_cnt = asic_inferenced_label_for_test_cnt + 1;
         end
         if (asic_inferenced_label_for_test_cnt == 1) begin
