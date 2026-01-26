@@ -646,7 +646,7 @@ module top_bh_fpga(
     reg asic_config_ongoing, n_asic_config_ongoing;
 
     reg [16:0] captured_sample_num_executed, n_captured_sample_num_executed;
-    reg [32*12:0] samplefinish_num_epochfinish_num_label_num, n_samplefinish_num_epochfinish_num_label_num;
+    reg [32*12-1:0] samplefinish_num_epochfinish_num_label_num, n_samplefinish_num_epochfinish_num_label_num;
     always @ (*) begin
         n_ep20wireout = ep01wirein;
         n_ep21wireout = p_state;
