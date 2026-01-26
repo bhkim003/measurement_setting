@@ -525,4 +525,4 @@ set_property PACKAGE_PIN K6 [get_ports {mgtrefclk_p}]
 set_property PACKAGE_PIN K5 [get_ports {mgtrefclk_n}]
 
 # set_clock_groups -asynchronous -group [get_clocks {mmcm0_clk0 okUH0}] -group [get_clocks {sys_clk_p clk_pll_i}]
-set_clock_groups -asynchronous -group [get_clocks {mmcm0_clk0 okUH0}] -group [get_clocks {sys_clk_p clk_pll_i}] -group [get_clocks {clk_ref_mmcm_300}] -group [get_clocks {mmcm_ps_clk_bufg_in}]
+set_clock_groups -asynchronous -group [get_clocks {mmcm0_clk0 okUH0}] -group [get_clocks {sys_clk_p clk_pll_i}] -group [get_clocks {clk_ref_mmcm_300}] -group [get_clocks {mmcm_ps_clk_bufg_in}] -group [get_clocks {clk_out2_clk_wiz_0}]
