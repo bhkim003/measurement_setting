@@ -1,5 +1,5 @@
-`define TEST_SETTING 1
-// `define ASIC_IN_FPGA 1
+// `define TEST_SETTING 1
+`define ASIC_IN_FPGA 1
 // `define CLK_WIZARD_FOR_DYNAMIC_PHASE_USED 1
 module a_domain(
         input clk_a_domain,
