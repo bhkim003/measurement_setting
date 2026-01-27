@@ -42,7 +42,11 @@ module a_domain(
 
         input inferenced_label_from_asic_to_fpga,
 
-        output [9:0] margin_pin
+        output [9:0] margin_pin,
+
+        
+        // clk for fifo
+        output clk_out1
     );
 
 
@@ -50,7 +54,6 @@ module a_domain(
     // ######### clocking wizard ###########################################################################
     // ######### clocking wizard ###########################################################################
     // ######### clocking wizard ###########################################################################
-    wire clk_out1;
     reg psen;
     reg psincdec;
     wire psdone;
@@ -280,7 +283,7 @@ module a_domain(
     reg collect_label, n_collect_label;
 
     reg [31:0] sample_num, n_sample_num;
-    reg [29:0] sample_num_divided4, n_sample_num_divided4;
+    reg [29:0] sample_num_divided16, n_sample_num_divided16;
     reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
 
 
@@ -305,7 +308,7 @@ module a_domain(
     reg [63:0] processing_time_cnt, n_processing_time_cnt;
     reg [3:0] processing_time_cnt_transition_cnt, n_processing_time_cnt_transition_cnt;
 
-    reg sample_num_executed_partial_equals_sample_num_divided4, n_sample_num_executed_partial_equals_sample_num_divided4;
+    reg sample_num_executed_partial_equals_sample_num_divided16, n_sample_num_executed_partial_equals_sample_num_divided16;
     
     localparam ONE_SAMPLE_FINISH_END_INFERENCE_DELAY = 50;
     reg [ONE_SAMPLE_FINISH_END_INFERENCE_DELAY-1:0] one_sample_finish, n_one_sample_finish;
@@ -341,7 +344,7 @@ module a_domain(
             collect_label <= 0;
 
             sample_num <= 0;
-            sample_num_divided4 <= 0;
+            sample_num_divided16 <= 0;
             sample_num_transition_cnt <= 0;
 
 			result_transition_cnt <= 0;
@@ -378,7 +381,7 @@ module a_domain(
             collect_label <= n_collect_label;
 
             sample_num <= n_sample_num;
-            sample_num_divided4 <= n_sample_num_divided4;
+            sample_num_divided16 <= n_sample_num_divided16;
             sample_num_transition_cnt <= n_sample_num_transition_cnt;
 			
             result_transition_cnt <= n_result_transition_cnt;
@@ -422,7 +425,7 @@ module a_domain(
         n_collect_label = collect_label;
 
         n_sample_num = sample_num;
-        n_sample_num_divided4 = sample_num_divided4;
+        n_sample_num_divided16 = sample_num_divided16;
         n_sample_num_transition_cnt = sample_num_transition_cnt;
         
 
@@ -629,7 +632,7 @@ module a_domain(
                 end else if (sample_num_transition_cnt == 2) begin
                     if (!fifo_a2d_command_full) begin
                         n_sample_num_transition_cnt = 3;
-                        n_sample_num_divided4 = sample_num[2 +: 30];
+                        n_sample_num_divided16 = {2'd0, sample_num[4 +: 28]};
                     end
                 end else if (sample_num_transition_cnt == 3) begin
                     if (!fifo_a2d_command_full) begin
@@ -852,7 +855,7 @@ module a_domain(
 
 			sample_num_executed_partial_reset_flag_oneclk_delay <= 0;
             
-			sample_num_executed_partial_equals_sample_num_divided4 <= 0;
+			sample_num_executed_partial_equals_sample_num_divided16 <= 0;
         end else begin
 			label_comparison_time <= n_label_comparison_time;
 			correct_sample_num <= n_correct_sample_num;
@@ -874,7 +877,7 @@ module a_domain(
             
             sample_num_executed_partial_reset_flag_oneclk_delay <= sample_num_executed_partial_reset_flag;
 
-            sample_num_executed_partial_equals_sample_num_divided4 <= n_sample_num_executed_partial_equals_sample_num_divided4;
+            sample_num_executed_partial_equals_sample_num_divided16 <= n_sample_num_executed_partial_equals_sample_num_divided16;
         end
     end
     integer i;
@@ -908,7 +911,7 @@ module a_domain(
 
         sample_num_executed_partial_reset_flag = 0;
 
-		n_sample_num_executed_partial_equals_sample_num_divided4 = (sample_num_executed_partial == sample_num_divided4);
+		n_sample_num_executed_partial_equals_sample_num_divided16 = (sample_num_executed_partial == sample_num_divided16);
 
         if (streaming_count != 7) begin
             if (queuing_ongoing) begin
@@ -943,7 +946,7 @@ module a_domain(
                                     n_timestep = 0;
 
                                     n_sample_num_executed = sample_num_executed + 1;
-                                    if (sample_num_executed_partial_equals_sample_num_divided4) begin
+                                    if (sample_num_executed_partial_equals_sample_num_divided16) begin
                                         sample_num_executed_partial_reset_flag = 1;
                                         n_sample_num_executed_partial = 0;
                                     end else begin
@@ -972,7 +975,7 @@ module a_domain(
                                     n_timestep = 0;
 
                                     n_sample_num_executed = sample_num_executed + 1;
-                                    if (sample_num_executed_partial_equals_sample_num_divided4) begin
+                                    if (sample_num_executed_partial_equals_sample_num_divided16) begin
                                         sample_num_executed_partial_reset_flag = 1;
                                         n_sample_num_executed_partial = 0;
                                     end else begin
@@ -1001,7 +1004,7 @@ module a_domain(
                                     n_timestep = 0;
 
                                     n_sample_num_executed = sample_num_executed + 1;
-                                    if (sample_num_executed_partial_equals_sample_num_divided4) begin
+                                    if (sample_num_executed_partial_equals_sample_num_divided16) begin
                                         sample_num_executed_partial_reset_flag = 1;
                                         n_sample_num_executed_partial = 0;
                                     end else begin

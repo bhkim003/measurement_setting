@@ -215,7 +215,7 @@ module top_bh_fpga(
 
     assign sys_clk = ui_clk;
     wire sys_clk2;
-
+    wire clk_out1_from_a_domain;
     `ifdef ASIC_IN_FPGA 
         // assign sys_clk2 = okClk;
         // assign sys_clk2 = ui_clk;
@@ -230,7 +230,8 @@ module top_bh_fpga(
     `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
     `else
-        assign sys_clk2 = clk_clock_generator;
+        // assign sys_clk2 = clk_clock_generator;
+        assign sys_clk2 = clk_out1_from_a_domain;
     `endif
 
     assign clk_port_spare_1 = ui_clk;
@@ -563,7 +564,9 @@ module top_bh_fpga(
 
         .inferenced_label_from_asic_to_fpga  ( inferenced_label_from_asic_to_fpga  ),
 
-        .margin_pin (margin_pin)
+        .margin_pin (margin_pin),
+
+        .clk_out1 (clk_out1_from_a_domain)
     );
     // ########################## A DOMAIN ########################################################################################
 
