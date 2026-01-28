@@ -226,16 +226,23 @@ module top_bh_fpga(
     `ifdef ASIC_IN_FPGA 
         // assign sys_clk2 = okClk;
         // assign sys_clk2 = ui_clk;
-
         wire ui_clk_buf;
+        wire sys_clk2_temp;
         IBUFG u_IBUFG(.O(ui_clk_buf), .I(ui_clk));
         clk_wiz_0 u_clk_wiz_0(
             .clk_in1(ui_clk_buf),
             .clk_out1(), // 100MHz
-            .clk_out2(sys_clk2) // 20MHz
+            .clk_out2(sys_clk2_temp) // 20MHz
         );
-        assign psdone = psen_delayed[4];
-        assign locked = 1;
+        clk_wiz_1_20MHz u_clk_wiz_1_20MHz(
+            .clk_out1 ( sys_clk2 ),
+            .psclk ( okClk ),
+            .psen (psen),
+            .psincdec (psincdec),
+            .psdone (psdone),
+            .clk_in1 (sys_clk2_temp),
+            .locked ( locked )
+        );
     `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
         assign psdone = psen_delayed[4];
