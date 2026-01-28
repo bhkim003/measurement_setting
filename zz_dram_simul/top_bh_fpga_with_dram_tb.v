@@ -1297,29 +1297,37 @@ module top_bh_fpga_with_dram_tb;
 
         // 클락 페이즈 조절 -
         ActivateTriggerIn(8'h40, 24);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
         repeat (100) @(posedge clk_clock_generator_at_testbench);
         // 클락 페이즈 조절 -
         ActivateTriggerIn(8'h40, 24);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
         repeat (100) @(posedge clk_clock_generator_at_testbench);
         // 클락 페이즈 조절 -
         ActivateTriggerIn(8'h40, 24);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
         repeat (100) @(posedge clk_clock_generator_at_testbench);
         // 클락 페이즈 조절 -
         ActivateTriggerIn(8'h40, 24);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
         repeat (100) @(posedge clk_clock_generator_at_testbench);
 
 
         // 클락 페이즈 조절 +
         ActivateTriggerIn(8'h40, 21);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
         repeat (100) @(posedge clk_clock_generator_at_testbench);
         // 클락 페이즈 조절 +
         ActivateTriggerIn(8'h40, 21);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
         repeat (100) @(posedge clk_clock_generator_at_testbench);
         // 클락 페이즈 조절 +
         ActivateTriggerIn(8'h40, 21);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
         repeat (100) @(posedge clk_clock_generator_at_testbench);
         // 클락 페이즈 조절 +
         ActivateTriggerIn(8'h40, 21);
+        Wait_TriggerOut(8'h60, {31'd0,1'b1});
         repeat (100) @(posedge clk_clock_generator_at_testbench);
 
 
