@@ -1269,6 +1269,79 @@ module top_bh_fpga_with_dram_tb;
         $display("Calibration Complete! Starting User Logic...");
         init_calib_complete_at_top_tb = 1'b1;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+
+        // 클락 페이즈 조절 -
+        ActivateTriggerIn(8'h40, 24);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 -
+        ActivateTriggerIn(8'h40, 24);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 -
+        ActivateTriggerIn(8'h40, 24);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 -
+        ActivateTriggerIn(8'h40, 24);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+
+
+        // 클락 페이즈 조절 +
+        ActivateTriggerIn(8'h40, 21);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 +
+        ActivateTriggerIn(8'h40, 21);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 +
+        ActivateTriggerIn(8'h40, 21);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+        // 클락 페이즈 조절 +
+        ActivateTriggerIn(8'h40, 21);
+        repeat (100) @(posedge clk_clock_generator_at_testbench);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // 2. 파이썬 설정 시퀀스 실행
         P_CONFIG_SEQUENCE();
 
@@ -1696,34 +1769,6 @@ module top_bh_fpga_with_dram_tb;
 
 
 
-        repeat (100) @(posedge clk_clock_generator_at_testbench);
-
-        // 클락 페이즈 조절 -
-        ActivateTriggerIn(8'h40, 24);
-        repeat (100) @(posedge clk_clock_generator_at_testbench);
-        // 클락 페이즈 조절 -
-        ActivateTriggerIn(8'h40, 24);
-        repeat (100) @(posedge clk_clock_generator_at_testbench);
-        // 클락 페이즈 조절 -
-        ActivateTriggerIn(8'h40, 24);
-        repeat (100) @(posedge clk_clock_generator_at_testbench);
-        // 클락 페이즈 조절 -
-        ActivateTriggerIn(8'h40, 24);
-        repeat (100) @(posedge clk_clock_generator_at_testbench);
-
-
-        // 클락 페이즈 조절 +
-        ActivateTriggerIn(8'h40, 21);
-        repeat (100) @(posedge clk_clock_generator_at_testbench);
-        // 클락 페이즈 조절 +
-        ActivateTriggerIn(8'h40, 21);
-        repeat (100) @(posedge clk_clock_generator_at_testbench);
-        // 클락 페이즈 조절 +
-        ActivateTriggerIn(8'h40, 21);
-        repeat (100) @(posedge clk_clock_generator_at_testbench);
-        // 클락 페이즈 조절 +
-        ActivateTriggerIn(8'h40, 21);
-        repeat (100) @(posedge clk_clock_generator_at_testbench);
 
 
 // $finish;

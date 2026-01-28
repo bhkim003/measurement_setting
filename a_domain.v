@@ -1,6 +1,5 @@
 // `define TEST_SETTING 1
 `define ASIC_IN_FPGA 1
-// `define CLK_WIZARD_FOR_DYNAMIC_PHASE_USED 1
 module a_domain(
         input clk_a_domain,
         input reset_n,
@@ -42,57 +41,9 @@ module a_domain(
 
         input inferenced_label_from_asic_to_fpga,
 
-        output [9:0] margin_pin,
-
-        
-        // clk for fifo
-        output clk_out1
+        output [9:0] margin_pin
     );
 
-
-
-    // ######### clocking wizard ###########################################################################
-    // ######### clocking wizard ###########################################################################
-    // ######### clocking wizard ###########################################################################
-    reg psen;
-    reg psincdec;
-    wire psdone;
-    wire phase_command_fifo_full;
-    reg phase_command_fifo_rd_en;
-    wire phase_command_fifo_dout;
-    wire phase_command_fifo_empty;
-    wire phase_command_fifo_valid;
-    `ifdef CLK_WIZARD_FOR_DYNAMIC_PHASE_USED
-        clk_wiz_1 u_clk_wiz_1(
-            .clk_out1 ( clk_out1 ),
-            .psclk    ( clk_a_domain ),
-            .psen     ( fifo_d2a_data_valid     ),
-            .psincdec ( phase_command_fifo_dout ),
-            .psdone   ( psdone   ),
-            .clk_in1  ( clk_a_domain  )
-        );
-        phase_command_fifo u_phase_command_fifo(
-        // write
-        .wr_clk(clk_out1),
-        .wr_en(psen),
-        .din(psincdec),
-        .full(phase_command_fifo_full),
-        // read
-        .rd_clk(clk_a_domain),
-        .rd_en(phase_command_fifo_rd_en),
-        .dout(phase_command_fifo_dout),
-        .empty(fifo_d2a_data_empty),
-        .valid(fifo_d2a_data_valid)
-        );
-        always @ (*) begin
-            phase_command_fifo_rd_en = fifo_d2a_data_valid;
-        end
-    `else
-        assign clk_out1 = clk_a_domain;
-    `endif
-    // ######### clocking wizard ###########################################################################
-    // ######### clocking wizard ###########################################################################
-    // ######### clocking wizard ###########################################################################
 
 
 
@@ -134,7 +85,7 @@ module a_domain(
         wire start_ready_asicinfpga;
         wire inferenced_label_asicinfpga;
         top_bh u_top_bh(
-            .clk                             ( clk_out1                             ),
+            .clk                             ( clk_a_domain                             ),
             .reset_n                         ( reset_n                         ),
             .input_streaming_valid_i         ( input_streaming_valid_from_fpga_to_asic         ),
             .input_streaming_data_i          ( input_streaming_data_from_fpga_to_asic          ),
@@ -157,7 +108,7 @@ module a_domain(
     reg input_streaming_ready_from_asic_to_fpga_buf;
     reg start_ready_from_asic_to_fpga_buf;
     reg inferenced_label_from_asic_to_fpga_buf;
-    always @(posedge clk_out1) begin
+    always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             input_streaming_ready_from_asic_to_fpga_buf <= 0;
             start_ready_from_asic_to_fpga_buf <= 0;
@@ -193,7 +144,7 @@ module a_domain(
     reg [65:0] input_streaming_data_from_fpga_to_asic_buf, input_streaming_data;
     reg start_training_signal_from_fpga_to_asic_buf, start_training_signal; 
     reg start_inference_signal_from_fpga_to_asic_buf, start_inference_signal; 
-    always @(posedge clk_out1) begin
+    always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             input_streaming_valid_from_fpga_to_asic_buf <= 0;
             input_streaming_data_from_fpga_to_asic_buf <= 0;
@@ -233,7 +184,7 @@ module a_domain(
     wire label_fifo_valid;
 
     label_fifo u_label_fifo (
-        .clk(clk_out1),
+        .clk(clk_a_domain),
         .srst(~reset_n),
         .din(label_fifo_din),
         .wr_en(label_fifo_wr_en),
@@ -317,7 +268,7 @@ module a_domain(
 
     reg [3:0] sample_num_executed_transition_cnt, n_sample_num_executed_transition_cnt;
     
-    always @(posedge clk_out1) begin
+    always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             config_a_domain_setting_cnt <= 0;
 
@@ -437,8 +388,6 @@ module a_domain(
 
 		n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt;
 
-        psen = 0;
-        psincdec = 0;
 
         if (fifo_d2a_command_valid) begin
             if (fifo_d2a_command_dout[14:0] == 1) begin
@@ -684,22 +633,6 @@ module a_domain(
             end
         end
 
-        if (fifo_d2a_command_valid) begin
-            if (fifo_d2a_command_dout[14:0] == 20) begin // clk phase command
-                fifo_d2a_command_rd_en = 1; 
-                psen = 1;
-                psincdec = 0;
-            end
-        end
-        if (fifo_d2a_command_valid) begin
-            if (fifo_d2a_command_dout[14:0] == 23) begin // clk phase command plus
-                fifo_d2a_command_rd_en = 1; 
-                psen = 1;
-                psincdec = 1;
-            end
-        end
-
-
         if (training_processing_ongoing) begin
             n_processing_time_cnt = processing_time_cnt + 1;
             if(start_ready_oneclk_past == 0 && start_ready == 1) begin
@@ -833,7 +766,7 @@ module a_domain(
 
 
     // STREAMING CONTROL
-    always @(posedge clk_out1) begin
+    always @(posedge clk_a_domain) begin
         if(!reset_n) begin
 			label_comparison_time <= 0;
 			correct_sample_num <= 0;
@@ -1164,7 +1097,7 @@ module a_domain(
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
-    always @(posedge clk_out1) begin
+    always @(posedge clk_a_domain) begin
         if(!reset_n) begin
             config_stream_cnt <= 0;
             asic_start_ready_for_test <= 1;

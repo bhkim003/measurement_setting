@@ -216,6 +216,14 @@ module top_bh_fpga(
     assign sys_clk = ui_clk;
     wire sys_clk2;
     wire clk_out1_from_a_domain;
+    reg psen;
+    reg psincdec;
+    wire psdone;
+    wire locked;
+
+    reg psdone_oneclk_delay;
+    reg signed [31:0] ps_phase, n_ps_phase;
+    reg [4:0] psen_delayed;
     `ifdef ASIC_IN_FPGA 
         // assign sys_clk2 = okClk;
         // assign sys_clk2 = ui_clk;
@@ -227,11 +235,22 @@ module top_bh_fpga(
             .clk_out1(), // 100MHz
             .clk_out2(sys_clk2) // 20MHz
         );
+        assign psdone = psen_delayed[4];
+        assign locked = 1;
     `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
+        assign psdone = psen_delayed[4];
+        assign locked = 1;
     `else
-        // assign sys_clk2 = clk_clock_generator;
-        assign sys_clk2 = clk_out1_from_a_domain;
+        clk_wiz_1 u_clk_wiz_1(
+            .clk_out1 ( sys_clk2 ),
+            .psclk ( okClk ),
+            .psen (psen),
+            .psincdec (psincdec),
+            .psdone (psdone),
+            .clk_in1 (clk_clock_generator),
+            .locked ( locked )
+        );
     `endif
 
     assign clk_port_spare_1 = ui_clk;
@@ -564,9 +583,7 @@ module top_bh_fpga(
 
         .inferenced_label_from_asic_to_fpga  ( inferenced_label_from_asic_to_fpga  ),
 
-        .margin_pin (margin_pin),
-
-        .clk_out1 (clk_out1_from_a_domain)
+        .margin_pin (margin_pin)
     );
     // ########################## A DOMAIN ########################################################################################
 
@@ -658,6 +675,10 @@ module top_bh_fpga(
 
         if (p_state == P_STATE_00_IDLE) begin
             led = xem7360_led({8{blink_1000ms}});
+            if (ep01wirein == 1) begin
+                led = xem7360_led(ps_phase[7:0]);
+                n_ep20wireout = ps_phase; 
+            end
         end else if (p_state == P_STATE_01_WORKLOAD_CONFIG) begin
             if (ep01wirein == 0) begin
                 if (config_all_domain_setting_complete) begin
@@ -918,6 +939,10 @@ module top_bh_fpga(
             sample_stream_cnt_small_from_a <= 0;
 
             samplefinish_num_epochfinish_num_label_num <= 0;
+
+            ps_phase <= 0;
+            psdone_oneclk_delay <= 0;
+            psen_delayed <= 0;
         end else begin
             p_state <= n_p_state;
 
@@ -978,6 +1003,10 @@ module top_bh_fpga(
             sample_stream_cnt_small_from_a <= n_sample_stream_cnt_small_from_a;
 
             samplefinish_num_epochfinish_num_label_num <= n_samplefinish_num_epochfinish_num_label_num;
+
+            ps_phase <= n_ps_phase;
+            psdone_oneclk_delay <= psdone;
+            psen_delayed <= {psen_delayed[3:0], psen};
         end
     end
 
@@ -1063,7 +1092,11 @@ module top_bh_fpga(
 		n_sample_stream_cnt_small_from_a = sample_stream_cnt_small_from_a;
 
 		n_samplefinish_num_epochfinish_num_label_num = samplefinish_num_epochfinish_num_label_num;
-        
+
+		n_ps_phase = ps_phase;
+        psen = 0;
+        psincdec = 0;
+
         if(ep40trigin[29]) begin
             if (!fifo_p2d_data_full) begin
                 fifo_p2d_command_wr_en = 1;
@@ -1504,19 +1537,19 @@ module top_bh_fpga(
 
         // clk phase 조절 커맨드
         if(ep40trigin[24]) begin
-            if (!fifo_p2d_command_full) begin
-                fifo_p2d_command_wr_en = 1;
-                fifo_p2d_command_din = {ep01wirein[16:0], 15'd20};
-            end
+            n_ps_phase = ps_phase - 1;
+            psen = 1;
+            psincdec = 0;
         end
         // clk phase plus 조절 커맨드
         if(ep40trigin[21]) begin
-            if (!fifo_p2d_command_full) begin
-                fifo_p2d_command_wr_en = 1;
-                fifo_p2d_command_din = {ep01wirein[16:0], 15'd23};
-            end
+            n_ps_phase = ps_phase + 1;
+            psen = 1;
+            psincdec = 1;
         end
-
+        if (psdone_oneclk_delay && locked) begin
+            ep60trigout = {31'd0, 1'b1};
+        end
 
 
 
