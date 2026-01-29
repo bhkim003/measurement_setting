@@ -543,7 +543,7 @@ set_property PACKAGE_PIN K5 [get_ports {mgtrefclk_n}]
 
 
 
-set_clock_groups -asynchronous -group [get_clocks {okUH0 mmcm0_clk0}] -group [get_clocks {sys_clk_p clk_pll_i}] -group [get_clocks {clk_out1_clk_wiz_1}] -group [get_clocks {clk_out1_clk_wiz_1_20MHz_1}] -group [get_clocks {clk_out2_clk_wiz_0}] -group [get_clocks {clk_clock_generator}]
+set_clock_groups -asynchronous -group [get_clocks {okUH0 mmcm0_clk0}] -group [get_clocks {sys_clk_p clk_pll_i}] -group [get_clocks {clk_out1_clk_wiz_1}] -group [get_clocks {clk_out1_clk_wiz_1_20MHz_1}] -group [get_clocks {clk_out1_clk_wiz_1_100to20MHz_nobuffer}] -group [get_clocks {clk_out2_clk_wiz_0}] -group [get_clocks {clk_clock_generator}]
 
 
 
