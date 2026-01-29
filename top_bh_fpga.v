@@ -270,6 +270,104 @@ module top_bh_fpga(
             .clk_in1 (clk_clock_generator),
             .locked ( locked )
         );
+
+        // clk_wiz_dynamic_200MHzto200MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // clk_wiz_dynamic_150MHzto150MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // clk_wiz_dynamic_100MHzto100MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // clk_wiz_dynamic_50MHzto50MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // clk_wiz_dynamic_20MHzto20MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // clk_wiz_static_200MHzto200MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign locked = 1;
+
+        // clk_wiz_static_150MHzto150MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign locked = 1;
+
+        // clk_wiz_static_100MHzto100MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign locked = 1;
+
+        // clk_wiz_static_50MHzto50MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign locked = 1;
+
+        // clk_wiz_static_20MHzto20MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign locked = 1;
+
+
+        // IBUFG u_IBUFG(.O(sys_clk2), .I(clk_clock_generator));
+
+
+        // assign sys_clk2 = clk_clock_generator;
+
+
     `endif
 
     assign clk_port_spare_1 = ui_clk;
