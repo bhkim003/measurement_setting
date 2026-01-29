@@ -1,5 +1,6 @@
 // `define TEST_SETTING 1
 `define ASIC_IN_FPGA 1
+`define BUILTIN_FIFO_FOR_A_DOMAIN 1
 module top_bh_fpga(
         // ########################## okHost interface ########################################################################################
         // ########################## okHost interface ########################################################################################
@@ -229,11 +230,13 @@ module top_bh_fpga(
         wire ui_clk_buf;
         wire sys_clk2_temp;
         IBUFG u_IBUFG(.O(ui_clk_buf), .I(ui_clk));
+        // // PLL
         // clk_wiz_0 u_clk_wiz_0(
         //     .clk_in1(ui_clk_buf),
         //     .clk_out1(), // 100MHz
         //     .clk_out2(sys_clk2_temp) // 20MHz
         // );
+        // // MCMM
         // clk_wiz_1_20MHz u_clk_wiz_1_20MHz(
         //     .clk_out1 ( sys_clk2 ),
         //     .psclk ( okClk ),
@@ -246,21 +249,35 @@ module top_bh_fpga(
         // assign psdone = psen_delayed[4];
         // assign locked = 1;
 
-        
-        clk_wiz_1_100to20MHz_nobuffer u_clk_wiz_1_100to20MHz_nobuffer(
-            .clk_out1 ( sys_clk2 ),
-            .psclk ( okClk ),
-            .psen (psen),
-            .psincdec (psincdec),
-            .psdone (psdone),
-            .clk_in1 (ui_clk_buf),
-            .locked ( locked )
-        );
+        `ifdef BUILTIN_FIFO_FOR_A_DOMAIN 
+            // // MCMM
+            clk_wiz_1_100to10MHz_nobuffer u_clk_wiz_1_100to10MHz_nobuffer(
+                .clk_out1 ( sys_clk2 ),
+                .psclk ( okClk ),
+                .psen (psen),
+                .psincdec (psincdec),
+                .psdone (psdone),
+                .clk_in1 (ui_clk_buf),
+                .locked ( locked )
+            );
+        `else
+            // // MCMM
+            clk_wiz_1_100to20MHz_nobuffer u_clk_wiz_1_100to20MHz_nobuffer(
+                .clk_out1 ( sys_clk2 ),
+                .psclk ( okClk ),
+                .psen (psen),
+                .psincdec (psincdec),
+                .psdone (psdone),
+                .clk_in1 (ui_clk_buf),
+                .locked ( locked )
+            );
+        `endif
     `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
         assign psdone = psen_delayed[4];
         assign locked = 1;
     `else
+        // // MCMM
         clk_wiz_1 u_clk_wiz_1(
             .clk_out1 ( sys_clk2 ),
             .psclk ( okClk ),
@@ -271,6 +288,7 @@ module top_bh_fpga(
             .locked ( locked )
         );
 
+        // // MCMM
         // clk_wiz_dynamic_200MHzto200MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .psclk ( okClk ),
@@ -281,6 +299,7 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
 
+        // // MCMM
         // clk_wiz_dynamic_150MHzto150MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .psclk ( okClk ),
@@ -291,6 +310,7 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
 
+        // // MCMM
         // clk_wiz_dynamic_100MHzto100MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .psclk ( okClk ),
@@ -301,6 +321,7 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
 
+        // // MCMM
         // clk_wiz_dynamic_50MHzto50MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .psclk ( okClk ),
@@ -311,6 +332,7 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
 
+        // // MCMM
         // clk_wiz_dynamic_20MHzto20MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .psclk ( okClk ),
@@ -321,6 +343,18 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
 
+        // // MCMM
+        // clk_wiz_dynamic_10MHzto10MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // // PLL
         // clk_wiz_static_200MHzto200MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .clk_in1 (clk_clock_generator),
@@ -329,6 +363,7 @@ module top_bh_fpga(
         // assign psdone = psen_delayed[4];
         // assign locked = 1;
 
+        // // PLL
         // clk_wiz_static_150MHzto150MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .clk_in1 (clk_clock_generator),
@@ -337,6 +372,7 @@ module top_bh_fpga(
         // assign psdone = psen_delayed[4];
         // assign locked = 1;
 
+        // // PLL
         // clk_wiz_static_100MHzto100MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .clk_in1 (clk_clock_generator),
@@ -345,6 +381,7 @@ module top_bh_fpga(
         // assign psdone = psen_delayed[4];
         // assign locked = 1;
 
+        // // PLL
         // clk_wiz_static_50MHzto50MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .clk_in1 (clk_clock_generator),
@@ -353,7 +390,17 @@ module top_bh_fpga(
         // assign psdone = psen_delayed[4];
         // assign locked = 1;
 
+        // // PLL
         // clk_wiz_static_20MHzto20MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign locked = 1;
+
+        // // MCMM
+        // clk_wiz_static_10MHzto10MHz u_clk_wiz_1(
         //     .clk_out1 ( sys_clk2 ),
         //     .clk_in1 (clk_clock_generator),
         //     .locked ( locked )
@@ -514,94 +561,105 @@ module top_bh_fpga(
     // ########################## D TO P DOMAIN CROSSING FIFO ########################################################################################
  
     // ########################## D TO A DOMAIN CROSSING FIFO ########################################################################################
-    fifo_bh_ww32d16_rw32d16 u_fifo_d2a_command(
-        .rst(reset_n == 0 || ui_clk_sync_rst),
-        // write
-        .wr_clk(sys_clk),
-        .wr_en(fifo_d2a_command_wr_en),
-        .din(fifo_d2a_command_din),
-        .full(fifo_d2a_command_full),
-        // read
-        .rd_clk(sys_clk2),
-        .rd_en(fifo_d2a_command_rd_en),
-        .dout(fifo_d2a_command_dout),
-        .empty(fifo_d2a_command_empty),
-        .valid(fifo_d2a_command_valid)
-    );    
-    // fifo_bh_ww32d512_rw32d512_r10MHz_w200MHz u_fifo_d2a_command(
-    //     .rst(reset_n == 0 || ui_clk_sync_rst),
-    //     // write
-    //     .wr_clk(sys_clk),
-    //     .wr_en(fifo_d2a_command_wr_en),
-    //     .din(fifo_d2a_command_din),
-    //     .full(fifo_d2a_command_full),
-    //     // read
-    //     .rd_clk(sys_clk2),
-    //     .rd_en(fifo_d2a_command_rd_en),
-    //     .dout(fifo_d2a_command_dout),
-    //     .empty(fifo_d2a_command_empty),
-    //     .valid(fifo_d2a_command_valid)
-    // );
+ 
+    `ifdef BUILTIN_FIFO_FOR_A_DOMAIN
+        fifo_bh_ww32d512_rw32d512_r10MHz_w100MHz u_fifo_d2a_command(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk),
+            .wr_en(fifo_d2a_command_wr_en),
+            .din(fifo_d2a_command_din),
+            .full(fifo_d2a_command_full),
+            // read
+            .rd_clk(sys_clk2),
+            .rd_en(fifo_d2a_command_rd_en),
+            .dout(fifo_d2a_command_dout),
+            .empty(fifo_d2a_command_empty),
+            .valid(fifo_d2a_command_valid)
+        );
+    `else
+        fifo_bh_ww32d16_rw32d16 u_fifo_d2a_command(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk),
+            .wr_en(fifo_d2a_command_wr_en),
+            .din(fifo_d2a_command_din),
+            .full(fifo_d2a_command_full),
+            // read
+            .rd_clk(sys_clk2),
+            .rd_en(fifo_d2a_command_rd_en),
+            .dout(fifo_d2a_command_dout),
+            .empty(fifo_d2a_command_empty),
+            .valid(fifo_d2a_command_valid)
+        );   
+    `endif
 
-    fifo_bh_ww66d1024_rw66d1024 u_fifo_d2a_data(
-        .rst(reset_n == 0 || ui_clk_sync_rst),
-        // write
-        .wr_clk(sys_clk),
-        .wr_en(fifo_d2a_data_wr_en),
-        .din(fifo_d2a_data_din),
-        .full(fifo_d2a_data_full),
-        // read
-        .rd_clk(sys_clk2),
-        .rd_en(fifo_d2a_data_rd_en),
-        .dout(fifo_d2a_data_dout),
-        .empty(fifo_d2a_data_empty),
-        .valid(fifo_d2a_data_valid)
-    );
-    // fifo_bh_ww66d1024_rw66d1024_r10MHz_w200MHz u_fifo_d2a_data(
-    //     .rst(reset_n == 0 || ui_clk_sync_rst),
-    //     // write
-    //     .wr_clk(sys_clk),
-    //     .wr_en(fifo_d2a_data_wr_en),
-    //     .din(fifo_d2a_data_din),
-    //     .full(fifo_d2a_data_full),
-    //     // read
-    //     .rd_clk(sys_clk2),
-    //     .rd_en(fifo_d2a_data_rd_en),
-    //     .dout(fifo_d2a_data_dout),
-    //     .empty(fifo_d2a_data_empty),
-    //     .valid(fifo_d2a_data_valid)
-    // );
+    `ifdef BUILTIN_FIFO_FOR_A_DOMAIN
+        fifo_bh_ww66d1024_rw66d1024_r10MHz_w100MHz u_fifo_d2a_data(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk),
+            .wr_en(fifo_d2a_data_wr_en),
+            .din(fifo_d2a_data_din),
+            .full(fifo_d2a_data_full),
+            // read
+            .rd_clk(sys_clk2),
+            .rd_en(fifo_d2a_data_rd_en),
+            .dout(fifo_d2a_data_dout),
+            .empty(fifo_d2a_data_empty),
+            .valid(fifo_d2a_data_valid)
+        );
+    `else
+        fifo_bh_ww66d1024_rw66d1024 u_fifo_d2a_data(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk),
+            .wr_en(fifo_d2a_data_wr_en),
+            .din(fifo_d2a_data_din),
+            .full(fifo_d2a_data_full),
+            // read
+            .rd_clk(sys_clk2),
+            .rd_en(fifo_d2a_data_rd_en),
+            .dout(fifo_d2a_data_dout),
+            .empty(fifo_d2a_data_empty),
+            .valid(fifo_d2a_data_valid)
+        );
+    `endif
     // ########################## D TO A DOMAIN CROSSING FIFO ########################################################################################
 
     // ########################## A TO D DOMAIN CROSSING FIFO ########################################################################################
-    fifo_bh_ww32d16_rw32d16 u_fifo_a2d_command(
-        .rst(reset_n == 0 || ui_clk_sync_rst),
-        // write
-        .wr_clk(sys_clk2),
-        .wr_en(fifo_a2d_command_wr_en),
-        .din(fifo_a2d_command_din),
-        .full(fifo_a2d_command_full),
-        // read
-        .rd_clk(sys_clk),
-        .rd_en(fifo_a2d_command_rd_en),
-        .dout(fifo_a2d_command_dout),
-        .empty(fifo_a2d_command_empty),
-        .valid(fifo_a2d_command_valid)
-    );    
-    // fifo_bh_ww32d512_rw32d512_r200MHz_w10MHz u_fifo_a2d_command(
-    //     .rst(reset_n == 0 || ui_clk_sync_rst),
-    //     // write
-    //     .wr_clk(sys_clk2),
-    //     .wr_en(fifo_a2d_command_wr_en),
-    //     .din(fifo_a2d_command_din),
-    //     .full(fifo_a2d_command_full),
-    //     // read
-    //     .rd_clk(sys_clk),
-    //     .rd_en(fifo_a2d_command_rd_en),
-    //     .dout(fifo_a2d_command_dout),
-    //     .empty(fifo_a2d_command_empty),
-    //     .valid(fifo_a2d_command_valid)
-    // );
+  
+    `ifdef BUILTIN_FIFO_FOR_A_DOMAIN
+        fifo_bh_ww32d512_rw32d512_r100MHz_w10MHz u_fifo_a2d_command(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk2),
+            .wr_en(fifo_a2d_command_wr_en),
+            .din(fifo_a2d_command_din),
+            .full(fifo_a2d_command_full),
+            // read
+            .rd_clk(sys_clk),
+            .rd_en(fifo_a2d_command_rd_en),
+            .dout(fifo_a2d_command_dout),
+            .empty(fifo_a2d_command_empty),
+            .valid(fifo_a2d_command_valid)
+        );
+    `else
+        fifo_bh_ww32d16_rw32d16 u_fifo_a2d_command(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk2),
+            .wr_en(fifo_a2d_command_wr_en),
+            .din(fifo_a2d_command_din),
+            .full(fifo_a2d_command_full),
+            // read
+            .rd_clk(sys_clk),
+            .rd_en(fifo_a2d_command_rd_en),
+            .dout(fifo_a2d_command_dout),
+            .empty(fifo_a2d_command_empty),
+            .valid(fifo_a2d_command_valid)
+        );  
+    `endif
     // ########################## A TO D DOMAIN CROSSING FIFO ########################################################################################
     
     
