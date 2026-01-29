@@ -232,19 +232,19 @@ module top_bh_fpga(
         clk_wiz_0 u_clk_wiz_0(
             .clk_in1(ui_clk_buf),
             .clk_out1(), // 100MHz
-            .clk_out2(sys_clk2) // 20MHz
+            .clk_out2(sys_clk2_temp) // 20MHz
         );
-        // clk_wiz_1_20MHz u_clk_wiz_1_20MHz(
-        //     .clk_out1 ( sys_clk2 ),
-        //     .psclk ( okClk ),
-        //     .psen (psen),
-        //     .psincdec (psincdec),
-        //     .psdone (psdone),
-        //     .clk_in1 (sys_clk2_temp),
-        //     .locked ( locked )
-        // );
-        assign psdone = psen_delayed[4];
-        assign locked = 1;
+        clk_wiz_1_20MHz u_clk_wiz_1_20MHz(
+            .clk_out1 ( sys_clk2 ),
+            .psclk ( okClk ),
+            .psen (psen),
+            .psincdec (psincdec),
+            .psdone (psdone),
+            .clk_in1 (sys_clk2_temp),
+            .locked ( locked )
+        );
+        // assign psdone = psen_delayed[4];
+        // assign locked = 1;
     `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
         assign psdone = psen_delayed[4];
