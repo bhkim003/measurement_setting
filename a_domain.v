@@ -1,5 +1,5 @@
 // `define TEST_SETTING 1
-`define ASIC_IN_FPGA 1
+// `define ASIC_IN_FPGA 1
 module a_domain(
         input clk_a_domain,
         input reset_n,
@@ -105,64 +105,75 @@ module a_domain(
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
-    reg input_streaming_ready_from_asic_to_fpga_buf;
-    reg start_ready_from_asic_to_fpga_buf;
-    reg inferenced_label_from_asic_to_fpga_buf;
+    localparam INPUT_BUf_NUM = 1;
+    reg input_streaming_ready_from_asic_to_fpga_buf [0:INPUT_BUf_NUM-1];
+    reg start_ready_from_asic_to_fpga_buf [0:INPUT_BUf_NUM-1];
+    reg inferenced_label_from_asic_to_fpga_buf [0:INPUT_BUf_NUM-1];
     always @(posedge clk_a_domain) begin
-        if(!reset_n) begin
-            input_streaming_ready_from_asic_to_fpga_buf <= 0;
-            start_ready_from_asic_to_fpga_buf <= 0;
-            inferenced_label_from_asic_to_fpga_buf <= 0;
-        end
-        else begin
-            `ifdef ASIC_IN_FPGA
-                input_streaming_ready_from_asic_to_fpga_buf <= input_streaming_ready_asicinfpga;
-                start_ready_from_asic_to_fpga_buf <= start_ready_asicinfpga;
-                inferenced_label_from_asic_to_fpga_buf <= inferenced_label_asicinfpga;
-            `elsif TEST_SETTING
-                input_streaming_ready_from_asic_to_fpga_buf <= 1'd1;
-                start_ready_from_asic_to_fpga_buf <= asic_start_ready_for_test;
-                inferenced_label_from_asic_to_fpga_buf <= asic_inferenced_label_for_test;
-            `else
-                input_streaming_ready_from_asic_to_fpga_buf <= input_streaming_ready_from_asic_to_fpga;
-                start_ready_from_asic_to_fpga_buf <= start_ready_from_asic_to_fpga;
-                inferenced_label_from_asic_to_fpga_buf <= inferenced_label_from_asic_to_fpga;
-            `endif
-        end
+        `ifdef ASIC_IN_FPGA
+            input_streaming_ready_from_asic_to_fpga_buf[0] <= input_streaming_ready_asicinfpga;
+            start_ready_from_asic_to_fpga_buf[0] <= start_ready_asicinfpga;
+            inferenced_label_from_asic_to_fpga_buf[0] <= inferenced_label_asicinfpga;
+        `elsif TEST_SETTING
+            input_streaming_ready_from_asic_to_fpga_buf[0] <= 1'd1;
+            start_ready_from_asic_to_fpga_buf[0] <= asic_start_ready_for_test;
+            inferenced_label_from_asic_to_fpga_buf[0] <= asic_inferenced_label_for_test;
+        `else
+            input_streaming_ready_from_asic_to_fpga_buf[0] <= input_streaming_ready_from_asic_to_fpga;
+            start_ready_from_asic_to_fpga_buf[0] <= start_ready_from_asic_to_fpga;
+            inferenced_label_from_asic_to_fpga_buf[0] <= inferenced_label_from_asic_to_fpga;
+        `endif
     end
+    genvar input_gen_i;
+    generate
+        for (input_gen_i = 1; input_gen_i < INPUT_BUf_NUM; input_gen_i = input_gen_i + 1) begin : gen_input_buf
+            always @(posedge clk_a_domain) begin
+                input_streaming_ready_from_asic_to_fpga_buf[input_gen_i] <= input_streaming_ready_from_asic_to_fpga_buf[input_gen_i-1];
+                start_ready_from_asic_to_fpga_buf[input_gen_i] <= start_ready_from_asic_to_fpga_buf[input_gen_i-1];
+                inferenced_label_from_asic_to_fpga_buf[input_gen_i] <= inferenced_label_from_asic_to_fpga_buf[input_gen_i-1];
+            end
+        end
+    endgenerate
     wire input_streaming_ready;
     wire start_ready;
     wire inferenced_label;
-    assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga_buf;
-    assign start_ready = start_ready_from_asic_to_fpga_buf;
-    assign inferenced_label = inferenced_label_from_asic_to_fpga_buf;
+    assign input_streaming_ready = input_streaming_ready_from_asic_to_fpga_buf[INPUT_BUf_NUM-1];
+    assign start_ready = start_ready_from_asic_to_fpga_buf[INPUT_BUf_NUM-1];
+    assign inferenced_label = inferenced_label_from_asic_to_fpga_buf[INPUT_BUf_NUM-1];
 
 
 
 
-    reg input_streaming_valid_from_fpga_to_asic_buf, input_streaming_valid;
-    reg [65:0] input_streaming_data_from_fpga_to_asic_buf, input_streaming_data;
-    reg start_training_signal_from_fpga_to_asic_buf, start_training_signal; 
-    reg start_inference_signal_from_fpga_to_asic_buf, start_inference_signal; 
+    localparam OUTPUT_BUf_NUM = 1;
+    reg input_streaming_valid;
+    reg input_streaming_valid_from_fpga_to_asic_buf [0:OUTPUT_BUf_NUM-1];
+    reg [65:0] input_streaming_data;
+    reg [65:0] input_streaming_data_from_fpga_to_asic_buf [0:OUTPUT_BUf_NUM-1];
+    reg start_training_signal; 
+    reg start_training_signal_from_fpga_to_asic_buf[0:OUTPUT_BUf_NUM-1];
+    reg start_inference_signal; 
+    reg start_inference_signal_from_fpga_to_asic_buf [0:OUTPUT_BUf_NUM-1];
     always @(posedge clk_a_domain) begin
-        if(!reset_n) begin
-            input_streaming_valid_from_fpga_to_asic_buf <= 0;
-            input_streaming_data_from_fpga_to_asic_buf <= 0;
-            start_training_signal_from_fpga_to_asic_buf <= 0;
-            start_inference_signal_from_fpga_to_asic_buf <= 0;
-        end
-        else begin
-            input_streaming_valid_from_fpga_to_asic_buf <= input_streaming_valid;
-            input_streaming_data_from_fpga_to_asic_buf <= input_streaming_data;
-            start_training_signal_from_fpga_to_asic_buf <= start_training_signal;
-            start_inference_signal_from_fpga_to_asic_buf <= start_inference_signal;
-        end
+        input_streaming_valid_from_fpga_to_asic_buf[0] <= input_streaming_valid;
+        input_streaming_data_from_fpga_to_asic_buf[0] <= input_streaming_data;
+        start_training_signal_from_fpga_to_asic_buf[0] <= start_training_signal;
+        start_inference_signal_from_fpga_to_asic_buf[0] <= start_inference_signal;
     end
+    genvar output_gen_i;
+    generate
+        for (output_gen_i = 1; output_gen_i < OUTPUT_BUf_NUM; output_gen_i = output_gen_i + 1) begin : gen_output_buf
+            always @(posedge clk_a_domain) begin
+                input_streaming_ready_from_asic_to_fpga_buf[output_gen_i] <= input_streaming_ready_from_asic_to_fpga_buf[output_gen_i-1];
+                start_ready_from_asic_to_fpga_buf[output_gen_i] <= start_ready_from_asic_to_fpga_buf[output_gen_i-1];
+                inferenced_label_from_asic_to_fpga_buf[output_gen_i] <= inferenced_label_from_asic_to_fpga_buf[output_gen_i-1];
+            end
+        end
+    endgenerate
     assign reset_n_from_fpga_to_asic = reset_n; // RESET SIGNAL NO NEES BUFFER !!!
-    assign input_streaming_valid_from_fpga_to_asic = input_streaming_valid_from_fpga_to_asic_buf;
-    assign input_streaming_data_from_fpga_to_asic = input_streaming_data_from_fpga_to_asic_buf;
-    assign start_training_signal_from_fpga_to_asic = start_training_signal_from_fpga_to_asic_buf;
-    assign start_inference_signal_from_fpga_to_asic = start_inference_signal_from_fpga_to_asic_buf;
+    assign input_streaming_valid_from_fpga_to_asic = input_streaming_valid_from_fpga_to_asic_buf[OUTPUT_BUf_NUM-1];
+    assign input_streaming_data_from_fpga_to_asic = input_streaming_data_from_fpga_to_asic_buf[OUTPUT_BUf_NUM-1];
+    assign start_training_signal_from_fpga_to_asic = start_training_signal_from_fpga_to_asic_buf[OUTPUT_BUf_NUM-1];
+    assign start_inference_signal_from_fpga_to_asic = start_inference_signal_from_fpga_to_asic_buf[OUTPUT_BUf_NUM-1];
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
