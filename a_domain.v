@@ -53,7 +53,7 @@ module a_domain(
 
 
 
-    localparam TWO_DEPTH_FIFO_NUM = 3;
+    localparam TWO_DEPTH_FIFO_NUM = 8;
 
 
     wire fifo_d2a_command_rd_en_buf [0:TWO_DEPTH_FIFO_NUM-1];
@@ -207,7 +207,7 @@ module a_domain(
     genvar a2d_command_2fifo_i;
     generate
         for (a2d_command_2fifo_i = 1; a2d_command_2fifo_i < TWO_DEPTH_FIFO_NUM; a2d_command_2fifo_i = a2d_command_2fifo_i + 1) begin : gen_a2d_command_2fifo
-            assign fifo_a2d_command_wr_en_buf[a2d_command_2fifo_i-1] = !fifo_a2d_command_full_buf[a2d_command_2fifo_i] && !fifo_a2d_command_empty_buf[a2d_command_2fifo_i-1];
+            assign fifo_a2d_command_wr_en_buf[a2d_command_2fifo_i-1] = !fifo_a2d_command_full_buf[a2d_command_2fifo_i-1] && !fifo_a2d_command_empty_buf[a2d_command_2fifo_i];
             fifo_bh_two_depth#(
                 .FIFO_DATA_WIDTH ( 32 )
             )u_fifo_bh_two_depth_a2d_command(
@@ -231,6 +231,19 @@ module a_domain(
     assign fifo_a2d_command_wr_en_buf[TWO_DEPTH_FIFO_NUM-1] = fifo_a2d_command_wr_en_temp;
     assign fifo_a2d_command_din_buf[TWO_DEPTH_FIFO_NUM-1] = fifo_a2d_command_din_temp;
     assign fifo_a2d_command_full_temp = fifo_a2d_command_full_buf[TWO_DEPTH_FIFO_NUM-1];
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
