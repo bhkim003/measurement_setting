@@ -5,22 +5,22 @@ module a_domain(
         input reset_n,
 
         // d2a command fifo
-        output fifo_d2a_command_rd_en,
+        output reg fifo_d2a_command_rd_en,
         input [32 - 1:0] fifo_d2a_command_dout,
         input fifo_d2a_command_empty,
         input fifo_d2a_command_valid,
 
 
         // d2a data fifo
-        output fifo_d2a_data_rd_en,
+        output reg fifo_d2a_data_rd_en,
         input [66 - 1:0] fifo_d2a_data_dout,
         input fifo_d2a_data_empty,
         input fifo_d2a_data_valid,
 
 
         // a2d command fifo
-        output fifo_a2d_command_wr_en,
-        output [32 - 1:0] fifo_a2d_command_din,
+        output reg fifo_a2d_command_wr_en,
+        output reg [32 - 1:0] fifo_a2d_command_din,
         input fifo_a2d_command_full,
 
 
@@ -47,198 +47,6 @@ module a_domain(
 
 
 
-
-
-
-
-
-
-    localparam TWO_DEPTH_FIFO_NUM = 3;
-
-
-    wire fifo_d2a_command_rd_en_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire [32 - 1:0] fifo_d2a_command_dout_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire fifo_d2a_command_empty_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire fifo_d2a_command_full_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    
-    assign fifo_d2a_command_rd_en = !fifo_d2a_command_full_buf[0]  && !fifo_d2a_command_empty;
-    fifo_bh_two_depth#(
-        .FIFO_DATA_WIDTH ( 32 )
-    )u_fifo_bh_two_depth_d2a_command(
-        .clk     ( clk_a_domain ),
-        .reset_n ( reset_n ),
-        .wren_i  (fifo_d2a_command_rd_en ),
-        .rden_i  ( fifo_d2a_command_rd_en_buf[0]  ),
-        .wdata_i (fifo_d2a_command_dout ),
-        .rdata_o ( fifo_d2a_command_dout_buf[0]  ),
-        .full_o  (fifo_d2a_command_full_buf[0]),
-        .empty_o  (fifo_d2a_command_empty_buf[0]   )
-    );
-
-    genvar d2a_command_2fifo_i;
-    generate
-        for (d2a_command_2fifo_i = 1; d2a_command_2fifo_i < TWO_DEPTH_FIFO_NUM; d2a_command_2fifo_i = d2a_command_2fifo_i + 1) begin : gen_d2a_command_2fifo
-            assign fifo_d2a_command_rd_en_buf[d2a_command_2fifo_i-1] = !fifo_d2a_command_full_buf[d2a_command_2fifo_i]  && !fifo_d2a_command_empty_buf[d2a_command_2fifo_i-1];
-            fifo_bh_two_depth#(
-                .FIFO_DATA_WIDTH ( 32 )
-            )u_fifo_bh_two_depth_d2a_command(
-                .clk     ( clk_a_domain ),
-                .reset_n ( reset_n ),
-                .wren_i  (fifo_d2a_command_rd_en_buf[d2a_command_2fifo_i-1]) ,
-                .rden_i  ( fifo_d2a_command_rd_en_buf[d2a_command_2fifo_i]  ),
-                .wdata_i (fifo_d2a_command_dout_buf[d2a_command_2fifo_i-1] ),
-                .rdata_o ( fifo_d2a_command_dout_buf[d2a_command_2fifo_i]  ),
-                .full_o  (fifo_d2a_command_full_buf[d2a_command_2fifo_i]),
-                .empty_o  (fifo_d2a_command_empty_buf[d2a_command_2fifo_i]   )
-            );
-        end
-    endgenerate
-
-
-    reg fifo_d2a_command_rd_en_temp;
-    wire [32 - 1:0] fifo_d2a_command_dout_temp;
-    wire fifo_d2a_command_empty_temp;
-    wire fifo_d2a_command_valid_temp;
-
-    assign fifo_d2a_command_rd_en_buf[TWO_DEPTH_FIFO_NUM-1] = fifo_d2a_command_rd_en_temp;
-    assign fifo_d2a_command_dout_temp = fifo_d2a_command_dout_buf[TWO_DEPTH_FIFO_NUM-1];
-    assign fifo_d2a_command_empty_temp = fifo_d2a_command_empty_buf[TWO_DEPTH_FIFO_NUM-1];
-    assign fifo_d2a_command_valid_temp = !fifo_d2a_command_empty_temp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    wire fifo_d2a_data_rd_en_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire [32 - 1:0] fifo_d2a_data_dout_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire fifo_d2a_data_empty_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire fifo_d2a_data_full_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    
-    assign fifo_d2a_data_rd_en = !fifo_d2a_data_full_buf[0]  && !fifo_d2a_data_empty;
-    fifo_bh_two_depth#(
-        .FIFO_DATA_WIDTH ( 66 )
-    )u_fifo_bh_two_depth_d2a_data(
-        .clk     ( clk_a_domain ),
-        .reset_n ( reset_n ),
-        .wren_i  (fifo_d2a_data_rd_en ),
-        .rden_i  ( fifo_d2a_data_rd_en_buf[0]  ),
-        .wdata_i (fifo_d2a_data_dout ),
-        .rdata_o ( fifo_d2a_data_dout_buf[0]  ),
-        .full_o  (fifo_d2a_data_full_buf[0]),
-        .empty_o  (fifo_d2a_data_empty_buf[0]   )
-    );
-
-    genvar d2a_data_2fifo_i;
-    generate
-        for (d2a_data_2fifo_i = 1; d2a_data_2fifo_i < TWO_DEPTH_FIFO_NUM; d2a_data_2fifo_i = d2a_data_2fifo_i + 1) begin : gen_d2a_data_2fifo
-            assign fifo_d2a_data_rd_en_buf[d2a_data_2fifo_i-1] = !fifo_d2a_data_full_buf[d2a_data_2fifo_i]  && !fifo_d2a_data_empty_buf[d2a_data_2fifo_i-1];
-            fifo_bh_two_depth#(
-                .FIFO_DATA_WIDTH ( 66 )
-            )u_fifo_bh_two_depth_d2a_data(
-                .clk     ( clk_a_domain ),
-                .reset_n ( reset_n ),
-                .wren_i  (fifo_d2a_data_rd_en_buf[d2a_data_2fifo_i-1]) ,
-                .rden_i  ( fifo_d2a_data_rd_en_buf[d2a_data_2fifo_i]  ),
-                .wdata_i (fifo_d2a_data_dout_buf[d2a_data_2fifo_i-1] ),
-                .rdata_o ( fifo_d2a_data_dout_buf[d2a_data_2fifo_i]  ),
-                .full_o  (fifo_d2a_data_full_buf[d2a_data_2fifo_i]),
-                .empty_o  (fifo_d2a_data_empty_buf[d2a_data_2fifo_i]   )
-            );
-        end
-    endgenerate
-
-
-    reg fifo_d2a_data_rd_en_temp;
-    wire [32 - 1:0] fifo_d2a_data_dout_temp;
-    wire fifo_d2a_data_empty_temp;
-    wire fifo_d2a_data_valid_temp;
-
-    assign fifo_d2a_data_rd_en_buf[TWO_DEPTH_FIFO_NUM-1] = fifo_d2a_data_rd_en_temp;
-    assign fifo_d2a_data_dout_temp = fifo_d2a_data_dout_buf[TWO_DEPTH_FIFO_NUM-1];
-    assign fifo_d2a_data_empty_temp = fifo_d2a_data_empty_buf[TWO_DEPTH_FIFO_NUM-1];
-    assign fifo_d2a_data_valid_temp = !fifo_d2a_data_empty_temp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    wire fifo_a2d_command_wr_en_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire [32 - 1:0] fifo_a2d_command_din_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire fifo_a2d_command_empty_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire fifo_a2d_command_full_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    
-
-
-    assign fifo_a2d_command_wr_en = !fifo_a2d_command_empty_buf[0] && !fifo_a2d_command_full;
-    fifo_bh_two_depth#(
-        .FIFO_DATA_WIDTH ( 32 )
-    )u_fifo_bh_two_depth_a2d_command(
-        .clk     ( clk_a_domain ),
-        .reset_n ( reset_n ),
-        .wren_i  (fifo_a2d_command_wr_en_buf[0] ),
-        .rden_i  ( fifo_a2d_command_wr_en ),
-        .wdata_i (fifo_a2d_command_din_buf[0] ),
-        .rdata_o ( fifo_a2d_command_din  ),
-        .full_o  ( fifo_a2d_command_full_buf[0] ),
-        .empty_o  ( fifo_a2d_command_empty_buf[0]  )
-    );
-
-
-    genvar a2d_command_2fifo_i;
-    generate
-        for (a2d_command_2fifo_i = 1; a2d_command_2fifo_i < TWO_DEPTH_FIFO_NUM; a2d_command_2fifo_i = a2d_command_2fifo_i + 1) begin : gen_a2d_command_2fifo
-            assign fifo_a2d_command_wr_en_buf[a2d_command_2fifo_i-1] = !fifo_a2d_command_full_buf[a2d_command_2fifo_i] && !fifo_a2d_command_empty_buf[a2d_command_2fifo_i-1];
-            fifo_bh_two_depth#(
-                .FIFO_DATA_WIDTH ( 32 )
-            )u_fifo_bh_two_depth_a2d_command(
-                .clk     ( clk_a_domain ),
-                .reset_n ( reset_n ),
-                .wren_i  ( fifo_a2d_command_wr_en_buf[a2d_command_2fifo_i] ) ,
-                .rden_i  ( fifo_a2d_command_wr_en_buf[a2d_command_2fifo_i-1]  ),
-                .wdata_i (fifo_a2d_command_din_buf[a2d_command_2fifo_i] ),
-                .rdata_o ( fifo_a2d_command_din_buf[a2d_command_2fifo_i-1]  ),
-                .full_o  (fifo_a2d_command_full_buf[a2d_command_2fifo_i]),
-                .empty_o  (fifo_a2d_command_empty_buf[a2d_command_2fifo_i]   )
-            );
-        end
-    endgenerate
-
-
-    reg fifo_a2d_command_wr_en_temp;
-    reg [32 - 1:0] fifo_a2d_command_din_temp;
-    wire fifo_a2d_command_full_temp;
-
-    assign fifo_a2d_command_wr_en_buf[TWO_DEPTH_FIFO_NUM-1] = fifo_a2d_command_wr_en_temp;
-    assign fifo_a2d_command_din_buf[TWO_DEPTH_FIFO_NUM-1] = fifo_a2d_command_din_temp;
-    assign fifo_a2d_command_full_temp = fifo_a2d_command_full_buf[TWO_DEPTH_FIFO_NUM-1];
-
-
-
-
-
-
-
-
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
@@ -260,10 +68,10 @@ module a_domain(
 
 
     wire [14:0] a2d_command_only;
-    assign a2d_command_only = fifo_a2d_command_din_temp[14:0];
+    assign a2d_command_only = fifo_a2d_command_din[14:0];
 
     wire [14:0] d2a_command_only;
-    assign d2a_command_only = fifo_d2a_command_dout_temp[14:0];
+    assign d2a_command_only = fifo_d2a_command_dout[14:0];
 
 
 
@@ -551,10 +359,10 @@ module a_domain(
     always @ (*) begin
         n_config_a_domain_setting_cnt = config_a_domain_setting_cnt;
 
-        fifo_a2d_command_wr_en_temp = 0;
-        fifo_a2d_command_din_temp = 0;
+        fifo_a2d_command_wr_en = 0;
+        fifo_a2d_command_din = 0;
 
-        fifo_d2a_command_rd_en_temp = 0;
+        fifo_d2a_command_rd_en = 0;
         
         n_a_config_asic_mode = a_config_asic_mode;
         n_a_config_training_epochs = a_config_training_epochs;
@@ -592,155 +400,155 @@ module a_domain(
 		n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt;
 
 
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 1) begin
-                fifo_d2a_command_rd_en_temp = 1;
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 1) begin
+                fifo_d2a_command_rd_en = 1;
                 if (config_a_domain_setting_cnt == 0) begin
-                    n_a_config_asic_mode = fifo_d2a_command_dout_temp[15 +: 2];
+                    n_a_config_asic_mode = fifo_d2a_command_dout[15 +: 2];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 1) begin
-                    n_a_config_training_epochs = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_training_epochs = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 2) begin
-                    n_a_config_inference_epochs = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_inference_epochs = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 3) begin
-                    n_a_config_dataset = fifo_d2a_command_dout_temp[15 +: 2];
+                    n_a_config_dataset = fifo_d2a_command_dout[15 +: 2];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 4) begin
-                    n_a_config_timesteps = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_timesteps = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 5) begin
-                    n_a_config_input_size_layer1_define = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_input_size_layer1_define = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 6) begin
-                    n_a_config_long_time_input_streaming_mode = fifo_d2a_command_dout_temp[15 +: 1];
+                    n_a_config_long_time_input_streaming_mode = fifo_d2a_command_dout[15 +: 1];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 7) begin
-                    n_a_config_binary_classifier_mode = fifo_d2a_command_dout_temp[15 +: 1];
+                    n_a_config_binary_classifier_mode = fifo_d2a_command_dout[15 +: 1];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 8) begin
-                    n_a_config_loser_encourage_mode = fifo_d2a_command_dout_temp[15 +: 1];
+                    n_a_config_loser_encourage_mode = fifo_d2a_command_dout[15 +: 1];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 9) begin
-                    n_a_config_layer1_cut_list[17*0 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*0 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 10) begin
-                    n_a_config_layer1_cut_list[17*1 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*1 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 11) begin
-                    n_a_config_layer1_cut_list[17*2 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*2 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 12) begin
-                    n_a_config_layer1_cut_list[17*3 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*3 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 13) begin
-                    n_a_config_layer1_cut_list[17*4 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*4 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 14) begin
-                    n_a_config_layer1_cut_list[17*5 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*5 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 15) begin
-                    n_a_config_layer1_cut_list[17*6 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*6 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 16) begin
-                    n_a_config_layer1_cut_list[17*7 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*7 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 17) begin
-                    n_a_config_layer1_cut_list[17*8 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*8 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 18) begin
-                    n_a_config_layer1_cut_list[17*9 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*9 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 19) begin
-                    n_a_config_layer1_cut_list[17*10 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*10 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 20) begin
-                    n_a_config_layer1_cut_list[17*11 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*11 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 21) begin
-                    n_a_config_layer1_cut_list[17*12 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*12 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 22) begin
-                    n_a_config_layer1_cut_list[17*13 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*13 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 23) begin
-                    n_a_config_layer1_cut_list[17*14 +: 17] = fifo_d2a_command_dout_temp[15 +: 17];
+                    n_a_config_layer1_cut_list[17*14 +: 17] = fifo_d2a_command_dout[15 +: 17];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 24) begin
-                    n_a_config_layer2_cut_list[16*0 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*0 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 25) begin
-                    n_a_config_layer2_cut_list[16*1 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*1 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 26) begin
-                    n_a_config_layer2_cut_list[16*2 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*2 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 27) begin
-                    n_a_config_layer2_cut_list[16*3 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*3 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 28) begin
-                    n_a_config_layer2_cut_list[16*4 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*4 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 29) begin
-                    n_a_config_layer2_cut_list[16*5 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*5 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 30) begin
-                    n_a_config_layer2_cut_list[16*6 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*6 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 31) begin
-                    n_a_config_layer2_cut_list[16*7 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*7 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 32) begin
-                    n_a_config_layer2_cut_list[16*8 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*8 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 33) begin
-                    n_a_config_layer2_cut_list[16*9 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*9 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 34) begin
-                    n_a_config_layer2_cut_list[16*10 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*10 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 35) begin
-                    n_a_config_layer2_cut_list[16*11 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*11 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 36) begin
-                    n_a_config_layer2_cut_list[16*12 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*12 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 37) begin
-                    n_a_config_layer2_cut_list[16*13 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*13 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end else if (config_a_domain_setting_cnt == 38) begin
-                    n_a_config_layer2_cut_list[16*14 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_a_config_layer2_cut_list[16*14 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     n_config_a_domain_setting_cnt = config_a_domain_setting_cnt + 1;
                 end
             end
         end
         if (config_a_domain_setting_cnt == 39) begin
-            if (!fifo_a2d_command_full_temp) begin
+            if (!fifo_a2d_command_full) begin
                 n_config_a_domain_setting_cnt = 0;
-                fifo_a2d_command_wr_en_temp = 1;
-                fifo_a2d_command_din_temp = {{17{1'b0}}, 15'd2};
+                fifo_a2d_command_wr_en = 1;
+                fifo_a2d_command_din = {{17{1'b0}}, 15'd2};
             end 
         end
 
 
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 7) begin
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_d2a_command_rd_en_temp = 1; 
-                    fifo_a2d_command_wr_en_temp = 1;
-                    fifo_a2d_command_din_temp = {{16{1'b0}}, start_ready, 15'd7};
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 7) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_d2a_command_rd_en = 1; 
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = {{16{1'b0}}, start_ready, 15'd7};
                 end
             end
         end
 
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 8) begin
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 8) begin
                 if (start_ready) begin
-                    if (!fifo_a2d_command_full_temp) begin
-                        fifo_d2a_command_rd_en_temp = 1; 
-                        fifo_a2d_command_wr_en_temp = 1;
-                        fifo_a2d_command_din_temp = {{17{1'b0}}, 15'd8};
+                    if (!fifo_a2d_command_full) begin
+                        fifo_d2a_command_rd_en = 1; 
+                        fifo_a2d_command_wr_en = 1;
+                        fifo_a2d_command_din = {{17{1'b0}}, 15'd8};
                         n_config_on_real = 1;
                     end
                 end
@@ -749,86 +557,86 @@ module a_domain(
 
         if (config_on_real) begin
             if(start_ready_oneclk_past == 0 && start_ready == 1) begin
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_a2d_command_wr_en_temp = 1;
-                    fifo_a2d_command_din_temp = {config_stream_cnt[15:0], start_ready, 15'd9};
-                    // fifo_a2d_command_din_temp = {config_stream_catch_41418[15:0], start_ready, 15'd9};
-                    // fifo_a2d_command_din_temp = {config_stream_catch_41421[15:0], start_ready, 15'd9};
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = {config_stream_cnt[15:0], start_ready, 15'd9};
+                    // fifo_a2d_command_din = {config_stream_catch_41418[15:0], start_ready, 15'd9};
+                    // fifo_a2d_command_din = {config_stream_catch_41421[15:0], start_ready, 15'd9};
                     n_config_on_real = 0;
                 end
             end
         end
 
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 10) begin
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_d2a_command_rd_en_temp = 1; 
-                    fifo_a2d_command_wr_en_temp = 1;
-                    fifo_a2d_command_din_temp = fifo_d2a_command_dout_temp;
-                    n_streaming_wait_cycle = fifo_d2a_command_dout_temp[15 +: 17];
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 10) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_d2a_command_rd_en = 1; 
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = fifo_d2a_command_dout;
+                    n_streaming_wait_cycle = fifo_d2a_command_dout[15 +: 17];
                 end
             end
         end
 
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 11) begin
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 11) begin
                 if (sample_num_transition_cnt == 0) begin
-                    fifo_d2a_command_rd_en_temp = 1;
+                    fifo_d2a_command_rd_en = 1;
                     n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
-                    n_sample_num[0 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                    n_sample_num[0 +: 16] = fifo_d2a_command_dout[15 +: 16];
                 end else if (sample_num_transition_cnt == 1) begin
-                    if (!fifo_a2d_command_full_temp) begin
+                    if (!fifo_a2d_command_full) begin
                         n_sample_num_transition_cnt = 2;
-                        n_sample_num[16 +: 16] = fifo_d2a_command_dout_temp[15 +: 16];
+                        n_sample_num[16 +: 16] = fifo_d2a_command_dout[15 +: 16];
                     end
                 end else if (sample_num_transition_cnt == 2) begin
-                    if (!fifo_a2d_command_full_temp) begin
+                    if (!fifo_a2d_command_full) begin
                         n_sample_num_transition_cnt = 3;
                         n_sample_num_divided16 = {2'd0, sample_num[4 +: 28]};
                     end
                 end else if (sample_num_transition_cnt == 3) begin
-                    if (!fifo_a2d_command_full_temp) begin
-                        fifo_d2a_command_rd_en_temp = 1;
+                    if (!fifo_a2d_command_full) begin
+                        fifo_d2a_command_rd_en = 1;
                         n_sample_num_transition_cnt = 0;
-                        fifo_a2d_command_wr_en_temp = 1;
-                        fifo_a2d_command_din_temp = {17'd0, 15'd11};
+                        fifo_a2d_command_wr_en = 1;
+                        fifo_a2d_command_din = {17'd0, 15'd11};
                     end
                 end
             end
         end
 
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 12) begin // training queuing
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_d2a_command_rd_en_temp = 1; 
-                    fifo_a2d_command_wr_en_temp = 1;
-                    fifo_a2d_command_din_temp = fifo_d2a_command_dout_temp;
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 12) begin // training queuing
+                if (!fifo_a2d_command_full) begin
+                    fifo_d2a_command_rd_en = 1; 
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = fifo_d2a_command_dout;
                     n_queuing_ongoing = 1;
                 end
             end
         end
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 13) begin // inference queuing
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_d2a_command_rd_en_temp = 1; 
-                    fifo_a2d_command_wr_en_temp = 1;
-                    fifo_a2d_command_din_temp = fifo_d2a_command_dout_temp;
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 13) begin // inference queuing
+                if (!fifo_a2d_command_full) begin
+                    fifo_d2a_command_rd_en = 1; 
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = fifo_d2a_command_dout;
                     n_queuing_ongoing = 1;
                 end
             end
         end
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 16) begin // training start
-                fifo_d2a_command_rd_en_temp = 1; 
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 16) begin // training start
+                fifo_d2a_command_rd_en = 1; 
                 start_training_signal = 1;
                 n_training_processing_ongoing = 1;
                 n_collect_label = 0;
                 n_processing_time_cnt = 0;
             end
         end
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 17) begin // inference start
-                fifo_d2a_command_rd_en_temp = 1; 
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 17) begin // inference start
+                fifo_d2a_command_rd_en = 1; 
                 start_inference_signal = 1;
                 n_inference_processing_ongoing = 1;
                 n_collect_label = 1;
@@ -839,9 +647,9 @@ module a_domain(
         if (training_processing_ongoing) begin
             n_processing_time_cnt = processing_time_cnt + 1;
             if(start_ready_oneclk_past == 0 && start_ready == 1) begin
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_a2d_command_wr_en_temp = 1;
-                    fifo_a2d_command_din_temp = {data_stream_cnt_for_test[15:0], start_ready, 15'd14};
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = {data_stream_cnt_for_test[15:0], start_ready, 15'd14};
                     n_training_processing_ongoing = 0;
                 end
             end
@@ -849,9 +657,9 @@ module a_domain(
         if (inference_processing_ongoing) begin
             n_processing_time_cnt = processing_time_cnt + 1;
             if(start_ready_oneclk_past == 0 && start_ready == 1) begin
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_a2d_command_wr_en_temp = 1;
-                    fifo_a2d_command_din_temp = {data_stream_cnt_for_test[15:0], start_ready, 15'd15};
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
+                    fifo_a2d_command_din = {data_stream_cnt_for_test[15:0], start_ready, 15'd15};
                     n_inference_processing_ongoing = 0;
                 end
             end
@@ -861,9 +669,9 @@ module a_domain(
         if (inference_processing_ongoing || training_processing_ongoing) begin
             if (sample_num != 0 && sample_num_executed != 0) begin
                 if (sample_num_executed_partial_reset_flag_oneclk_delay) begin
-                    if (!fifo_a2d_command_full_temp) begin
-                        fifo_a2d_command_wr_en_temp = 1;
-                        fifo_a2d_command_din_temp = {sample_num_executed[16:0], 15'd18};
+                    if (!fifo_a2d_command_full) begin
+                        fifo_a2d_command_wr_en = 1;
+                        fifo_a2d_command_din = {sample_num_executed[16:0], 15'd18};
                     end
                 end
             end
@@ -875,29 +683,29 @@ module a_domain(
 
 
 
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 19) begin
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_a2d_command_wr_en_temp = 1;
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 19) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
                     if (result_transition_cnt == 0) begin
-                        fifo_a2d_command_din_temp = {1'd0, correct_sample_num[0*16 +: 16], 15'd19};
+                        fifo_a2d_command_din = {1'd0, correct_sample_num[0*16 +: 16], 15'd19};
                         n_result_transition_cnt = result_transition_cnt + 1;
                     end else if (result_transition_cnt == 1) begin
-                        fifo_a2d_command_din_temp = {1'd0, correct_sample_num[1*16 +: 16], 15'd19};
+                        fifo_a2d_command_din = {1'd0, correct_sample_num[1*16 +: 16], 15'd19};
                         n_result_transition_cnt = result_transition_cnt + 1;
                     end else if (result_transition_cnt == 2) begin
-                        fifo_a2d_command_din_temp = {1'd0, wrong_sample_num[0*16 +: 16], 15'd19};
+                        fifo_a2d_command_din = {1'd0, wrong_sample_num[0*16 +: 16], 15'd19};
                         n_result_transition_cnt = result_transition_cnt + 1;
                     end else if (result_transition_cnt == 3) begin
-                        fifo_a2d_command_din_temp = {1'd0, wrong_sample_num[1*16 +: 16], 15'd19};
+                        fifo_a2d_command_din = {1'd0, wrong_sample_num[1*16 +: 16], 15'd19};
                         n_result_transition_cnt = result_transition_cnt + 1;
                     end else if (result_transition_cnt == 4) begin
-                        fifo_a2d_command_din_temp = {1'd0, total_inference_sample_num[0*16 +: 16], 15'd19};
+                        fifo_a2d_command_din = {1'd0, total_inference_sample_num[0*16 +: 16], 15'd19};
                         n_result_transition_cnt = result_transition_cnt + 1;
                     end else if (result_transition_cnt == 5) begin
-                        fifo_a2d_command_din_temp = {1'd0, total_inference_sample_num[1*16 +: 16], 15'd19};
+                        fifo_a2d_command_din = {1'd0, total_inference_sample_num[1*16 +: 16], 15'd19};
                         n_result_transition_cnt = 0;
-                        fifo_d2a_command_rd_en_temp = 1;
+                        fifo_d2a_command_rd_en = 1;
                     end
                 end
             end
@@ -905,52 +713,52 @@ module a_domain(
 
 
 
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 21) begin
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_a2d_command_wr_en_temp = 1;
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 21) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
                     if (processing_time_cnt_transition_cnt == 0) begin
-                        fifo_a2d_command_din_temp = {1'd0, processing_time_cnt[0*16 +: 16], 15'd21};
+                        fifo_a2d_command_din = {1'd0, processing_time_cnt[0*16 +: 16], 15'd21};
                         n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
                     end else if (processing_time_cnt_transition_cnt == 1) begin
-                        fifo_a2d_command_din_temp = {1'd0, processing_time_cnt[1*16 +: 16], 15'd21};
+                        fifo_a2d_command_din = {1'd0, processing_time_cnt[1*16 +: 16], 15'd21};
                         n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
                     end else if (processing_time_cnt_transition_cnt == 2) begin
-                        fifo_a2d_command_din_temp = {1'd0, processing_time_cnt[2*16 +: 16], 15'd21};
+                        fifo_a2d_command_din = {1'd0, processing_time_cnt[2*16 +: 16], 15'd21};
                         n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
                     end else if (processing_time_cnt_transition_cnt == 3) begin
-                        fifo_a2d_command_din_temp = {1'd0, processing_time_cnt[3*16 +: 16], 15'd21};
+                        fifo_a2d_command_din = {1'd0, processing_time_cnt[3*16 +: 16], 15'd21};
                         n_processing_time_cnt_transition_cnt = 0;
-                        fifo_d2a_command_rd_en_temp = 1;
+                        fifo_d2a_command_rd_en = 1;
                     end
                 end
             end
         end
 
 
-        if (fifo_d2a_command_valid_temp) begin
-            if (fifo_d2a_command_dout_temp[14:0] == 22) begin
-                if (!fifo_a2d_command_full_temp) begin
-                    fifo_a2d_command_wr_en_temp = 1;
+        if (fifo_d2a_command_valid) begin
+            if (fifo_d2a_command_dout[14:0] == 22) begin
+                if (!fifo_a2d_command_full) begin
+                    fifo_a2d_command_wr_en = 1;
                     if (sample_num_executed_transition_cnt == 0) begin
-                        fifo_a2d_command_din_temp = {1'd0, sample_num_executed[0*16 +: 16], 15'd22};
+                        fifo_a2d_command_din = {1'd0, sample_num_executed[0*16 +: 16], 15'd22};
                         n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
                     end else if (sample_num_executed_transition_cnt == 1) begin
-                        fifo_a2d_command_din_temp = {1'd0, sample_num_executed[1*16 +: 16], 15'd22};
+                        fifo_a2d_command_din = {1'd0, sample_num_executed[1*16 +: 16], 15'd22};
                         n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
                     end else if (sample_num_executed_transition_cnt == 2) begin
-                        fifo_a2d_command_din_temp = {1'd0, data_stream_cnt_for_test[0*16 +: 16], 15'd22};
+                        fifo_a2d_command_din = {1'd0, data_stream_cnt_for_test[0*16 +: 16], 15'd22};
                         n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
                     end else if (sample_num_executed_transition_cnt == 3) begin
-                        fifo_a2d_command_din_temp = {1'd0, data_stream_cnt_for_test[1*16 +: 16], 15'd22};
+                        fifo_a2d_command_din = {1'd0, data_stream_cnt_for_test[1*16 +: 16], 15'd22};
                         n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
                     end else if (sample_num_executed_transition_cnt == 4) begin
-                        fifo_a2d_command_din_temp = {1'd0, timestep, 15'd22};
+                        fifo_a2d_command_din = {1'd0, timestep, 15'd22};
                         n_sample_num_executed_transition_cnt = sample_num_executed_transition_cnt + 1;
                     end else if (sample_num_executed_transition_cnt == 5) begin
-                        fifo_a2d_command_din_temp = {9'd0, sample_stream_cnt_small, 15'd22};
+                        fifo_a2d_command_din = {9'd0, sample_stream_cnt_small, 15'd22};
                         n_sample_num_executed_transition_cnt = 0;
-                        fifo_d2a_command_rd_en_temp = 1;
+                        fifo_d2a_command_rd_en = 1;
                     end
                 end
             end
@@ -1039,7 +847,7 @@ module a_domain(
 
         n_one_sample_finish = {one_sample_finish[0 +: ONE_SAMPLE_FINISH_END_INFERENCE_DELAY-1], 1'd0};
 
-        fifo_d2a_data_rd_en_temp = 0;
+        fifo_d2a_data_rd_en = 0;
 
         label_fifo_wr_en = 0;
         label_fifo_din = 0;
@@ -1051,7 +859,7 @@ module a_domain(
 
         if (streaming_count != 7) begin
             if (queuing_ongoing) begin
-                fifo_d2a_data_rd_en_temp = 0;
+                fifo_d2a_data_rd_en = 0;
                 input_streaming_valid = 0;
                 input_streaming_data = 0;
                 n_sample_num_executed = 0;
@@ -1062,10 +870,10 @@ module a_domain(
 
                 
                 if (input_streaming_ready) begin
-                    if (fifo_d2a_data_valid_temp) begin
-                        fifo_d2a_data_rd_en_temp = 1;
+                    if (fifo_d2a_data_valid) begin
+                        fifo_d2a_data_rd_en = 1;
                         input_streaming_valid = 1;
-                        input_streaming_data = fifo_d2a_data_dout_temp;
+                        input_streaming_data = fifo_d2a_data_dout;
                         if (streaming_wait_cycle != 0) begin
                             n_streaming_count = streaming_count + 1;
                         end
@@ -1091,7 +899,7 @@ module a_domain(
 
                                     if (collect_label) begin
                                         label_fifo_wr_en = 1;
-                                        label_fifo_din = fifo_d2a_data_dout_temp[58 +: 4];
+                                        label_fifo_din = fifo_d2a_data_dout[58 +: 4];
                                     end
 
                                     n_one_sample_finish[0] = 1;
@@ -1120,7 +928,7 @@ module a_domain(
 
                                     if (collect_label) begin
                                         label_fifo_wr_en = 1;
-                                        label_fifo_din = fifo_d2a_data_dout_temp[52 +: 4];
+                                        label_fifo_din = fifo_d2a_data_dout[52 +: 4];
                                     end
 
                                     n_one_sample_finish[0] = 1;
@@ -1149,7 +957,7 @@ module a_domain(
 
                                     if (collect_label) begin
                                         label_fifo_wr_en = 1;
-                                        label_fifo_din = fifo_d2a_data_dout_temp[52 +: 4];
+                                        label_fifo_din = fifo_d2a_data_dout[52 +: 4];
                                     end
 
                                     n_one_sample_finish[0] = 1;
@@ -1355,18 +1163,18 @@ module a_domain(
                 n_asic_start_ready_for_test = 1;
             end
 
-            if (fifo_d2a_data_valid_temp && fifo_d2a_data_rd_en_temp) begin
+            if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
                 if (config_stream_cnt == 41424 - 3 - 3) begin // last one ago config value
-                    n_config_stream_catch_41418 = fifo_d2a_data_dout_temp;
+                    n_config_stream_catch_41418 = fifo_d2a_data_dout;
                 end
                 if (config_stream_cnt == 41424 - 3) begin // last config value
-                    n_config_stream_catch_41421 = fifo_d2a_data_dout_temp;
+                    n_config_stream_catch_41421 = fifo_d2a_data_dout;
                 end
             end
         end
 
 
-        if (fifo_d2a_data_valid_temp && fifo_d2a_data_rd_en_temp) begin
+        if (fifo_d2a_data_valid && fifo_d2a_data_rd_en) begin
             n_config_stream_cnt = config_stream_cnt + 1;
             n_data_stream_cnt_for_test = data_stream_cnt_for_test + 1;
         end
