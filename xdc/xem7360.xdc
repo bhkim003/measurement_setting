@@ -669,9 +669,19 @@ set_input_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -min -1.500 [get_ports 
 # 1.99ns 간격안에 fpga에서 나가서 asic에 박아넣어야함.
 # 5 - (fpga의 output delay max값) + (fpga의 output delay min)의 값이 1.99ns미만이어야 한다.
 
-# output
-set_output_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -max 1.500 [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
-set_output_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -min -7.000 [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
+# # output
+# set_output_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -max 1.500 [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
+# set_output_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -min -7.000 [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
 
-set_multicycle_path -setup -to [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}] 2
-set_multicycle_path -hold -to [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}] 1
+# set_multicycle_path -setup -to [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}] 2
+# set_multicycle_path -hold -to [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}] 1
+
+
+# 1. 일단 전체적으로 너무 멀리 퍼지지 않게 울타리를 침 (예: 3ns 이내로 들어와라)
+set_max_delay -datapath_only -to [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}] 4.000
+
+# 2. 그 3ns라는 울타리 안에서도 비트끼리는 1.5ns 이상 벌어지지 마라
+set_bus_skew -to [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}] 1.500
+
+report_bus_skew -delay_type max -name bus_skew_report_max
+report_bus_skew -delay_type min -name bus_skew_report_min
