@@ -119,7 +119,7 @@ module a_domain(
 
 
     wire fifo_d2a_data_rd_en_buf [0:TWO_DEPTH_FIFO_NUM-1];
-    wire [32 - 1:0] fifo_d2a_data_dout_buf [0:TWO_DEPTH_FIFO_NUM-1];
+    wire [66 - 1:0] fifo_d2a_data_dout_buf [0:TWO_DEPTH_FIFO_NUM-1];
     wire fifo_d2a_data_empty_buf [0:TWO_DEPTH_FIFO_NUM-1];
     wire fifo_d2a_data_full_buf [0:TWO_DEPTH_FIFO_NUM-1];
     
@@ -158,7 +158,7 @@ module a_domain(
 
 
     reg fifo_d2a_data_rd_en_temp;
-    wire [32 - 1:0] fifo_d2a_data_dout_temp;
+    wire [66 - 1:0] fifo_d2a_data_dout_temp;
     wire fifo_d2a_data_empty_temp;
     wire fifo_d2a_data_valid_temp;
 
