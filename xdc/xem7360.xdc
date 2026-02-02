@@ -661,8 +661,8 @@ set_clock_groups -asynchronous -group [get_clocks {clk_out1_clk_wiz_static_200MH
 # (fpga의 input delay max값) - (fpga의 input delay min)의 값이 3.5이상이어야하고
 
 # input clk_out1_clk_wiz_1
-set_input_delay -clock [get_clocks {clk_out1_clk_wiz_static_200MHzto200MHz}] -max 2.000 [get_ports {input_streaming_ready_from_asic_to_fpga start_ready_from_asic_to_fpga inferenced_label_from_asic_to_fpga}]
-set_input_delay -clock [get_clocks {clk_out1_clk_wiz_static_200MHzto200MHz}] -min -1.500 [get_ports {input_streaming_ready_from_asic_to_fpga start_ready_from_asic_to_fpga inferenced_label_from_asic_to_fpga}]
+set_input_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -max 2.000 [get_ports {input_streaming_ready_from_asic_to_fpga start_ready_from_asic_to_fpga inferenced_label_from_asic_to_fpga}]
+set_input_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -min -1.500 [get_ports {input_streaming_ready_from_asic_to_fpga start_ready_from_asic_to_fpga inferenced_label_from_asic_to_fpga}]
 
 
 # ASIC에서 INPUT DELAY -MAX 2ns, -MIN 0.01ns
@@ -670,9 +670,8 @@ set_input_delay -clock [get_clocks {clk_out1_clk_wiz_static_200MHzto200MHz}] -mi
 # 5 - (fpga의 output delay max값) + (fpga의 output delay min)의 값이 1.99ns미만이어야 한다.
 
 # output
-set_output_delay -clock [get_clocks {clk_out1_clk_wiz_static_200MHzto200MHz}] -max 2.000 [get_ports {input_streaming_data_from_fpga_to_asic[*]}]
-set_output_delay -clock [get_clocks {clk_out1_clk_wiz_static_200MHzto200MHz}] -min -1.500 [get_ports {input_streaming_data_from_fpga_to_asic[*]}]
+set_output_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -max 1.500 [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
+set_output_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -min -7.000 [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
 
-set_output_delay -clock [get_clocks {clk_out1_clk_wiz_static_200MHzto200MHz}] -max -2.000 [get_ports {reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
-set_output_delay -clock [get_clocks {clk_out1_clk_wiz_static_200MHzto200MHz}] -min -1.500 [get_ports {reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
-
+set_multicycle_path -setup -to [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}] 2
+set_multicycle_path -hold -to [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}] 1

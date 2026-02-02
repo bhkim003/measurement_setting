@@ -1,5 +1,5 @@
 // `define TEST_SETTING 1
-`define ASIC_IN_FPGA 1
+// `define ASIC_IN_FPGA 1
 // `define BUILTIN_FIFO_FOR_A_DOMAIN 1
 module top_bh_fpga(
         // ########################## okHost interface ########################################################################################
@@ -277,16 +277,16 @@ module top_bh_fpga(
         assign psdone = psen_delayed[4];
         assign locked = 1;
     `else
-        // // // MCMM
-        // clk_wiz_1 u_clk_wiz_1(
-        //     .clk_out1 ( sys_clk2 ),
-        //     .psclk ( okClk ),
-        //     .psen (psen),
-        //     .psincdec (psincdec),
-        //     .psdone (psdone),
-        //     .clk_in1 (clk_clock_generator),
-        //     .locked ( locked )
-        // );
+        // // MCMM clk_out1_clk_wiz_1
+        clk_wiz_1 u_clk_wiz_1(
+            .clk_out1 ( sys_clk2 ),
+            .psclk ( okClk ),
+            .psen (psen),
+            .psincdec (psincdec),
+            .psdone (psdone),
+            .clk_in1 (clk_clock_generator),
+            .locked ( locked )
+        );
 
         // // MCMM
         // clk_wiz_dynamic_200MHzto200MHz u_clk_wiz_1(
@@ -354,14 +354,14 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
 
-        // PLL
-        // clk_out1_clk_wiz_static_200MHzto200MHz
-        clk_wiz_static_200MHzto200MHz u_clk_wiz_1(
-            .clk_out1 ( sys_clk2 ),
-            .clk_in1 (clk_clock_generator),
-            .locked ( locked )
-        );
-        assign psdone = psen_delayed[4];
+        // // PLL
+        // // clk_out1_clk_wiz_static_200MHzto200MHz
+        // clk_wiz_static_200MHzto200MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
 
         // // PLL
         // clk_wiz_static_150MHzto150MHz u_clk_wiz_1(
