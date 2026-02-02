@@ -1,5 +1,5 @@
 // `define TEST_SETTING 1
-// `define ASIC_IN_FPGA 1
+`define ASIC_IN_FPGA 1
 module a_domain(
         input clk_a_domain,
         input reset_n,
@@ -53,7 +53,7 @@ module a_domain(
 
 
 
-    localparam TWO_DEPTH_FIFO_NUM = 8;
+    localparam TWO_DEPTH_FIFO_NUM = 3;
 
 
     wire fifo_d2a_command_rd_en_buf [0:TWO_DEPTH_FIFO_NUM-1];
