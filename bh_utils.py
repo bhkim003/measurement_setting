@@ -28,7 +28,7 @@ def layer_cut_generator(threshold, sg_width, learning_rate, verbose = False):
     scale_sg_temp = 2 ** math.ceil(math.log2(sg_temp_max / (2 ** (sg_bit - 1) - 1)))
 
     # v = torch.arange(-2**v_bit, 2**v_bit + 1) * scale_v
-    v = torch.arange((-2**v_bit)/16 +((2**(-weight_exp))*threshold), (2**v_bit + 1)/16 + ((2**(-weight_exp))*threshold) +1) * scale_v
+    v = torch.arange((-2**v_bit)/1 +((2**(-weight_exp))*threshold), (2**v_bit + 1)/1 + ((2**(-weight_exp))*threshold) +1) * scale_v
     # v = torch.arange((-2**v_bit)/2 +((2**(-weight_exp))*threshold), (2**v_bit + 1)/2 + ((2**(-weight_exp))*threshold) +1) * scale_v
 
     # Surrogate gradient function
@@ -48,6 +48,7 @@ def layer_cut_generator(threshold, sg_width, learning_rate, verbose = False):
     y_change = y[change_indices]
     x_change_before_lr = x_change.clone()
     #설명약간
+    assert len(x_change_before_lr) == 14, f"Error: Expected 14 change points before learning rate application, but got {len(change_indices)}."
 
     if verbose:
         # Plotting
@@ -70,7 +71,8 @@ def layer_cut_generator(threshold, sg_width, learning_rate, verbose = False):
         matplotlib.pyplot.tight_layout()
         matplotlib.pyplot.show()
 
-
+    # print(y,'hihi')
+    # print(f'nonzero_y: {y[y != 0]} hihi')
     y = learning_rate * y  # Apply learning rate
     y = torch.clamp(torch.sign(y / scale_v) * torch.floor(torch.abs(y / scale_v) + 0.5), -2**(dw_bit-1) + 1, 2**(dw_bit-1) - 1) * scale_v
 
@@ -105,6 +107,7 @@ def layer_cut_generator(threshold, sg_width, learning_rate, verbose = False):
     
     if len(x_change_after_lr) == 14:
         pass
+        x_change_after_lr_extension = x_change_after_lr.clone().tolist()
     elif len(x_change_after_lr) in [12, 10, 8, 6, 4, 2]:
         extension = 14 - len(x_change_after_lr)
         extension_start_index = len(x_change_after_lr)//2 - 1
@@ -126,7 +129,7 @@ def layer_cut_generator(threshold, sg_width, learning_rate, verbose = False):
             print(f"Extended length: {len(x_change_after_lr_extension)}")
             print(f"Result: {x_change_after_lr_extension}")
     else:
-        assert False, "Error: Unexpected number of change points after learning rate application."
+        assert False, f"Error: Unexpected number of change points after learning rate application. {len(x_change_after_lr)}"
     
     if verbose:
         print(f'x_change_before_lr: {x_change_before_lr}')
