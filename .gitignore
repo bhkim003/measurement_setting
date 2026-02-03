@@ -4,3 +4,4 @@ zz_measure_dataset/
 total_inference_dataset_hex_string.txt
 total_training_dataset_hex_string.txt
 init_weight.txt
+wandb/
