@@ -648,7 +648,7 @@ set_property PACKAGE_PIN K5 [get_ports {mgtrefclk_n}]
 
 
 set_property IOB TRUE [get_ports {input_streaming_ready_from_asic_to_fpga start_ready_from_asic_to_fpga inferenced_label_from_asic_to_fpga}]
-set_property IOB TRUE [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
+set_property IOB TRUE [get_ports {input_streaming_data_from_fpga_to_asic[*] input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
 
 
 
