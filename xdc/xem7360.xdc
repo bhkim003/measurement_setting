@@ -673,6 +673,7 @@ set_input_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -min 4.100 [get_ports {
 # 5 - (fpga의 output delay max값) + (fpga의 output delay min)의 값이 1.99ns미만이어야 한다.
 # 근데 보니까 asic input hold margin 0.25ns setupmargin 1.23ns있음. 그럼 
 # 5 - (fpga의 output delay max값) + (fpga의 output delay min)의 값이 3.47ns미만이어도됨
+# 근데 여전히 역부족이네. 나 250MHz로 돌렸었으니까  1ns더 봐줘서 4.47ns미만이어도됨.으로 가자
 
 # # output
 set_output_delay -clock [get_clocks {clk_out1_clk_wiz_1}] -max -1.900 [get_ports {input_streaming_data_from_fpga_to_asic[*] reset_n_from_fpga_to_asic input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
