@@ -216,7 +216,6 @@ module top_bh_fpga(
 
     assign sys_clk = ui_clk;
     wire sys_clk2;
-
     reg psen;
     reg psincdec;
     wire psdone;
@@ -225,20 +224,6 @@ module top_bh_fpga(
     reg psdone_oneclk_delay;
     reg signed [31:0] ps_phase, n_ps_phase;
     reg [4:0] psen_delayed;
-
-
-
-    wire clk_a_domain_for_out;
-    reg psen2;
-    reg psincdec2;
-    wire psdone2;
-    wire locked2;
-
-    reg psdone2_oneclk_delay;
-    reg signed [31:0] ps_phase2, n_ps_phase2;
-    reg [4:0] psen2_delayed;
-
-
     `ifdef ASIC_IN_FPGA 
         // assign sys_clk2 = okClk;
         // assign sys_clk2 = ui_clk;
@@ -275,15 +260,6 @@ module top_bh_fpga(
                 .clk_in1 (ui_clk_buf),
                 .locked ( locked )
             );
-            clk_wiz_1_100to10MHz_nobuffer u_clk_wiz_2_100to10MHz_nobuffer(
-                .clk_out1 ( clk_a_domain_for_out ),
-                .psclk ( okClk ),
-                .psen (psen2),
-                .psincdec (psincdec2),
-                .psdone (psdone2),
-                .clk_in1 (ui_clk_buf),
-                .locked ( locked2 )
-            );
         `else
             // // MCMM
             clk_wiz_1_100to20MHz_nobuffer u_clk_wiz_1_100to20MHz_nobuffer(
@@ -295,28 +271,12 @@ module top_bh_fpga(
                 .clk_in1 (ui_clk_buf),
                 .locked ( locked )
             );
-            clk_wiz_1_100to20MHz_nobuffer u_clk_wiz_2_100to20MHz_nobuffer(
-                .clk_out1 ( clk_a_domain_for_out ),
-                .psclk ( okClk ),
-                .psen (psen2),
-                .psincdec (psincdec2),
-                .psdone (psdone2),
-                .clk_in1 (ui_clk_buf),
-                .locked ( locked2 )
-            );
         `endif
     `elsif TEST_SETTING 
         assign sys_clk2 = ui_clk;
         assign psdone = psen_delayed[4];
         assign locked = 1;
-
-        assign clk_a_domain_for_out = ui_clk;
-        assign psdone2 = psen2_delayed[4];
-        assign locked2 = 1;
     `else
-        wire clk_clock_generator_buf;
-        IBUFG u_IBUFG(.O(clk_clock_generator_buf), .I(clk_clock_generator));
-
         // // MCMM clk_out1_clk_wiz_1
         clk_wiz_1 u_clk_wiz_1(
             .clk_out1 ( sys_clk2 ),
@@ -324,18 +284,8 @@ module top_bh_fpga(
             .psen (psen),
             .psincdec (psincdec),
             .psdone (psdone),
-            .clk_in1 (clk_clock_generator_buf),
+            .clk_in1 (clk_clock_generator),
             .locked ( locked )
-        );
-        // // MCMM clk_out1_clk_wiz_1_1
-        clk_wiz_1 u_clk_wiz_2(
-            .clk_out1 ( clk_a_domain_for_out ),
-            .psclk ( okClk ),
-            .psen (psen2),
-            .psincdec (psincdec2),
-            .psdone (psdone2),
-            .clk_in1 (clk_clock_generator_buf),
-            .locked ( locked2 )
         );
 
         // // MCMM
@@ -412,7 +362,6 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
         // assign psdone = psen_delayed[4];
-        // assign psdone2 = psen2_delayed[4];
 
         // // PLL
         // clk_wiz_static_150MHzto150MHz u_clk_wiz_1(
@@ -421,7 +370,6 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
         // assign psdone = psen_delayed[4];
-        // assign psdone2 = psen2_delayed[4];
 
         // // PLL
         // clk_wiz_static_100MHzto100MHz u_clk_wiz_1(
@@ -430,7 +378,6 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
         // assign psdone = psen_delayed[4];
-        // assign psdone2 = psen2_delayed[4];
 
         // // PLL
         // clk_wiz_static_50MHzto50MHz u_clk_wiz_1(
@@ -439,7 +386,6 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
         // assign psdone = psen_delayed[4];
-        // assign psdone2 = psen2_delayed[4];
 
         // // PLL
         // clk_wiz_static_20MHzto20MHz u_clk_wiz_1(
@@ -448,7 +394,6 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
         // assign psdone = psen_delayed[4];
-        // assign psdone2 = psen2_delayed[4];
 
         // // MCMM
         // clk_wiz_static_10MHzto10MHz u_clk_wiz_1(
@@ -457,23 +402,12 @@ module top_bh_fpga(
         //     .locked ( locked )
         // );
         // assign psdone = psen_delayed[4];
-        // assign psdone2 = psen2_delayed[4];
 
 
         // IBUFG u_IBUFG(.O(sys_clk2), .I(clk_clock_generator));
-        // IBUFG u_IBUFG(.O(clk_a_domain_for_out), .I(clk_clock_generator));
-        // assign psdone = psen_delayed[4];
-        // assign psdone2 = psen2_delayed[4];
 
 
-        // 느린 클락 잴 때는 걍 이거 써
-        // 느린 클락 잴 때는 걍 이거 써
-        // 느린 클락 잴 때는 걍 이거 써
-        // 느린 클락 잴 때는 걍 이거 써
         // assign sys_clk2 = clk_clock_generator;
-        // assign clk_a_domain_for_out = clk_clock_generator;
-        // assign psdone = psen_delayed[4];
-        // assign psdone2 = psen2_delayed[4];
 
 
     `endif
@@ -789,7 +723,6 @@ module top_bh_fpga(
     // ########################## A DOMAIN ########################################################################################
     a_domain u_a_domain(
         .clk_a_domain                    ( sys_clk2                    ),
-        .clk_a_domain_for_out            (clk_a_domain_for_out),
         .reset_n                ( !(reset_n == 0 || ui_clk_sync_rst)                ),
 
         .fifo_d2a_command_rd_en ( fifo_d2a_command_rd_en ),
@@ -915,9 +848,6 @@ module top_bh_fpga(
             if (ep01wirein == 1) begin
                 led = xem7360_led(ps_phase[7:0]);
                 n_ep20wireout = ps_phase; 
-            end else if (ep01wirein == 2) begin
-                led = xem7360_led(ps_phase2[7:0]);
-                n_ep20wireout = ps_phase2; 
             end
         end else if (p_state == P_STATE_01_WORKLOAD_CONFIG) begin
             if (ep01wirein == 0) begin
@@ -1183,9 +1113,6 @@ module top_bh_fpga(
             ps_phase <= 0;
             psdone_oneclk_delay <= 0;
             psen_delayed <= 0;
-            ps_phase2 <= 0;
-            psdone2_oneclk_delay <= 0;
-            psen2_delayed <= 0;
         end else begin
             p_state <= n_p_state;
 
@@ -1250,9 +1177,6 @@ module top_bh_fpga(
             ps_phase <= n_ps_phase;
             psdone_oneclk_delay <= psdone;
             psen_delayed <= {psen_delayed[3:0], psen};
-            ps_phase2 <= n_ps_phase2;
-            psdone2_oneclk_delay <= psdone2;
-            psen2_delayed <= {psen2_delayed[3:0], psen2};
         end
     end
 
@@ -1342,9 +1266,6 @@ module top_bh_fpga(
 		n_ps_phase = ps_phase;
         psen = 0;
         psincdec = 0;
-		n_ps_phase2 = ps_phase2;
-        psen2 = 0;
-        psincdec2 = 0;
 
         if(ep40trigin[29]) begin
             if (!fifo_p2d_data_full) begin
@@ -1797,24 +1718,6 @@ module top_bh_fpga(
             psincdec = 1;
         end
         if (psdone_oneclk_delay && locked) begin
-            ep60trigout = {31'd0, 1'b1};
-        end
-
-
-
-        // clk phase 조절 커맨드
-        if(ep40trigin[18]) begin
-            n_ps_phase2 = ps_phase2 - 1;
-            psen2 = 1;
-            psincdec2 = 0;
-        end
-        // clk phase plus 조절 커맨드
-        if(ep40trigin[17]) begin
-            n_ps_phase2 = ps_phase2 + 1;
-            psen2 = 1;
-            psincdec2 = 1;
-        end
-        if (psdone2_oneclk_delay && locked2) begin
             ep60trigout = {31'd0, 1'b1};
         end
 
