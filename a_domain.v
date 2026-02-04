@@ -1,5 +1,5 @@
 // `define TEST_SETTING 1
-// `define ASIC_IN_FPGA 1
+`define ASIC_IN_FPGA 1
 `define USING_ANOTHER_CLK_FOR_OUT 1
 module a_domain(
         input clk_a_domain,
