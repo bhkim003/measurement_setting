@@ -1,5 +1,5 @@
 // `define TEST_SETTING 1
-`define ASIC_IN_FPGA 1
+// `define ASIC_IN_FPGA 1
 // `define BUILTIN_FIFO_FOR_A_DOMAIN 1
 module top_bh_fpga(
         // ########################## okHost interface ########################################################################################
@@ -88,14 +88,11 @@ module top_bh_fpga(
         // ########################## clk generated from clock generator ########################################################################################
         // ########################## clk generated from clock generator ########################################################################################
         input clk_clock_generator,
-        input clk_port_spare_0,
-        output clk_port_spare_1,
+        output clk_from_fpga,
         // ########################## clk generated from clock generator ########################################################################################
         // ########################## clk generated from clock generator ########################################################################################
         // ########################## clk generated from clock generator ########################################################################################
 
-
-        output [9:0] margin_pin,
 
 
         // ########################## fpga to asic, asic to fpga ########################################################################################
@@ -111,11 +108,25 @@ module top_bh_fpga(
         output start_inference_signal_from_fpga_to_asic, 
         input start_ready_from_asic_to_fpga, 
 
-        input inferenced_label_from_asic_to_fpga 
+        input inferenced_label_from_asic_to_fpga,
         // ########################## fpga to asic, asic to fpga ########################################################################################
         // ########################## fpga to asic, asic to fpga ########################################################################################
         // ########################## fpga to asic, asic to fpga ########################################################################################
+    
+    
+    
+    
+    
+        output [0:0] margin_pin_mc1,
+        output [22:0] margin_pin_mc2
+
+    
+    
+    
+    
+    
     );
+    assign margin_pin_mc1[0] = 0;
 
 	// ########################## End Point Connet ########################################################################################
     wire            okClk;
@@ -173,6 +184,11 @@ module top_bh_fpga(
     reg	pipe_out_ready;
     okBTPipeOut BTPipeOutA0 (.okHE(okHE), .okEH(okEHx[4]), .ep_addr(8'hA0), .ep_datain(pipe_out_data), .ep_read(pipe_out_read), .ep_blockstrobe(), .ep_ready(pipe_out_ready));
 	// ########################## End Point Connet ########################################################################################
+
+
+
+    assign margin_pin_mc2[22:8] = ep20wireout[14:0];
+
 
 
     // ########################## LED Function ########################################################################################
@@ -478,7 +494,7 @@ module top_bh_fpga(
 
     `endif
 
-    assign clk_port_spare_1 = ui_clk;
+    assign clk_from_fpga = ui_clk;
     // ########################## sys_clk gen instance ########################################################################################
  
 
@@ -820,10 +836,9 @@ module top_bh_fpga(
 
         .inferenced_label_from_asic_to_fpga  ( inferenced_label_from_asic_to_fpga  ),
 
-        .margin_pin (margin_pin)
+        .margin_pin (margin_pin_mc2[7:0])
     );
     // ########################## A DOMAIN ########################################################################################
-
 
 
 

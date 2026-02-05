@@ -1,5 +1,5 @@
 // `define TEST_SETTING 1
-`define ASIC_IN_FPGA 1
+// `define ASIC_IN_FPGA 1
 `define USING_ANOTHER_CLK_FOR_OUT 1
 module a_domain(
         input clk_a_domain,
@@ -43,7 +43,7 @@ module a_domain(
 
         input inferenced_label_from_asic_to_fpga,
 
-        output [9:0] margin_pin
+        output [7:0] margin_pin
     );
 
     // ######### for VERIFICATION (굳이 지울필욘없음. 걍 같이 implement 해) ###########################################################################
@@ -1189,8 +1189,6 @@ module a_domain(
     assign margin_pin[5] = start_inference_signal;
     assign margin_pin[6] = start_ready;
     assign margin_pin[7] = inferenced_label;
-    assign margin_pin[8] = 0;
-    assign margin_pin[9] = 0;
     // ######### MARGIN PIN MAPPING ###########################################################################
     // ######### MARGIN PIN MAPPING ###########################################################################
     // ######### MARGIN PIN MAPPING ###########################################################################
