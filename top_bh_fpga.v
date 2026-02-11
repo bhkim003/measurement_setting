@@ -117,7 +117,6 @@ module top_bh_fpga(
     
     
     
-        output [0:0] margin_pin_mc1,
         output [22:0] margin_pin_mc2
 
     
@@ -126,7 +125,6 @@ module top_bh_fpga(
     
     
     );
-    assign margin_pin_mc1[0] = 0;
 
 	// ########################## End Point Connet ########################################################################################
     wire            okClk;

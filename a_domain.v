@@ -104,7 +104,7 @@ module a_domain(
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
-    localparam INPUT_BUf_NUM = 1;
+    localparam INPUT_BUf_NUM = 2;
     reg input_streaming_ready_from_asic_to_fpga_buf [0:INPUT_BUf_NUM-1];
     reg start_ready_from_asic_to_fpga_buf [0:INPUT_BUf_NUM-1];
     reg inferenced_label_from_asic_to_fpga_buf [0:INPUT_BUf_NUM-1];
@@ -143,7 +143,7 @@ module a_domain(
 
 
 
-    localparam OUTPUT_BUf_NUM = 1;
+    localparam OUTPUT_BUf_NUM = 2;
     reg input_streaming_valid;
     reg input_streaming_valid_from_fpga_to_asic_buf [0:OUTPUT_BUf_NUM-1];
     reg [65:0] input_streaming_data;
@@ -193,9 +193,10 @@ module a_domain(
             generate
                 for (output_gen_i = 1; output_gen_i < OUTPUT_BUf_NUM; output_gen_i = output_gen_i + 1) begin : gen_output_buf
                     always @(posedge clk_a_domain) begin
-                        input_streaming_ready_from_asic_to_fpga_buf[output_gen_i] <= input_streaming_ready_from_asic_to_fpga_buf[output_gen_i-1];
-                        start_ready_from_asic_to_fpga_buf[output_gen_i] <= start_ready_from_asic_to_fpga_buf[output_gen_i-1];
-                        inferenced_label_from_asic_to_fpga_buf[output_gen_i] <= inferenced_label_from_asic_to_fpga_buf[output_gen_i-1];
+                        input_streaming_valid_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_valid_from_fpga_to_asic_buf[output_gen_i-1];
+                        input_streaming_data_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_data_from_fpga_to_asic_buf[output_gen_i-1];
+                        start_training_signal_from_fpga_to_asic_buf[output_gen_i] <= start_training_signal_from_fpga_to_asic_buf[output_gen_i-1];
+                        start_inference_signal_from_fpga_to_asic_buf[output_gen_i] <= start_inference_signal_from_fpga_to_asic_buf[output_gen_i-1];;
                     end
                 end
             endgenerate
@@ -239,9 +240,10 @@ module a_domain(
             generate
                 for (output_gen_i = 1; output_gen_i < OUTPUT_BUf_NUM; output_gen_i = output_gen_i + 1) begin : gen_output_buf
                     always @(posedge clk_a_domain_for_out) begin
-                        input_streaming_ready_from_asic_to_fpga_buf[output_gen_i] <= input_streaming_ready_from_asic_to_fpga_buf[output_gen_i-1];
-                        start_ready_from_asic_to_fpga_buf[output_gen_i] <= start_ready_from_asic_to_fpga_buf[output_gen_i-1];
-                        inferenced_label_from_asic_to_fpga_buf[output_gen_i] <= inferenced_label_from_asic_to_fpga_buf[output_gen_i-1];
+                        input_streaming_valid_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_valid_from_fpga_to_asic_buf[output_gen_i-1];
+                        input_streaming_data_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_data_from_fpga_to_asic_buf[output_gen_i-1];
+                        start_training_signal_from_fpga_to_asic_buf[output_gen_i] <= start_training_signal_from_fpga_to_asic_buf[output_gen_i-1];
+                        start_inference_signal_from_fpga_to_asic_buf[output_gen_i] <= start_inference_signal_from_fpga_to_asic_buf[output_gen_i-1];
                     end
                 end
             endgenerate
@@ -257,9 +259,10 @@ module a_domain(
         generate
             for (output_gen_i = 1; output_gen_i < OUTPUT_BUf_NUM; output_gen_i = output_gen_i + 1) begin : gen_output_buf
                 always @(posedge clk_a_domain) begin
-                    input_streaming_ready_from_asic_to_fpga_buf[output_gen_i] <= input_streaming_ready_from_asic_to_fpga_buf[output_gen_i-1];
-                    start_ready_from_asic_to_fpga_buf[output_gen_i] <= start_ready_from_asic_to_fpga_buf[output_gen_i-1];
-                    inferenced_label_from_asic_to_fpga_buf[output_gen_i] <= inferenced_label_from_asic_to_fpga_buf[output_gen_i-1];
+                    input_streaming_valid_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_valid_from_fpga_to_asic_buf[output_gen_i-1];
+                    input_streaming_data_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_data_from_fpga_to_asic_buf[output_gen_i-1];
+                    start_training_signal_from_fpga_to_asic_buf[output_gen_i] <= start_training_signal_from_fpga_to_asic_buf[output_gen_i-1];
+                    start_inference_signal_from_fpga_to_asic_buf[output_gen_i] <= start_inference_signal_from_fpga_to_asic_buf[output_gen_i-1];
                 end
             end
         endgenerate
@@ -1175,6 +1178,34 @@ module a_domain(
 
 
 
+    reg input_streaming_valid_for_margin;
+    reg input_streaming_data_0_for_margin;
+    reg input_streaming_ready_for_margin;
+    reg start_training_signal_for_margin;
+    reg start_inference_signal_for_margin;
+    reg start_ready_for_margin;
+    reg inferenced_label_for_margin;
+    always @(posedge clk_a_domain) begin
+        if(!reset_n) begin
+            input_streaming_valid_for_margin <= 0;
+            input_streaming_data_0_for_margin <= 0;
+            input_streaming_ready_for_margin <= 0;
+            start_training_signal_for_margin <= 0;
+            start_inference_signal_for_margin <= 0;
+            start_ready_for_margin <= 0;
+            inferenced_label_for_margin <= 0;
+        end else begin
+            input_streaming_valid_for_margin <= input_streaming_valid;
+            input_streaming_data_0_for_margin <= input_streaming_data[0];
+            input_streaming_ready_for_margin <= input_streaming_ready;
+            start_training_signal_for_margin <= start_training_signal;
+            start_inference_signal_for_margin <= start_inference_signal;
+            start_ready_for_margin <= start_ready;
+            inferenced_label_for_margin <= inferenced_label;
+        end
+    end
+
+
 
 
 
@@ -1182,13 +1213,13 @@ module a_domain(
     // ######### MARGIN PIN MAPPING ###########################################################################
     // ######### MARGIN PIN MAPPING ###########################################################################
     assign margin_pin[0] = reset_n_from_fpga_to_asic;
-    assign margin_pin[1] = input_streaming_valid;
-    assign margin_pin[2] = input_streaming_data[0];
-    assign margin_pin[3] = input_streaming_ready;
-    assign margin_pin[4] = start_training_signal;
-    assign margin_pin[5] = start_inference_signal;
-    assign margin_pin[6] = start_ready;
-    assign margin_pin[7] = inferenced_label;
+    assign margin_pin[1] = input_streaming_valid_for_margin;
+    assign margin_pin[2] = input_streaming_data_0_for_margin;
+    assign margin_pin[3] = input_streaming_ready_for_margin;
+    assign margin_pin[4] = start_training_signal_for_margin;
+    assign margin_pin[5] = start_inference_signal_for_margin;
+    assign margin_pin[6] = start_ready_for_margin;
+    assign margin_pin[7] = inferenced_label_for_margin;
     // ######### MARGIN PIN MAPPING ###########################################################################
     // ######### MARGIN PIN MAPPING ###########################################################################
     // ######### MARGIN PIN MAPPING ###########################################################################

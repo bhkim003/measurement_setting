@@ -123,267 +123,469 @@ set_property SLEW FAST [get_ports {reset}]
 
 
 
-#--- Generating XDC Constraints ---
 
-# MC1-7 (Manually Assigned Clock)
-set_property PACKAGE_PIN G17 [get_ports {clk_clock_generator}]
-set_property IOSTANDARD LVCMOS18 [get_ports {clk_clock_generator}]
-# MC1-118
-set_property PACKAGE_PIN A8 [get_ports {margin_pin_mc1[0]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc1[0]}]
-# MC1-117
-set_property PACKAGE_PIN H8 [get_ports {input_streaming_data_from_fpga_to_asic[0]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[0]}]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Auto-generated XDC Output with Validation
+# Checked for FPGA I/O and Clock Capable Pins
+
 # MC1-116
-set_property PACKAGE_PIN A9 [get_ports {input_streaming_data_from_fpga_to_asic[1]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[1]}]
-# MC1-115
-set_property PACKAGE_PIN H9 [get_ports {input_streaming_data_from_fpga_to_asic[2]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[2]}]
+set_property PACKAGE_PIN A9 [get_ports {margin_pin_mc2[0]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[0]}]
+
 # MC1-112
-set_property PACKAGE_PIN B9 [get_ports {input_streaming_data_from_fpga_to_asic[3]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[3]}]
-# MC1-111
-set_property PACKAGE_PIN G9 [get_ports {input_streaming_data_from_fpga_to_asic[4]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[4]}]
+set_property PACKAGE_PIN B9 [get_ports {margin_pin_mc2[1]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[1]}]
+
 # MC1-110
-set_property PACKAGE_PIN C9 [get_ports {input_streaming_data_from_fpga_to_asic[5]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[5]}]
-# MC1-109
-set_property PACKAGE_PIN G10 [get_ports {input_streaming_data_from_fpga_to_asic[6]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[6]}]
+set_property PACKAGE_PIN C9 [get_ports {margin_pin_mc2[2]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[2]}]
+
 # MC1-108
-set_property PACKAGE_PIN C14 [get_ports {input_streaming_data_from_fpga_to_asic[7]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[7]}]
-# MC1-107
-set_property PACKAGE_PIN H12 [get_ports {input_streaming_data_from_fpga_to_asic[8]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[8]}]
+set_property PACKAGE_PIN C14 [get_ports {margin_pin_mc2[3]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[3]}]
+
 # MC1-106
-set_property PACKAGE_PIN A10 [get_ports {input_streaming_data_from_fpga_to_asic[9]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[9]}]
-# MC1-105
-set_property PACKAGE_PIN J10 [get_ports {input_streaming_data_from_fpga_to_asic[10]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[10]}]
+set_property PACKAGE_PIN A10 [get_ports {margin_pin_mc2[4]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[4]}]
+
 # MC1-104
-set_property PACKAGE_PIN B10 [get_ports {input_streaming_data_from_fpga_to_asic[11]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[11]}]
-# MC1-103
-set_property PACKAGE_PIN J11 [get_ports {input_streaming_data_from_fpga_to_asic[12]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[12]}]
+set_property PACKAGE_PIN B10 [get_ports {margin_pin_mc2[5]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[5]}]
+
 # MC1-102
-set_property PACKAGE_PIN J14 [get_ports {input_streaming_data_from_fpga_to_asic[13]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[13]}]
-# MC1-101
-set_property PACKAGE_PIN A12 [get_ports {input_streaming_data_from_fpga_to_asic[14]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[14]}]
-# MC1-100
-set_property PACKAGE_PIN F10 [get_ports {input_streaming_data_from_fpga_to_asic[15]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[15]}]
-# MC1-99
-set_property PACKAGE_PIN F8 [get_ports {input_streaming_data_from_fpga_to_asic[16]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[16]}]
-# MC1-98
-set_property PACKAGE_PIN G11 [get_ports {input_streaming_data_from_fpga_to_asic[17]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[17]}]
-# MC1-97
-set_property PACKAGE_PIN F9 [get_ports {input_streaming_data_from_fpga_to_asic[18]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[18]}]
-# MC1-96
-set_property PACKAGE_PIN A15 [get_ports {input_streaming_data_from_fpga_to_asic[19]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[19]}]
-# MC1-95
-set_property PACKAGE_PIN A13 [get_ports {input_streaming_data_from_fpga_to_asic[20]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[20]}]
-# MC1-94
-set_property PACKAGE_PIN A14 [get_ports {input_streaming_data_from_fpga_to_asic[21]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[21]}]
-# MC1-93
-set_property PACKAGE_PIN D8 [get_ports {input_streaming_data_from_fpga_to_asic[22]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[22]}]
-# MC1-92
-set_property PACKAGE_PIN B14 [get_ports {input_streaming_data_from_fpga_to_asic[23]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[23]}]
-# MC1-91
-set_property PACKAGE_PIN D9 [get_ports {input_streaming_data_from_fpga_to_asic[24]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[24]}]
-# MC1-90
-set_property PACKAGE_PIN B15 [get_ports {input_streaming_data_from_fpga_to_asic[25]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[25]}]
-# MC1-89
-set_property PACKAGE_PIN J8 [get_ports {input_streaming_data_from_fpga_to_asic[26]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[26]}]
-# MC1-88
-set_property PACKAGE_PIN C11 [get_ports {input_streaming_data_from_fpga_to_asic[27]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[27]}]
-# MC1-87
-set_property PACKAGE_PIN D10 [get_ports {input_streaming_data_from_fpga_to_asic[28]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[28]}]
-# MC1-86
-set_property PACKAGE_PIN C12 [get_ports {input_streaming_data_from_fpga_to_asic[29]}]
+set_property PACKAGE_PIN J14 [get_ports {input_streaming_data_from_fpga_to_asic[29]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[29]}]
-# MC1-85
-set_property PACKAGE_PIN E10 [get_ports {input_streaming_data_from_fpga_to_asic[30]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[30]}]
-# MC1-82
-set_property PACKAGE_PIN B11 [get_ports {input_streaming_data_from_fpga_to_asic[31]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[31]}]
-# MC1-81
-set_property PACKAGE_PIN E12 [get_ports {input_streaming_data_from_fpga_to_asic[32]}]
+
+# MC1-100
+set_property PACKAGE_PIN F10 [get_ports {input_streaming_data_from_fpga_to_asic[32]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[32]}]
-# MC1-80
-set_property PACKAGE_PIN B12 [get_ports {input_streaming_data_from_fpga_to_asic[33]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[33]}]
-# MC1-79
-set_property PACKAGE_PIN E13 [get_ports {input_streaming_data_from_fpga_to_asic[34]}]
+
+# MC1-98
+set_property PACKAGE_PIN G11 [get_ports {input_streaming_data_from_fpga_to_asic[34]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[34]}]
-# MC1-76
-set_property PACKAGE_PIN F13 [get_ports {input_streaming_data_from_fpga_to_asic[35]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[35]}]
-# MC1-75
-set_property PACKAGE_PIN D13 [get_ports {input_streaming_data_from_fpga_to_asic[36]}]
+
+# MC1-96
+set_property PACKAGE_PIN A15 [get_ports {input_streaming_data_from_fpga_to_asic[36]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[36]}]
-# MC1-74
-set_property PACKAGE_PIN F14 [get_ports {input_streaming_data_from_fpga_to_asic[37]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[37]}]
-# MC1-73
-set_property PACKAGE_PIN D14 [get_ports {input_streaming_data_from_fpga_to_asic[38]}]
+
+# MC1-94
+set_property PACKAGE_PIN A14 [get_ports {input_streaming_data_from_fpga_to_asic[38]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[38]}]
+
+# MC1-92
+set_property PACKAGE_PIN B14 [get_ports {input_streaming_data_from_fpga_to_asic[30]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[30]}]
+
+# MC1-90
+set_property PACKAGE_PIN B15 [get_ports {input_streaming_data_from_fpga_to_asic[28]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[28]}]
+
+# MC1-88
+set_property PACKAGE_PIN C11 [get_ports {input_streaming_data_from_fpga_to_asic[20]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[20]}]
+
+# MC1-86
+set_property PACKAGE_PIN C12 [get_ports {input_streaming_data_from_fpga_to_asic[22]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[22]}]
+
+# MC1-82
+set_property PACKAGE_PIN B11 [get_ports {input_streaming_data_from_fpga_to_asic[24]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[24]}]
+
+# MC1-80
+set_property PACKAGE_PIN B12 [get_ports {input_streaming_data_from_fpga_to_asic[26]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[26]}]
+
+# MC1-76
+set_property PACKAGE_PIN F13 [get_ports {input_streaming_data_from_fpga_to_asic[27]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[27]}]
+
+# MC1-74
+set_property PACKAGE_PIN F14 [get_ports {margin_pin_mc2[6]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[6]}]
+
 # MC1-70
-set_property PACKAGE_PIN F12 [get_ports {input_streaming_data_from_fpga_to_asic[39]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[39]}]
-# MC1-69
-set_property PACKAGE_PIN H13 [get_ports {input_streaming_data_from_fpga_to_asic[40]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[40]}]
+set_property PACKAGE_PIN F12 [get_ports {margin_pin_mc2[7]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[7]}]
+
 # MC1-68
-set_property PACKAGE_PIN G12 [get_ports {input_streaming_data_from_fpga_to_asic[41]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[41]}]
-# MC1-67
-set_property PACKAGE_PIN J13 [get_ports {input_streaming_data_from_fpga_to_asic[42]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[42]}]
+set_property PACKAGE_PIN G12 [get_ports {margin_pin_mc2[8]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[8]}]
+
 # MC1-64
-set_property PACKAGE_PIN G14 [get_ports {input_streaming_data_from_fpga_to_asic[43]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[43]}]
-# MC1-63
-set_property PACKAGE_PIN D11 [get_ports {input_streaming_data_from_fpga_to_asic[44]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[44]}]
+set_property PACKAGE_PIN G14 [get_ports {margin_pin_mc2[9]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[9]}]
+
 # MC1-62
-set_property PACKAGE_PIN H14 [get_ports {input_streaming_data_from_fpga_to_asic[45]}]
+set_property PACKAGE_PIN H14 [get_ports {margin_pin_mc2[10]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[10]}]
+
+# MC1-117
+set_property PACKAGE_PIN H8 [get_ports {input_streaming_data_from_fpga_to_asic[31]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[31]}]
+
+# MC1-115
+set_property PACKAGE_PIN H9 [get_ports {input_streaming_data_from_fpga_to_asic[33]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[33]}]
+
+# MC1-111
+set_property PACKAGE_PIN G9 [get_ports {input_streaming_data_from_fpga_to_asic[35]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[35]}]
+
+# MC1-109
+set_property PACKAGE_PIN G10 [get_ports {input_streaming_data_from_fpga_to_asic[37]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[37]}]
+
+# MC1-105
+set_property PACKAGE_PIN J10 [get_ports {input_streaming_data_from_fpga_to_asic[39]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[39]}]
+
+# MC1-101
+set_property PACKAGE_PIN A12 [get_ports {input_streaming_data_from_fpga_to_asic[41]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[41]}]
+
+# MC1-99
+set_property PACKAGE_PIN F8 [get_ports {input_streaming_data_from_fpga_to_asic[43]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[43]}]
+
+# MC1-97
+set_property PACKAGE_PIN F9 [get_ports {input_streaming_data_from_fpga_to_asic[45]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[45]}]
-# MC1-61
-set_property PACKAGE_PIN E11 [get_ports {input_streaming_data_from_fpga_to_asic[46]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[46]}]
-# MC1-58
-set_property PACKAGE_PIN J16 [get_ports {input_streaming_data_from_fpga_to_asic[47]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[47]}]
-# MC1-57
-set_property PACKAGE_PIN K17 [get_ports {input_streaming_data_from_fpga_to_asic[48]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[48]}]
-# MC1-56
-set_property PACKAGE_PIN J15 [get_ports {input_streaming_data_from_fpga_to_asic[49]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[49]}]
-# MC1-55
-set_property PACKAGE_PIN K16 [get_ports {input_streaming_data_from_fpga_to_asic[50]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[50]}]
-# MC1-52
-set_property PACKAGE_PIN D18 [get_ports {input_streaming_data_from_fpga_to_asic[51]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[51]}]
-# MC1-51
-set_property PACKAGE_PIN G16 [get_ports {input_streaming_data_from_fpga_to_asic[52]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[52]}]
-# MC1-50
-set_property PACKAGE_PIN E18 [get_ports {input_streaming_data_from_fpga_to_asic[53]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[53]}]
-# MC1-49
-set_property PACKAGE_PIN H16 [get_ports {input_streaming_data_from_fpga_to_asic[54]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[54]}]
-# MC1-48
-set_property PACKAGE_PIN M16 [get_ports {input_streaming_data_from_fpga_to_asic[55]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[55]}]
-# MC1-47
-set_property PACKAGE_PIN L17 [get_ports {input_streaming_data_from_fpga_to_asic[56]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[56]}]
-# MC1-46
-set_property PACKAGE_PIN D20 [get_ports {input_streaming_data_from_fpga_to_asic[57]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[57]}]
-# MC1-45
-set_property PACKAGE_PIN F15 [get_ports {input_streaming_data_from_fpga_to_asic[58]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[58]}]
-# MC1-44
-set_property PACKAGE_PIN D19 [get_ports {input_streaming_data_from_fpga_to_asic[59]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[59]}]
-# MC1-43
-set_property PACKAGE_PIN G15 [get_ports {input_streaming_data_from_fpga_to_asic[60]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[60]}]
-# MC1-42
-set_property PACKAGE_PIN K18 [get_ports {input_streaming_data_from_fpga_to_asic[61]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[61]}]
-# MC1-41
-set_property PACKAGE_PIN L18 [get_ports {input_streaming_data_from_fpga_to_asic[62]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[62]}]
-# MC1-40
-set_property PACKAGE_PIN H18 [get_ports {input_streaming_data_from_fpga_to_asic[63]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[63]}]
-# MC1-39
-set_property PACKAGE_PIN J19 [get_ports {input_streaming_data_from_fpga_to_asic[64]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[64]}]
-# MC1-38
-set_property PACKAGE_PIN H17 [get_ports {input_streaming_data_from_fpga_to_asic[65]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[65]}]
-# MC1-37
-set_property PACKAGE_PIN J18 [get_ports {input_streaming_valid_from_fpga_to_asic}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_valid_from_fpga_to_asic}]
-# MC1-36
-set_property PACKAGE_PIN K20 [get_ports {input_streaming_ready_from_asic_to_fpga}]
-set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_ready_from_asic_to_fpga}]
-# MC1-35
-set_property PACKAGE_PIN M17 [get_ports {start_training_signal_from_fpga_to_asic}]
+
+# MC1-95
+set_property PACKAGE_PIN A13 [get_ports {input_streaming_data_from_fpga_to_asic[44]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[44]}]
+
+# MC1-93
+set_property PACKAGE_PIN D8 [get_ports {input_streaming_data_from_fpga_to_asic[42]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[42]}]
+
+# MC1-91
+set_property PACKAGE_PIN D9 [get_ports {input_streaming_data_from_fpga_to_asic[40]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[40]}]
+
+# MC1-89
+set_property PACKAGE_PIN J8 [get_ports {input_streaming_data_from_fpga_to_asic[18]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[18]}]
+
+# MC1-87
+set_property PACKAGE_PIN D10 [get_ports {input_streaming_data_from_fpga_to_asic[16]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[16]}]
+
+# MC1-85
+set_property PACKAGE_PIN E10 [get_ports {start_training_signal_from_fpga_to_asic}]
 set_property IOSTANDARD LVCMOS18 [get_ports {start_training_signal_from_fpga_to_asic}]
-# MC1-34
-set_property PACKAGE_PIN B16 [get_ports {start_ready_from_asic_to_fpga}]
-set_property IOSTANDARD LVCMOS18 [get_ports {start_ready_from_asic_to_fpga}]
-# MC1-33
-set_property PACKAGE_PIN L20 [get_ports {start_inference_signal_from_fpga_to_asic}]
-set_property IOSTANDARD LVCMOS18 [get_ports {start_inference_signal_from_fpga_to_asic}]
-# MC1-32
-set_property PACKAGE_PIN C16 [get_ports {inferenced_label_from_asic_to_fpga}]
-set_property IOSTANDARD LVCMOS18 [get_ports {inferenced_label_from_asic_to_fpga}]
-# MC1-31
-set_property PACKAGE_PIN L19 [get_ports {reset_n_from_fpga_to_asic}]
+
+# MC1-81
+set_property PACKAGE_PIN E12 [get_ports {reset_n_from_fpga_to_asic}]
 set_property IOSTANDARD LVCMOS18 [get_ports {reset_n_from_fpga_to_asic}]
 
+# MC1-79
+set_property PACKAGE_PIN E13 [get_ports {start_inference_signal_from_fpga_to_asic}]
+set_property IOSTANDARD LVCMOS18 [get_ports {start_inference_signal_from_fpga_to_asic}]
 
+# MC1-75
+set_property PACKAGE_PIN D13 [get_ports {input_streaming_valid_from_fpga_to_asic}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_valid_from_fpga_to_asic}]
 
+# MC1-73
+set_property PACKAGE_PIN D14 [get_ports {input_streaming_data_from_fpga_to_asic[17]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[17]}]
 
+# MC1-69
+set_property PACKAGE_PIN H13 [get_ports {input_streaming_data_from_fpga_to_asic[19]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[19]}]
 
+# MC1-67
+set_property PACKAGE_PIN J13 [get_ports {input_streaming_data_from_fpga_to_asic[21]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[21]}]
 
+# MC1-63
+set_property PACKAGE_PIN D11 [get_ports {input_streaming_data_from_fpga_to_asic[23]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[23]}]
 
+# MC1-61
+set_property PACKAGE_PIN E11 [get_ports {input_streaming_data_from_fpga_to_asic[25]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[25]}]
 
+# MC1-32
+set_property PACKAGE_PIN C16 [get_ports {margin_pin_mc2[11]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[11]}]
 
+# MC1-30
+set_property PACKAGE_PIN D15 [get_ports {margin_pin_mc2[12]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[12]}]
 
+# MC1-28
+set_property PACKAGE_PIN C18 [get_ports {margin_pin_mc2[13]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[13]}]
 
+# MC1-26
+set_property PACKAGE_PIN C17 [get_ports {margin_pin_mc2[14]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[14]}]
 
+# MC1-25
+set_property PACKAGE_PIN F17 [get_ports {clk_clock_generator}]
+set_property IOSTANDARD LVCMOS18 [get_ports {clk_clock_generator}]
 
+# MC1-22
+set_property PACKAGE_PIN G20 [get_ports {margin_pin_mc2[15]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[15]}]
 
+# MC1-20
+set_property PACKAGE_PIN H19 [get_ports {margin_pin_mc2[16]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[16]}]
 
+# MC1-16
+set_property PACKAGE_PIN E16 [get_ports {margin_pin_mc2[17]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[17]}]
 
+# MC1-14
+set_property PACKAGE_PIN E15 [get_ports {margin_pin_mc2[18]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[18]}]
 
+# MC1-10
+set_property PACKAGE_PIN A19 [get_ports {margin_pin_mc2[19]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[19]}]
 
+# MC1-8
+set_property PACKAGE_PIN A18 [get_ports {margin_pin_mc2[20]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[20]}]
 
+# MC1-4
+set_property PACKAGE_PIN B19 [get_ports {margin_pin_mc2[21]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[21]}]
 
+# MC1-2
+set_property PACKAGE_PIN C19 [get_ports {margin_pin_mc2[22]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[22]}]
 
+# MC2-118
+set_property PACKAGE_PIN AA20 [get_ports {input_streaming_data_from_fpga_to_asic[63]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[63]}]
 
+# MC2-116
+set_property PACKAGE_PIN AA19 [get_ports {input_streaming_data_from_fpga_to_asic[61]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[61]}]
 
+# MC2-112
+set_property PACKAGE_PIN AB20 [get_ports {input_streaming_data_from_fpga_to_asic[59]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[59]}]
 
+# MC2-110
+set_property PACKAGE_PIN AB19 [get_ports {input_streaming_data_from_fpga_to_asic[57]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[57]}]
 
+# MC2-108
+set_property PACKAGE_PIN W15 [get_ports {input_streaming_data_from_fpga_to_asic[55]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[55]}]
 
+# MC2-106
+set_property PACKAGE_PIN AD18 [get_ports {input_streaming_data_from_fpga_to_asic[53]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[53]}]
 
+# MC2-104
+set_property PACKAGE_PIN AC18 [get_ports {input_streaming_data_from_fpga_to_asic[51]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[51]}]
 
+# MC2-102
+set_property PACKAGE_PIN V19 [get_ports {input_streaming_data_from_fpga_to_asic[49]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[49]}]
 
+# MC2-100
+set_property PACKAGE_PIN AD19 [get_ports {input_streaming_data_from_fpga_to_asic[47]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[47]}]
 
+# MC2-98
+set_property PACKAGE_PIN AC19 [get_ports {input_streaming_data_from_fpga_to_asic[46]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[46]}]
 
-# 마진 클락 핀
-# MC2-7 (Manually Assigned Clock)
-set_property PACKAGE_PIN AC23 [get_ports {clk_from_fpga}]
+# MC2-96
+set_property PACKAGE_PIN W16 [get_ports {input_streaming_data_from_fpga_to_asic[48]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[48]}]
+
+# MC2-94
+set_property PACKAGE_PIN AE20 [get_ports {input_streaming_data_from_fpga_to_asic[50]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[50]}]
+
+# MC2-92
+set_property PACKAGE_PIN AD20 [get_ports {input_streaming_data_from_fpga_to_asic[52]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[52]}]
+
+# MC2-90
+set_property PACKAGE_PIN AD16 [get_ports {input_streaming_data_from_fpga_to_asic[54]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[54]}]
+
+# MC2-88
+set_property PACKAGE_PIN AD14 [get_ports {input_streaming_data_from_fpga_to_asic[13]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[13]}]
+
+# MC2-86
+set_property PACKAGE_PIN AC14 [get_ports {input_streaming_data_from_fpga_to_asic[15]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[15]}]
+
+# MC2-82
+set_property PACKAGE_PIN Y16 [get_ports {input_streaming_data_from_fpga_to_asic[14]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[14]}]
+
+# MC2-80
+set_property PACKAGE_PIN Y15 [get_ports {input_streaming_ready_from_asic_to_fpga}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_ready_from_asic_to_fpga}]
+
+# MC2-76
+set_property PACKAGE_PIN V17 [get_ports {inferenced_label_from_asic_to_fpga}]
+set_property IOSTANDARD LVCMOS18 [get_ports {inferenced_label_from_asic_to_fpga}]
+
+# MC2-74
+set_property PACKAGE_PIN V16 [get_ports {input_streaming_data_from_fpga_to_asic[11]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[11]}]
+
+# MC2-70
+set_property PACKAGE_PIN Y18 [get_ports {input_streaming_data_from_fpga_to_asic[9]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[9]}]
+
+# MC2-68
+set_property PACKAGE_PIN Y17 [get_ports {input_streaming_data_from_fpga_to_asic[7]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[7]}]
+
+# MC2-64
+set_property PACKAGE_PIN W19 [get_ports {input_streaming_data_from_fpga_to_asic[5]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[5]}]
+
+# MC2-62
+set_property PACKAGE_PIN W18 [get_ports {input_streaming_data_from_fpga_to_asic[3]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[3]}]
+
+# MC2-101
+set_property PACKAGE_PIN V18 [get_ports {input_streaming_data_from_fpga_to_asic[65]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[65]}]
+
+# MC2-99
+set_property PACKAGE_PIN AC17 [get_ports {input_streaming_data_from_fpga_to_asic[62]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[62]}]
+
+# MC2-97
+set_property PACKAGE_PIN AB17 [get_ports {input_streaming_data_from_fpga_to_asic[60]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[60]}]
+
+# MC2-95
+set_property PACKAGE_PIN W14 [get_ports {input_streaming_data_from_fpga_to_asic[58]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[58]}]
+
+# MC2-93
+set_property PACKAGE_PIN AF18 [get_ports {input_streaming_data_from_fpga_to_asic[56]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[56]}]
+
+# MC2-91
+set_property PACKAGE_PIN AE18 [get_ports {input_streaming_data_from_fpga_to_asic[64]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[64]}]
+
+# MC2-87
+set_property PACKAGE_PIN AC16 [get_ports {input_streaming_data_from_fpga_to_asic[0]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[0]}]
+
+# MC2-85
+set_property PACKAGE_PIN AB16 [get_ports {start_ready_from_asic_to_fpga}]
+set_property IOSTANDARD LVCMOS18 [get_ports {start_ready_from_asic_to_fpga}]
+
+# MC2-81
+set_property PACKAGE_PIN AA15 [get_ports {input_streaming_data_from_fpga_to_asic[12]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[12]}]
+
+# MC2-79
+set_property PACKAGE_PIN AA14 [get_ports {input_streaming_data_from_fpga_to_asic[10]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[10]}]
+
+# MC2-75
+set_property PACKAGE_PIN AA18 [get_ports {input_streaming_data_from_fpga_to_asic[8]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[8]}]
+
+# MC2-73
+set_property PACKAGE_PIN AA17 [get_ports {input_streaming_data_from_fpga_to_asic[6]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[6]}]
+
+# MC2-69
+set_property PACKAGE_PIN AF20 [get_ports {input_streaming_data_from_fpga_to_asic[4]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[4]}]
+
+# MC2-67
+set_property PACKAGE_PIN AF19 [get_ports {input_streaming_data_from_fpga_to_asic[2]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[2]}]
+
+# MC2-63
+set_property PACKAGE_PIN AF17 [get_ports {input_streaming_data_from_fpga_to_asic[1]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[1]}]
+
+# MC2-38
+set_property PACKAGE_PIN AA23 [get_ports {clk_from_fpga}]
 set_property IOSTANDARD LVCMOS18 [get_ports {clk_from_fpga}]
 
 
@@ -418,77 +620,65 @@ set_property IOSTANDARD LVCMOS18 [get_ports {clk_from_fpga}]
 
 
 
-#--- Generating XDC Constraints ---
 
-# MC2-117
-set_property PACKAGE_PIN AE15 [get_ports {margin_pin_mc2[0]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[0]}]
-# MC2-115
-set_property PACKAGE_PIN AD15 [get_ports {margin_pin_mc2[1]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[1]}]
-# MC2-111
-set_property PACKAGE_PIN AF15 [get_ports {margin_pin_mc2[2]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[2]}]
-# MC2-109
-set_property PACKAGE_PIN AF14 [get_ports {margin_pin_mc2[3]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[3]}]
-# MC2-107
-set_property PACKAGE_PIN V14 [get_ports {margin_pin_mc2[4]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[4]}]
-# MC2-105
-set_property PACKAGE_PIN AB15 [get_ports {margin_pin_mc2[5]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[5]}]
-# MC2-103
-set_property PACKAGE_PIN AB14 [get_ports {margin_pin_mc2[6]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[6]}]
-# MC2-101
-set_property PACKAGE_PIN V18 [get_ports {margin_pin_mc2[7]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[7]}]
-# MC2-99
-set_property PACKAGE_PIN AC17 [get_ports {margin_pin_mc2[8]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[8]}]
-# MC2-97
-set_property PACKAGE_PIN AB17 [get_ports {margin_pin_mc2[9]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[9]}]
-# MC2-95
-set_property PACKAGE_PIN W14 [get_ports {margin_pin_mc2[10]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[10]}]
-# MC2-93
-set_property PACKAGE_PIN AF18 [get_ports {margin_pin_mc2[11]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[11]}]
-# MC2-91
-set_property PACKAGE_PIN AE18 [get_ports {margin_pin_mc2[12]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[12]}]
-# MC2-87
-set_property PACKAGE_PIN AC16 [get_ports {margin_pin_mc2[13]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[13]}]
-# MC2-85
-set_property PACKAGE_PIN AB16 [get_ports {margin_pin_mc2[14]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[14]}]
-# MC2-81
-set_property PACKAGE_PIN AA15 [get_ports {margin_pin_mc2[15]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[15]}]
-# MC2-79
-set_property PACKAGE_PIN AA14 [get_ports {margin_pin_mc2[16]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[16]}]
-# MC2-75
-set_property PACKAGE_PIN AA18 [get_ports {margin_pin_mc2[17]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[17]}]
-# MC2-73
-set_property PACKAGE_PIN AA17 [get_ports {margin_pin_mc2[18]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[18]}]
-# MC2-69
-set_property PACKAGE_PIN AF20 [get_ports {margin_pin_mc2[19]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[19]}]
-# MC2-67
-set_property PACKAGE_PIN AF19 [get_ports {margin_pin_mc2[20]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[20]}]
-# MC2-63
-set_property PACKAGE_PIN AF17 [get_ports {margin_pin_mc2[21]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[21]}]
-# MC2-61
-set_property PACKAGE_PIN AE17 [get_ports {margin_pin_mc2[22]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[22]}]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -692,9 +882,9 @@ set_property PACKAGE_PIN K5 [get_ports {mgtrefclk_n}]
 
 
 
-# RESET_N은 빼라
-set_property IOB TRUE [get_ports {input_streaming_ready_from_asic_to_fpga start_ready_from_asic_to_fpga inferenced_label_from_asic_to_fpga}]
-set_property IOB TRUE [get_ports {input_streaming_data_from_fpga_to_asic[*] input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
+# # RESET_N과 마진 핀은 제외
+# set_property IOB TRUE [get_ports {input_streaming_ready_from_asic_to_fpga start_ready_from_asic_to_fpga inferenced_label_from_asic_to_fpga}]
+# set_property IOB TRUE [get_ports {input_streaming_data_from_fpga_to_asic[*] input_streaming_valid_from_fpga_to_asic start_training_signal_from_fpga_to_asic start_inference_signal_from_fpga_to_asic}]
 
 
 
