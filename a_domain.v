@@ -1,5 +1,5 @@
 // `define TEST_SETTING 1
-// `define ASIC_IN_FPGA 1
+`define ASIC_IN_FPGA 1
 `define USING_ANOTHER_CLK_FOR_OUT 1
 module a_domain(
         input clk_a_domain,
@@ -196,7 +196,7 @@ module a_domain(
                         input_streaming_valid_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_valid_from_fpga_to_asic_buf[output_gen_i-1];
                         input_streaming_data_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_data_from_fpga_to_asic_buf[output_gen_i-1];
                         start_training_signal_from_fpga_to_asic_buf[output_gen_i] <= start_training_signal_from_fpga_to_asic_buf[output_gen_i-1];
-                        start_inference_signal_from_fpga_to_asic_buf[output_gen_i] <= start_inference_signal_from_fpga_to_asic_buf[output_gen_i-1];;
+                        start_inference_signal_from_fpga_to_asic_buf[output_gen_i] <= start_inference_signal_from_fpga_to_asic_buf[output_gen_i-1];
                     end
                 end
             endgenerate
