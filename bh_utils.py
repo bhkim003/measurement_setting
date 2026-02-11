@@ -28,7 +28,7 @@ def layer_cut_generator(threshold, sg_width, learning_rate, verbose = False):
     scale_sg_temp = 2 ** math.ceil(math.log2(sg_temp_max / (2 ** (sg_bit - 1) - 1)))
 
     # v = torch.arange(-2**v_bit, 2**v_bit + 1) * scale_v
-    v = torch.arange((-2**v_bit)/1 +((2**(-weight_exp))*threshold), (2**v_bit + 1)/1 + ((2**(-weight_exp))*threshold) +1) * scale_v
+    v = torch.arange((-2**v_bit)/0.25 +((2**(-weight_exp))*threshold), (2**v_bit + 1)/0.25 + ((2**(-weight_exp))*threshold) +1) * scale_v
     # v = torch.arange((-2**v_bit)/2 +((2**(-weight_exp))*threshold), (2**v_bit + 1)/2 + ((2**(-weight_exp))*threshold) +1) * scale_v
 
     # Surrogate gradient function
