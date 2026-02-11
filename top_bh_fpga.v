@@ -331,6 +331,7 @@ module top_bh_fpga(
         wire clk_clock_generator_buf;
         IBUFG u_IBUFG(.O(clk_clock_generator_buf), .I(clk_clock_generator));
 
+// wire sys_clk2_pre;
         // // MCMM clk_out1_clk_wiz_1
         clk_wiz_1 u_clk_wiz_1(
             .clk_out1 ( sys_clk2 ),
@@ -341,6 +342,14 @@ module top_bh_fpga(
             .clk_in1 (clk_clock_generator_buf),
             .locked ( locked )
         );
+// // Global Clock Buffer 연결
+// BUFG bufg_inst_for_input (
+//     .I(sys_clk2_pre),
+//     .O(sys_clk2)
+// );
+
+
+// wire clk_a_domain_for_out_pre;
         // // MCMM clk_out1_clk_wiz_1_1
         clk_wiz_1 u_clk_wiz_2(
             .clk_out1 ( clk_a_domain_for_out ),
@@ -351,6 +360,14 @@ module top_bh_fpga(
             .clk_in1 (clk_clock_generator_buf),
             .locked ( locked2 )
         );
+// // Global Clock Buffer 연결
+// BUFG bufg_inst_for_output (
+//     .I(clk_a_domain_for_out_pre),
+//     .O(clk_a_domain_for_out)
+// );
+
+
+
 
         // // MCMM
         // clk_wiz_dynamic_200MHzto200MHz u_clk_wiz_1(
