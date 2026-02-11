@@ -1,5 +1,5 @@
 // `define TEST_SETTING 1
-`define ASIC_IN_FPGA 1
+// `define ASIC_IN_FPGA 1
 `define USING_ANOTHER_CLK_FOR_OUT 1
 module a_domain(
         input clk_a_domain,
@@ -104,7 +104,7 @@ module a_domain(
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
     // ######### IN OUT ###########################################################################
-    localparam INPUT_BUf_NUM = 2;
+    localparam INPUT_BUf_NUM = 1;
     reg input_streaming_ready_from_asic_to_fpga_buf [0:INPUT_BUf_NUM-1];
     reg start_ready_from_asic_to_fpga_buf [0:INPUT_BUf_NUM-1];
     reg inferenced_label_from_asic_to_fpga_buf [0:INPUT_BUf_NUM-1];
@@ -143,7 +143,7 @@ module a_domain(
 
 
 
-    localparam OUTPUT_BUf_NUM = 2;
+    localparam OUTPUT_BUf_NUM = 1;
     reg input_streaming_valid;
     reg input_streaming_valid_from_fpga_to_asic_buf [0:OUTPUT_BUf_NUM-1];
     reg [65:0] input_streaming_data;
