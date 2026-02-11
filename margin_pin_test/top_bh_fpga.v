@@ -1,0 +1,2400 @@
+// `define TEST_SETTING 1
+// `define ASIC_IN_FPGA 1
+// `define BUILTIN_FIFO_FOR_A_DOMAIN 1
+module top_bh_fpga(
+        // ########################## okHost interface ########################################################################################
+        // ########################## okHost interface ########################################################################################
+        // ########################## okHost interface ########################################################################################
+        input   wire [4:0]  okUH,
+        output  wire [2:0]  okHU,
+        inout   wire [31:0] okUHU,
+        inout   wire        okAA,
+        // ########################## okHost interface ########################################################################################
+        // ########################## okHost interface ########################################################################################
+        // ########################## okHost interface ########################################################################################
+
+
+
+
+        // ########################## sys_clk ########################################################################################
+        // ########################## sys_clk ########################################################################################
+        // ########################## sys_clk ########################################################################################
+        // input   wire        sys_clk,
+        input   wire        sys_clk_p,
+        input   wire        sys_clk_n,
+        // ########################## sys_clk ########################################################################################
+        // ########################## sys_clk ########################################################################################
+        // ########################## sys_clk ########################################################################################
+
+
+
+
+
+        // ########################## led ########################################################################################
+        // ########################## led ########################################################################################
+        // ########################## led ########################################################################################
+        // output  reg [7:0]  led, // xem7310
+        output  reg [3:0]  led, // xem7360
+        // ########################## led ########################################################################################
+        // ########################## led ########################################################################################
+        // ########################## led ########################################################################################
+        
+
+
+
+        // // ########################## dram interface ########################################################################################
+        // // ########################## dram interface ########################################################################################
+        // // ########################## dram interface ########################################################################################
+        output wire [15:0]  ddr3_addr,
+        output wire [2 :0]  ddr3_ba,
+        output wire         ddr3_cas_n,
+        output wire [0 :0]  ddr3_ck_n,
+        output wire [0 :0]  ddr3_ck_p,
+        output wire [0 :0]  ddr3_cke,
+        output wire         ddr3_ras_n,
+        output wire         ddr3_reset_n,
+
+        output wire         ddr3_we_n,
+        inout  wire [31:0]  ddr3_dq,
+        inout  wire [3 :0]  ddr3_dqs_n,
+        inout  wire [3 :0]  ddr3_dqs_p,
+
+        output wire [0 :0]  ddr3_cs_n, // @ XEM 7360
+        output wire [0 :0]  ddr3_odt,
+        output wire [3 :0]  ddr3_dm,
+        // // ########################## dram interface ########################################################################################
+        // // ########################## dram interface ########################################################################################
+        // // ########################## dram interface ########################################################################################
+
+
+
+
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        // @@@@@@@@ YOU MUST WRITE TO PORT BELOW AT XDC FILE !!!!!!!!!!!!!!! @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+        // ########################## clk generated from clock generator ########################################################################################
+        // ########################## clk generated from clock generator ########################################################################################
+        // ########################## clk generated from clock generator ########################################################################################
+        input clk_clock_generator,
+        output clk_from_fpga,
+        // ########################## clk generated from clock generator ########################################################################################
+        // ########################## clk generated from clock generator ########################################################################################
+        // ########################## clk generated from clock generator ########################################################################################
+
+
+
+        // ########################## fpga to asic, asic to fpga ########################################################################################
+        // ########################## fpga to asic, asic to fpga ########################################################################################
+        // ########################## fpga to asic, asic to fpga ########################################################################################
+        output reset_n_from_fpga_to_asic,
+
+        output input_streaming_valid_from_fpga_to_asic,
+        output [65:0] input_streaming_data_from_fpga_to_asic,
+        input input_streaming_ready_from_asic_to_fpga,
+
+        output start_training_signal_from_fpga_to_asic, 
+        output start_inference_signal_from_fpga_to_asic, 
+        input start_ready_from_asic_to_fpga, 
+
+        input inferenced_label_from_asic_to_fpga,
+        // ########################## fpga to asic, asic to fpga ########################################################################################
+        // ########################## fpga to asic, asic to fpga ########################################################################################
+        // ########################## fpga to asic, asic to fpga ########################################################################################
+    
+    
+    
+    
+    
+        output [22:0] margin_pin_mc2
+
+    
+    
+    
+    
+    
+    );
+
+	// ########################## End Point Connet ########################################################################################
+    wire            okClk;
+    wire [112:0]    okHE;
+    wire [64:0]     okEH;
+    okHost okHI(
+        .okUH(okUH),
+        .okHU(okHU),
+        .okUHU(okUHU),
+        .okAA(okAA),
+        .okClk(okClk),
+        .okHE(okHE), 
+        .okEH(okEH)
+    );
+
+    localparam N = 5;
+    wire [65 - 1:0] okEHx [0:N-1];
+    wire [65 * N - 1:0] okEHx_flat;
+    genvar okEHx_idx;
+    generate
+        for(okEHx_idx = 0; okEHx_idx < N; okEHx_idx = okEHx_idx + 1) begin : gen_okEHx_flat
+            assign okEHx_flat[okEHx_idx*65 +: 65] = okEHx[okEHx_idx];
+        end
+    endgenerate
+    okWireOR #(.N(N)) wireOR (okEH, okEHx_flat);
+ 
+
+    wire [32 - 1:0] ep00wirein;  // reset_n
+    okWireIn WireIn00       (.okHE(okHE), .ep_addr(8'h00), .ep_dataout(ep00wirein));
+    wire reset_n;
+    assign reset_n = ep00wirein[0];
+
+    wire [32 - 1:0] ep01wirein;
+    okWireIn WireIn01       (.okHE(okHE), .ep_addr(8'h01), .ep_dataout(ep01wirein));
+
+    reg [32 - 1:0] ep20wireout, n_ep20wireout;
+    okWireOut WireOut20(.okHE(okHE), .okEH(okEHx[0]), .ep_addr(8'h20), .ep_datain(ep20wireout));
+
+    reg [32 - 1:0] ep21wireout, n_ep21wireout;
+    okWireOut WireOut21(.okHE(okHE), .okEH(okEHx[1]), .ep_addr(8'h21), .ep_datain(ep21wireout));
+
+    wire [32 - 1:0] ep40trigin;
+    okTriggerIn TrigIn40 (.okHE(okHE), .ep_addr(8'h40), .ep_clk(okClk), .ep_trigger(ep40trigin));
+    
+    reg [32 - 1:0] ep60trigout;
+    okTriggerOut TrigOut60(.okHE(okHE), .okEH(okEHx[2]), .ep_addr(8'h60), .ep_clk(okClk), .ep_trigger(ep60trigout));
+
+    wire [32 - 1:0] pipe_in_data; 
+    wire pipe_in_valid;
+    reg	pipe_in_ready;
+    okBTPipeIn  BTPipeIn80  (.okHE(okHE), .okEH(okEHx[3]), .ep_addr(8'h80), .ep_dataout(pipe_in_data), .ep_write(pipe_in_valid), .ep_blockstrobe(), .ep_ready(pipe_in_ready));
+    
+    wire pipe_out_read;
+    wire [32 - 1:0] pipe_out_data;
+    reg	pipe_out_ready;
+    okBTPipeOut BTPipeOutA0 (.okHE(okHE), .okEH(okEHx[4]), .ep_addr(8'hA0), .ep_datain(pipe_out_data), .ep_read(pipe_out_read), .ep_blockstrobe(), .ep_ready(pipe_out_ready));
+	// ########################## End Point Connet ########################################################################################
+
+
+
+    // assign margin_pin_mc2[22:8] = ep20wireout[14:0];
+
+
+
+    // ########################## LED Function ########################################################################################
+    // function [7:0] xem7310_led;
+    //     input [7:0] a;
+    //     integer i_led;
+    //     begin
+    //         for(i_led = 0; i_led < 8; i_led = i_led + 1) begin
+    //             xem7310_led[i_led] = (a[i_led] == 1'b1) ? 1'b0 : 1'bz;
+    //         end
+    //     end
+    // endfunction
+    
+    function [3:0] xem7360_led;
+        // xem 7360 has 4 leds only!!!!!!!!!!!!!!!!!!!!!!
+        // 7310으로 짜다가 7360으로 바뀌어서 걍 이렇게 하위 4bit만 받게 함.
+        input [7:0] a; 
+        integer i_led;
+        begin
+            for(i_led = 0; i_led < 4; i_led = i_led + 1) begin
+                xem7360_led[i_led] = (a[i_led] == 1'b1) ? 1'b0 : 1'bz;
+            end
+        end
+    endfunction
+    // ########################## LED Function ########################################################################################
+
+
+
+    // ########################## MIG ########################################################################################
+    wire          		ui_clk;
+    wire          		ui_clk_sync_rst;
+    wire [12 - 1:0]    device_temp;
+    wire          init_calib_complete;
+    // ########################## MIG ########################################################################################
+
+
+
+    // ########################## sys_clk gen instance ########################################################################################
+    wire sys_clk;
+    // IBUFGDS osc_clk(.O(sys_clk), .I(sys_clk_p), .IB(sys_clk_n));
+
+    assign sys_clk = ui_clk;
+    wire sys_clk2;
+
+    reg psen;
+    reg psincdec;
+    wire psdone;
+    wire locked;
+
+    reg psdone_oneclk_delay;
+    reg signed [31:0] ps_phase, n_ps_phase;
+    reg [4:0] psen_delayed;
+
+
+
+    wire clk_a_domain_for_out;
+    reg psen2;
+    reg psincdec2;
+    wire psdone2;
+    wire locked2;
+
+    reg psdone2_oneclk_delay;
+    reg signed [31:0] ps_phase2, n_ps_phase2;
+    reg [4:0] psen2_delayed;
+
+
+    `ifdef ASIC_IN_FPGA 
+        // assign sys_clk2 = okClk;
+        // assign sys_clk2 = ui_clk;
+        wire ui_clk_buf;
+        wire sys_clk2_temp;
+        IBUFG u_IBUFG(.O(ui_clk_buf), .I(ui_clk));
+        // // PLL
+        // clk_wiz_0 u_clk_wiz_0(
+        //     .clk_in1(ui_clk_buf),
+        //     .clk_out1(), // 100MHz
+        //     .clk_out2(sys_clk2_temp) // 20MHz
+        // );
+        // // MCMM
+        // clk_wiz_1_20MHz u_clk_wiz_1_20MHz(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (sys_clk2_temp),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign locked = 1;
+
+        `ifdef BUILTIN_FIFO_FOR_A_DOMAIN 
+            // // MCMM
+            clk_wiz_1_100to10MHz_nobuffer u_clk_wiz_1_100to10MHz_nobuffer(
+                .clk_out1 ( sys_clk2 ),
+                .psclk ( okClk ),
+                .psen (psen),
+                .psincdec (psincdec),
+                .psdone (psdone),
+                .clk_in1 (ui_clk_buf),
+                .locked ( locked )
+            );
+            clk_wiz_1_100to10MHz_nobuffer u_clk_wiz_2_100to10MHz_nobuffer(
+                .clk_out1 ( clk_a_domain_for_out ),
+                .psclk ( okClk ),
+                .psen (psen2),
+                .psincdec (psincdec2),
+                .psdone (psdone2),
+                .clk_in1 (ui_clk_buf),
+                .locked ( locked2 )
+            );
+        `else
+            // // MCMM
+            clk_wiz_1_100to20MHz_nobuffer u_clk_wiz_1_100to20MHz_nobuffer(
+                .clk_out1 ( sys_clk2 ),
+                .psclk ( okClk ),
+                .psen (psen),
+                .psincdec (psincdec),
+                .psdone (psdone),
+                .clk_in1 (ui_clk_buf),
+                .locked ( locked )
+            );
+            clk_wiz_1_100to20MHz_nobuffer u_clk_wiz_2_100to20MHz_nobuffer(
+                .clk_out1 ( clk_a_domain_for_out ),
+                .psclk ( okClk ),
+                .psen (psen2),
+                .psincdec (psincdec2),
+                .psdone (psdone2),
+                .clk_in1 (ui_clk_buf),
+                .locked ( locked2 )
+            );
+        `endif
+    `elsif TEST_SETTING 
+        assign sys_clk2 = ui_clk;
+        assign psdone = psen_delayed[4];
+        assign locked = 1;
+
+        assign clk_a_domain_for_out = ui_clk;
+        assign psdone2 = psen2_delayed[4];
+        assign locked2 = 1;
+    `else
+        // wire clk_clock_generator_buf;
+        // IBUFG u_IBUFG(.O(clk_clock_generator_buf), .I(clk_clock_generator));
+
+        // // // MCMM clk_out1_clk_wiz_1
+        // clk_wiz_1 u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator_buf),
+        //     .locked ( locked )
+        // );
+
+        // // // MCMM clk_out1_clk_wiz_1_1
+        // clk_wiz_1 u_clk_wiz_2(
+        //     .clk_out1 ( clk_a_domain_for_out ),
+        //     .psclk ( okClk ),
+        //     .psen (psen2),
+        //     .psincdec (psincdec2),
+        //     .psdone (psdone2),
+        //     .clk_in1 (clk_clock_generator_buf),
+        //     .locked ( locked2 )
+        // );
+
+
+
+
+        wire ui_clk_buf;
+        IBUFG u_IBUFG(.O(ui_clk_buf), .I(ui_clk));
+
+
+        clk_wiz_1_100to100MHz_nobuffer u_clk_wiz_1_100to100MHz_nobuffer(
+            .clk_out1 ( sys_clk2 ),
+            .psclk ( okClk ),
+            .psen (psen),
+            .psincdec (psincdec),
+            .psdone (psdone),
+            .clk_in1 (ui_clk_buf),
+            .locked ( locked )
+        );
+        clk_wiz_1_100to100MHz_nobuffer u_clk_wiz_2_100to100MHz_nobuffer(
+            .clk_out1 ( clk_a_domain_for_out ),
+            .psclk ( okClk ),
+            .psen (psen2),
+            .psincdec (psincdec2),
+            .psdone (psdone2),
+            .clk_in1 (ui_clk_buf),
+            .locked ( locked2 )
+        );
+
+
+
+        // // MCMM
+        // clk_wiz_dynamic_200MHzto200MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // // MCMM
+        // clk_wiz_dynamic_150MHzto150MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // // MCMM
+        // clk_wiz_dynamic_100MHzto100MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // // MCMM
+        // clk_wiz_dynamic_50MHzto50MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // // MCMM
+        // clk_wiz_dynamic_20MHzto20MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // // MCMM
+        // clk_wiz_dynamic_10MHzto10MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .psclk ( okClk ),
+        //     .psen (psen),
+        //     .psincdec (psincdec),
+        //     .psdone (psdone),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+
+        // // PLL
+        // // clk_out1_clk_wiz_static_200MHzto200MHz
+        // clk_wiz_static_200MHzto200MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign psdone2 = psen2_delayed[4];
+
+        // // PLL
+        // clk_wiz_static_150MHzto150MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign psdone2 = psen2_delayed[4];
+
+        // // PLL
+        // clk_wiz_static_100MHzto100MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign psdone2 = psen2_delayed[4];
+
+        // // PLL
+        // clk_wiz_static_50MHzto50MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign psdone2 = psen2_delayed[4];
+
+        // // PLL
+        // clk_wiz_static_20MHzto20MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign psdone2 = psen2_delayed[4];
+
+        // // MCMM
+        // clk_wiz_static_10MHzto10MHz u_clk_wiz_1(
+        //     .clk_out1 ( sys_clk2 ),
+        //     .clk_in1 (clk_clock_generator),
+        //     .locked ( locked )
+        // );
+        // assign psdone = psen_delayed[4];
+        // assign psdone2 = psen2_delayed[4];
+
+
+        // IBUFG u_IBUFG(.O(sys_clk2), .I(clk_clock_generator));
+        // IBUFG u_IBUFG(.O(clk_a_domain_for_out), .I(clk_clock_generator));
+        // assign psdone = psen_delayed[4];
+        // assign psdone2 = psen2_delayed[4];
+
+
+        // 느린 클락 잴 때는 걍 이거 써
+        // 느린 클락 잴 때는 걍 이거 써
+        // 느린 클락 잴 때는 걍 이거 써
+        // 느린 클락 잴 때는 걍 이거 써
+        // assign sys_clk2 = clk_clock_generator;
+        // assign clk_a_domain_for_out = clk_clock_generator;
+        // assign psdone = psen_delayed[4];
+        // assign psdone2 = psen2_delayed[4];
+
+
+    `endif
+
+    assign clk_from_fpga = ui_clk;
+    // ########################## sys_clk gen instance ########################################################################################
+ 
+
+
+    localparam P_STATE_00_IDLE = 0;
+    localparam P_STATE_01_WORKLOAD_CONFIG = 1;
+    localparam P_STATE_02_WORKLOAD_CONFIG_DONE = 2;
+    localparam P_STATE_03_DRAMFILL_WEIGHT_DATA = 3;
+    localparam P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE = 4;
+    localparam P_STATE_05_DRAMFILL_INFERENCE_DATA = 5; // When DRAMFILL finish, go to P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE
+    localparam P_STATE_06_DRAMFILL_TRAINING_DATA = 6; // When DRAMFILL finish, go to P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE
+    localparam P_STATE_07_ASIC_CONFIG = 7;
+    localparam P_STATE_08_ASIC_CONFIG_DONE = 8;
+    localparam P_STATE_09_ASIC_INFERENCE_QUEUING = 9;
+    localparam P_STATE_10_ASIC_INFERENCE_PROCESSING = 10;
+    localparam P_STATE_11_ASIC_TRAINING_QUEUING = 11;
+    localparam P_STATE_12_ASIC_TRAINING_PROCESSING = 12;
+
+    reg [7:0] p_state, n_p_state;
+
+    reg config_all_domain_setting_complete, n_config_all_domain_setting_complete;
+
+
+    reg fifo_p2d_command_wr_en;
+    reg [32 - 1:0] fifo_p2d_command_din;
+    wire fifo_p2d_command_full;
+    wire fifo_p2d_command_rd_en;
+    wire [32 - 1:0] fifo_p2d_command_dout;
+    wire fifo_p2d_command_empty;
+    wire fifo_p2d_command_valid;
+
+
+    reg fifo_p2d_data_wr_en;
+    reg [32 - 1:0] fifo_p2d_data_din;
+    wire fifo_p2d_data_full;
+    wire fifo_p2d_data_rd_en;
+    wire [256 - 1:0] fifo_p2d_data_dout;
+    wire fifo_p2d_data_empty;
+    wire fifo_p2d_data_valid;
+    reg [32 - 1:0] fifo_p2d_data_wr_cnt;
+    reg [32 - 1:0] dram_write_cnt, n_dram_write_cnt;
+
+    wire fifo_d2p_command_wr_en;
+    wire [32 - 1:0] fifo_d2p_command_din;
+    wire fifo_d2p_command_full;
+    reg fifo_d2p_command_rd_en;
+    wire [32 - 1:0] fifo_d2p_command_dout;
+    wire fifo_d2p_command_empty;
+    wire fifo_d2p_command_valid;
+
+    wire fifo_d2a_command_wr_en;
+    wire [32 - 1:0] fifo_d2a_command_din;
+    wire fifo_d2a_command_full;
+    wire fifo_d2a_command_rd_en;
+    wire [32 - 1:0] fifo_d2a_command_dout;
+    wire fifo_d2a_command_empty;
+    wire fifo_d2a_command_valid;
+
+    wire fifo_d2a_data_wr_en;
+    wire [66 - 1:0] fifo_d2a_data_din;
+    wire fifo_d2a_data_full;
+    wire fifo_d2a_data_rd_en;
+    wire [66 - 1:0] fifo_d2a_data_dout;
+    wire fifo_d2a_data_empty;
+    wire fifo_d2a_data_valid;
+
+
+    wire fifo_a2d_command_wr_en;
+    wire [32 - 1:0] fifo_a2d_command_din;
+    wire fifo_a2d_command_full;
+    wire fifo_a2d_command_rd_en;
+    wire [32 - 1:0] fifo_a2d_command_dout;
+    wire fifo_a2d_command_empty;
+    wire fifo_a2d_command_valid;
+
+
+    always @(posedge okClk) begin
+        if (!reset_n) begin
+            dram_write_cnt <= 0;
+            fifo_p2d_data_wr_cnt <= 0;
+        end else begin
+            dram_write_cnt <= n_dram_write_cnt;
+
+            if (ep40trigin[30]) begin
+                fifo_p2d_data_wr_cnt <= 0;
+            end else if (fifo_p2d_data_wr_en) begin
+                fifo_p2d_data_wr_cnt <= fifo_p2d_data_wr_cnt + 1;
+            end
+        end
+    end
+
+
+    // ########################## P TO D DOMAIN CROSSING FIFO ########################################################################################
+    fifo_bh_ww32d16_rw32d16 u_fifo_p2d_command(
+        .rst(reset_n == 0 || ui_clk_sync_rst),
+        // write
+        .wr_clk(okClk),
+        .wr_en(fifo_p2d_command_wr_en),
+        .din(fifo_p2d_command_din),
+        .full(fifo_p2d_command_full),
+        // read
+        .rd_clk(sys_clk),
+        .rd_en(fifo_p2d_command_rd_en),
+        .dout(fifo_p2d_command_dout),
+        .empty(fifo_p2d_command_empty),
+        .valid(fifo_p2d_command_valid)
+    );
+
+
+    fifo_bh_ww32d4096_rw256d512 u_fifo_p2d_data(
+        .rst(reset_n == 0 || ui_clk_sync_rst),
+        // write
+        .wr_clk(okClk),
+        .wr_en(fifo_p2d_data_wr_en),
+        .din(fifo_p2d_data_din),
+        .full(fifo_p2d_data_full),
+        // read
+        .rd_clk(sys_clk),
+        .rd_en(fifo_p2d_data_rd_en),
+        .dout(fifo_p2d_data_dout),
+        .empty(fifo_p2d_data_empty),
+        .valid(fifo_p2d_data_valid)
+    );
+    // ########################## P TO D DOMAIN CROSSING FIFO ########################################################################################
+
+    // ########################## D TO P DOMAIN CROSSING FIFO ########################################################################################
+    fifo_bh_ww32d16_rw32d16 u_fifo_d2p_command(
+        .rst(reset_n == 0 || ui_clk_sync_rst),
+        // write
+        .wr_clk(sys_clk),
+        .wr_en(fifo_d2p_command_wr_en),
+        .din(fifo_d2p_command_din),
+        .full(fifo_d2p_command_full),
+        // read
+        .rd_clk(okClk),
+        .rd_en(fifo_d2p_command_rd_en),
+        .dout(fifo_d2p_command_dout),
+        .empty(fifo_d2p_command_empty),
+        .valid(fifo_d2p_command_valid)
+    );
+    // ########################## D TO P DOMAIN CROSSING FIFO ########################################################################################
+ 
+    // ########################## D TO A DOMAIN CROSSING FIFO ########################################################################################
+ 
+    `ifdef BUILTIN_FIFO_FOR_A_DOMAIN
+        fifo_bh_ww32d512_rw32d512_r10MHz_w100MHz u_fifo_d2a_command(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk),
+            .wr_en(fifo_d2a_command_wr_en),
+            .din(fifo_d2a_command_din),
+            .full(fifo_d2a_command_full),
+            // read
+            .rd_clk(sys_clk2),
+            .rd_en(fifo_d2a_command_rd_en),
+            .dout(fifo_d2a_command_dout),
+            .empty(fifo_d2a_command_empty),
+            .valid(fifo_d2a_command_valid)
+        );
+    `else
+        fifo_bh_ww32d16_rw32d16 u_fifo_d2a_command(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk),
+            .wr_en(fifo_d2a_command_wr_en),
+            .din(fifo_d2a_command_din),
+            .full(fifo_d2a_command_full),
+            // read
+            .rd_clk(sys_clk2),
+            .rd_en(fifo_d2a_command_rd_en),
+            .dout(fifo_d2a_command_dout),
+            .empty(fifo_d2a_command_empty),
+            .valid(fifo_d2a_command_valid)
+        );   
+    `endif
+
+    `ifdef BUILTIN_FIFO_FOR_A_DOMAIN
+        fifo_bh_ww66d1024_rw66d1024_r10MHz_w100MHz u_fifo_d2a_data(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk),
+            .wr_en(fifo_d2a_data_wr_en),
+            .din(fifo_d2a_data_din),
+            .full(fifo_d2a_data_full),
+            // read
+            .rd_clk(sys_clk2),
+            .rd_en(fifo_d2a_data_rd_en),
+            .dout(fifo_d2a_data_dout),
+            .empty(fifo_d2a_data_empty),
+            .valid(fifo_d2a_data_valid)
+        );
+    `else
+        fifo_bh_ww66d1024_rw66d1024 u_fifo_d2a_data(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk),
+            .wr_en(fifo_d2a_data_wr_en),
+            .din(fifo_d2a_data_din),
+            .full(fifo_d2a_data_full),
+            // read
+            .rd_clk(sys_clk2),
+            .rd_en(fifo_d2a_data_rd_en),
+            .dout(fifo_d2a_data_dout),
+            .empty(fifo_d2a_data_empty),
+            .valid(fifo_d2a_data_valid)
+        );
+    `endif
+    // ########################## D TO A DOMAIN CROSSING FIFO ########################################################################################
+
+    // ########################## A TO D DOMAIN CROSSING FIFO ########################################################################################
+  
+    `ifdef BUILTIN_FIFO_FOR_A_DOMAIN
+        fifo_bh_ww32d512_rw32d512_r100MHz_w10MHz u_fifo_a2d_command(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk2),
+            .wr_en(fifo_a2d_command_wr_en),
+            .din(fifo_a2d_command_din),
+            .full(fifo_a2d_command_full),
+            // read
+            .rd_clk(sys_clk),
+            .rd_en(fifo_a2d_command_rd_en),
+            .dout(fifo_a2d_command_dout),
+            .empty(fifo_a2d_command_empty),
+            .valid(fifo_a2d_command_valid)
+        );
+    `else
+        fifo_bh_ww32d16_rw32d16 u_fifo_a2d_command(
+            .rst(reset_n == 0 || ui_clk_sync_rst),
+            // write
+            .wr_clk(sys_clk2),
+            .wr_en(fifo_a2d_command_wr_en),
+            .din(fifo_a2d_command_din),
+            .full(fifo_a2d_command_full),
+            // read
+            .rd_clk(sys_clk),
+            .rd_en(fifo_a2d_command_rd_en),
+            .dout(fifo_a2d_command_dout),
+            .empty(fifo_a2d_command_empty),
+            .valid(fifo_a2d_command_valid)
+        );  
+    `endif
+    // ########################## A TO D DOMAIN CROSSING FIFO ########################################################################################
+    
+    
+    // ########################## D DOMAIN ########################################################################################
+    d_domain u_d_domain(
+        .sys_clk_p                    ( sys_clk_p                    ),
+        .sys_clk_n                    ( sys_clk_n                    ),
+        .reset_n                ( reset_n                ),
+
+        .fifo_p2d_command_rd_en ( fifo_p2d_command_rd_en ),
+        .fifo_p2d_command_dout  ( fifo_p2d_command_dout  ),
+        .fifo_p2d_command_empty ( fifo_p2d_command_empty ),
+        .fifo_p2d_command_valid ( fifo_p2d_command_valid ),
+
+        .fifo_p2d_data_rd_en    ( fifo_p2d_data_rd_en    ),
+        .fifo_p2d_data_dout     ( fifo_p2d_data_dout     ),
+        .fifo_p2d_data_empty    ( fifo_p2d_data_empty    ),
+        .fifo_p2d_data_valid    ( fifo_p2d_data_valid    ),
+
+        .fifo_d2p_command_wr_en ( fifo_d2p_command_wr_en ),
+        .fifo_d2p_command_din   ( fifo_d2p_command_din   ),
+        .fifo_d2p_command_full  ( fifo_d2p_command_full  ),
+
+        .fifo_d2a_command_wr_en ( fifo_d2a_command_wr_en ),
+        .fifo_d2a_command_din   ( fifo_d2a_command_din   ),
+        .fifo_d2a_command_full  ( fifo_d2a_command_full  ),
+
+        .fifo_d2a_data_wr_en ( fifo_d2a_data_wr_en ),
+        .fifo_d2a_data_din   ( fifo_d2a_data_din   ),
+        .fifo_d2a_data_full  ( fifo_d2a_data_full  ),
+
+        .fifo_a2d_command_rd_en    ( fifo_a2d_command_rd_en    ),
+        .fifo_a2d_command_dout     ( fifo_a2d_command_dout     ),
+        .fifo_a2d_command_empty    ( fifo_a2d_command_empty    ),
+        .fifo_a2d_command_valid    ( fifo_a2d_command_valid    ),
+
+
+        // Memory interface ports
+        .ui_clk                          ( ui_clk                          ),
+        .ui_clk_sync_rst                          ( ui_clk_sync_rst                          ),
+
+        .device_temp                      ( device_temp                      ),
+
+        .ddr3_addr                        ( ddr3_addr                        ),
+        .ddr3_ba                          ( ddr3_ba                          ),
+        .ddr3_cas_n                       ( ddr3_cas_n                       ),
+        .ddr3_ck_n                        ( ddr3_ck_n                        ),
+        .ddr3_ck_p                        ( ddr3_ck_p                        ),
+        .ddr3_cke                         ( ddr3_cke                         ),
+        .ddr3_ras_n                       ( ddr3_ras_n                       ),
+        .ddr3_reset_n                     ( ddr3_reset_n                     ),
+        .ddr3_we_n                        ( ddr3_we_n                        ),
+        .ddr3_dq                          (   ddr3_dq                   ),
+        .ddr3_dqs_n                       (   ddr3_dqs_n                ),
+        .ddr3_dqs_p                       (   ddr3_dqs_p                ),
+        .init_calib_complete              (   init_calib_complete            ),
+
+        .ddr3_cs_n                      (ddr3_cs_n),
+        .ddr3_dm                          ( ddr3_dm                          ),
+        .ddr3_odt                         ( ddr3_odt                         )
+    );
+    // ########################## D DOMAIN ########################################################################################
+
+
+
+    // ########################## A DOMAIN ########################################################################################
+    a_domain u_a_domain(
+        .clk_a_domain                    ( sys_clk2                    ),
+        .clk_a_domain_for_out            (clk_a_domain_for_out),
+        .reset_n                ( !(reset_n == 0 || ui_clk_sync_rst)                ),
+
+        .fifo_d2a_command_rd_en ( fifo_d2a_command_rd_en ),
+        .fifo_d2a_command_dout  ( fifo_d2a_command_dout  ),
+        .fifo_d2a_command_empty ( fifo_d2a_command_empty ),
+        .fifo_d2a_command_valid ( fifo_d2a_command_valid ),
+
+        .fifo_d2a_data_rd_en    ( fifo_d2a_data_rd_en    ),
+        .fifo_d2a_data_dout     ( fifo_d2a_data_dout     ),
+        .fifo_d2a_data_empty    ( fifo_d2a_data_empty    ),
+        .fifo_d2a_data_valid    ( fifo_d2a_data_valid    ),
+
+        .fifo_a2d_command_wr_en ( fifo_a2d_command_wr_en ),
+        .fifo_a2d_command_din   ( fifo_a2d_command_din   ),
+        .fifo_a2d_command_full  ( fifo_a2d_command_full  ),
+
+
+
+        .reset_n_from_fpga_to_asic ( reset_n_from_fpga_to_asic ),
+
+        .input_streaming_valid_from_fpga_to_asic   ( input_streaming_valid_from_fpga_to_asic   ),
+        .input_streaming_data_from_fpga_to_asic  ( input_streaming_data_from_fpga_to_asic  ),
+        .input_streaming_ready_from_asic_to_fpga  ( input_streaming_ready_from_asic_to_fpga  ),
+
+        .start_training_signal_from_fpga_to_asic  ( start_training_signal_from_fpga_to_asic  ),
+        .start_inference_signal_from_fpga_to_asic  ( start_inference_signal_from_fpga_to_asic  ),
+        .start_ready_from_asic_to_fpga  ( start_ready_from_asic_to_fpga  ),
+
+        .inferenced_label_from_asic_to_fpga  ( inferenced_label_from_asic_to_fpga  ),
+
+        // .margin_pin (margin_pin_mc2[7:0])
+        .margin_pin (margin_pin_mc2)
+    );
+    // ########################## A DOMAIN ########################################################################################
+
+
+
+    // ########################## P (okClk 100.8MHz) DOMAIN CONTROL ########################################################################################
+    reg [1:0] p_config_asic_mode, n_p_config_asic_mode; // 0 training_only, 1 train_inf_sweep, 2 inference_only 
+    reg [15:0] p_config_training_epochs, n_p_config_training_epochs;
+    reg [15:0] p_config_inference_epochs, n_p_config_inference_epochs;
+    reg [1:0] p_config_dataset, n_p_config_dataset; // 0 DVS_GESTURE, 1 N_MNIST, 2 NTIDIGITS
+    reg [15:0] p_config_timesteps, n_p_config_timesteps;
+    reg [15:0] p_config_input_size_layer1_define, n_p_config_input_size_layer1_define;
+    reg p_config_long_time_input_streaming_mode, n_p_config_long_time_input_streaming_mode;
+    reg p_config_binary_classifier_mode, n_p_config_binary_classifier_mode;
+    reg p_config_loser_encourage_mode, n_p_config_loser_encourage_mode;
+    reg [17*15 - 1:0] p_config_layer1_cut_list, n_p_config_layer1_cut_list;
+    reg [16*15 - 1:0] p_config_layer2_cut_list, n_p_config_layer2_cut_list;
+
+    reg [3:0] p_config_cut_cnt, n_p_config_cut_cnt;
+    reg [3:0] p_config_cut_cnt_past, n_p_config_cut_cnt_past;
+
+    reg blink_1000ms, blink_1000ms_past;
+    reg [25:0] blink_1000ms_cnt;
+    reg blink_500ms, blink_500ms_past;
+    reg [25:0] blink_500ms_cnt;
+    reg blink_100ms, blink_100ms_past;
+    reg [25:0] blink_100ms_cnt;
+    
+    reg [2:0] led_pos;   // 0~7
+    reg       led_dir;   // 0: left->right, 1: right->left
+    reg config_all_domain_setting_ongoing, n_config_all_domain_setting_ongoing;
+    reg [15:0] config_all_domain_setting_cnt, n_config_all_domain_setting_cnt;
+
+        
+    reg [31:0] dram_address, n_dram_address;
+    reg [31:0] dram_address_last, n_dram_address_last;
+    reg [3:0] dram_address_transition_cnt, n_dram_address_transition_cnt;
+
+    reg [15:0] config_stream_cnt, n_config_stream_cnt;
+
+    reg [31:0] sample_num, n_sample_num;
+    reg [3:0] sample_num_transition_cnt, n_sample_num_transition_cnt;
+    reg queuing_complete, n_queuing_complete;
+
+    reg [16:0] data_stream_cnt_and_start_ready, n_data_stream_cnt_and_start_ready;
+
+    reg [3:0] execute_16_division, n_execute_16_division;
+
+	reg [31:0] correct_sample_num, n_correct_sample_num;
+	reg [31:0] wrong_sample_num, n_wrong_sample_num;
+	reg [31:0] total_inference_sample_num, n_total_inference_sample_num;
+    reg [3:0] result_transition_cnt, n_result_transition_cnt;
+    reg [63:0] processing_time_cnt, n_processing_time_cnt;
+    reg [3:0] processing_time_cnt_transition_cnt, n_processing_time_cnt_transition_cnt;
+    reg [31:0] sample_num_executed_from_a, n_sample_num_executed_from_a;
+    reg [5:0] sample_num_executed_from_a_transition_cnt, n_sample_num_executed_from_a_transition_cnt;
+
+    reg [31:0] data_stream_cnt_for_test_from_a, n_data_stream_cnt_for_test_from_a;
+    reg [15:0] timestep_from_a, n_timestep_from_a;
+    reg [7:0] sample_stream_cnt_small_from_a, n_sample_stream_cnt_small_from_a;
+
+    always @(posedge okClk) begin
+        if (!reset_n) begin
+            ep20wireout <= 0;
+            ep21wireout <= 0;
+        end else begin
+            ep20wireout <= n_ep20wireout;
+            ep21wireout <= n_ep21wireout;
+        end
+    end
+
+    wire [14:0] d2p_cammand_only;
+    wire [14:0] p2d_command_only;
+    assign d2p_cammand_only = fifo_d2p_command_dout[14:0];
+    assign p2d_command_only = fifo_p2d_command_din[14:0];
+
+    reg [17 - 1:0] app_rd_data_check, n_app_rd_data_check;
+    reg asic_start_ready, n_asic_start_ready;
+    reg asic_config_ongoing, n_asic_config_ongoing;
+
+    reg [16:0] captured_sample_num_executed, n_captured_sample_num_executed;
+    reg [32*12-1:0] samplefinish_num_epochfinish_num_label_num, n_samplefinish_num_epochfinish_num_label_num;
+    always @ (*) begin
+        n_ep20wireout = ep01wirein;
+        n_ep21wireout = p_state;
+        led = xem7360_led(p_state & {8{blink_1000ms}});
+        // led = xem7360_led(8'b00000001 << led_pos);
+
+        if (p_state == P_STATE_00_IDLE) begin
+            led = xem7360_led({8{blink_1000ms}});
+            if (ep01wirein == 1) begin
+                led = xem7360_led(ps_phase[7:0]);
+                n_ep20wireout = ps_phase; 
+            end else if (ep01wirein == 2) begin
+                led = xem7360_led(ps_phase2[7:0]);
+                n_ep20wireout = ps_phase2; 
+            end
+        end else if (p_state == P_STATE_01_WORKLOAD_CONFIG) begin
+            if (ep01wirein == 0) begin
+                if (config_all_domain_setting_complete) begin
+                    led = xem7360_led({8{blink_100ms}});
+                    n_ep20wireout = 42; 
+                end
+            end else begin
+                if (ep01wirein == 1) begin
+                    led = xem7360_led({6'd0, p_config_asic_mode});
+                    n_ep20wireout = p_config_asic_mode;
+                end else if (ep01wirein == 2) begin
+                    led = xem7360_led(p_config_training_epochs[7:0]);
+                    n_ep20wireout = p_config_training_epochs;
+                end else if (ep01wirein == 3) begin
+                    led = xem7360_led(p_config_inference_epochs[7:0]);
+                    n_ep20wireout = p_config_inference_epochs;
+                end else if (ep01wirein == 4) begin
+                    led = xem7360_led({6'd0, p_config_dataset});
+                    n_ep20wireout = p_config_dataset;
+                end else if (ep01wirein == 5) begin
+                    led = xem7360_led(p_config_timesteps[7:0]);
+                    n_ep20wireout = p_config_timesteps;
+                end else if (ep01wirein == 6) begin
+                    led = xem7360_led(p_config_input_size_layer1_define[7:0]);
+                    n_ep20wireout = p_config_input_size_layer1_define;
+                end else if (ep01wirein == 7) begin
+                    led = xem7360_led({7'd0, p_config_long_time_input_streaming_mode});
+                    n_ep20wireout = p_config_long_time_input_streaming_mode;
+                end else if (ep01wirein == 8) begin
+                    led = xem7360_led({7'd0, p_config_binary_classifier_mode});
+                    n_ep20wireout = p_config_binary_classifier_mode;
+                end else if (ep01wirein == 9) begin
+                    led = xem7360_led({7'd0, p_config_loser_encourage_mode});
+                    n_ep20wireout = p_config_loser_encourage_mode;
+                end else if (ep01wirein == 10) begin
+                    led = xem7360_led(p_config_layer1_cut_list[17*p_config_cut_cnt_past +: 8]);
+                    n_ep20wireout = {{15{p_config_layer1_cut_list[17*p_config_cut_cnt_past + 16]}},p_config_layer1_cut_list[17*p_config_cut_cnt_past +: 17]};
+                end else if (ep01wirein == 11) begin
+                    led = xem7360_led(p_config_layer2_cut_list[16*p_config_cut_cnt_past +: 8]);
+                    n_ep20wireout = {{16{p_config_layer2_cut_list[16*p_config_cut_cnt_past + 15]}},p_config_layer2_cut_list[16*p_config_cut_cnt_past +: 16]};
+                end else begin
+                    led = xem7360_led(255 & {blink_1000ms, blink_1000ms, blink_1000ms, blink_1000ms, !blink_1000ms, !blink_1000ms, !blink_1000ms, !blink_1000ms});
+                    n_ep20wireout = 0;
+                end
+            end
+            if (config_all_domain_setting_ongoing) begin
+                // configure value update ongoing
+                led = xem7360_led((8'b00000001 << led_pos) | p_state);
+                n_ep20wireout = 0;
+            end 
+        end else if (p_state == P_STATE_03_DRAMFILL_WEIGHT_DATA || p_state == P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE ||
+                     p_state == P_STATE_05_DRAMFILL_INFERENCE_DATA || p_state == P_STATE_06_DRAMFILL_TRAINING_DATA) begin
+            if (ep01wirein != 0) begin
+                // led = xem7360_led(fifo_p2d_data_dout[7:0]);
+                // n_ep20wireout = fifo_p2d_data_dout[32*(ep01wirein-1) +: 32];
+                
+                if (ep01wirein == 10) begin
+                    led = xem7360_led(dram_address[7:0]);
+                    n_ep20wireout = dram_address;
+                end else if (ep01wirein == 11) begin
+                    led = xem7360_led(dram_address_last[7:0]);
+                    n_ep20wireout = dram_address_last;
+                end else if (ep01wirein == 12) begin
+                    led = xem7360_led(fifo_p2d_data_wr_cnt[7:0]);
+                    n_ep20wireout = fifo_p2d_data_wr_cnt;
+                end else if (ep01wirein == 13) begin
+                    led = xem7360_led(dram_write_cnt[7:0]);
+                    n_ep20wireout = dram_write_cnt;
+                end else if (ep01wirein == 14) begin
+                    led = xem7360_led(app_rd_data_check[7:0]);
+                    n_ep20wireout = app_rd_data_check;
+                end
+            end
+        end else if (p_state == P_STATE_07_ASIC_CONFIG || p_state == P_STATE_08_ASIC_CONFIG_DONE) begin
+            if (ep01wirein == 0) begin
+                if (asic_config_ongoing) begin
+                    led = xem7360_led(p_state & {8{blink_100ms}});
+                end else if (asic_start_ready == 1) begin
+                    led = xem7360_led(p_state & {8{blink_500ms}});
+                    n_ep20wireout = 1;
+                end else begin
+                    led = xem7360_led(p_state & {8{blink_1000ms}});
+                    n_ep20wireout = 0;
+                end
+            end else if (ep01wirein == 1) begin
+                led = xem7360_led(config_stream_cnt[7:0]);
+                n_ep20wireout = {16'd0, config_stream_cnt};
+            end else if (ep01wirein == 2) begin
+                led = xem7360_led(sample_num[7:0]);
+                n_ep20wireout = sample_num;
+            end else if (ep01wirein == 10) begin
+                led = xem7360_led(dram_address[7:0]);
+                n_ep20wireout = dram_address;
+            end else if (ep01wirein == 11) begin
+                led = xem7360_led(dram_address_last[7:0]);
+                n_ep20wireout = dram_address_last;
+            end else if (ep01wirein == 12) begin
+                led = xem7360_led(data_stream_cnt_and_start_ready[7:0]);
+                n_ep20wireout = {15'd0, data_stream_cnt_and_start_ready};
+            end else if (ep01wirein == 13) begin
+                led = xem7360_led(correct_sample_num[7:0]);
+                n_ep20wireout = correct_sample_num;
+            end else if (ep01wirein == 14) begin
+                led = xem7360_led(wrong_sample_num[7:0]);
+                n_ep20wireout = wrong_sample_num;
+            end else if (ep01wirein == 15) begin
+                led = xem7360_led(total_inference_sample_num[7:0]);
+                n_ep20wireout = total_inference_sample_num;
+            end else if (ep01wirein == 16) begin
+                led = xem7360_led(processing_time_cnt[7:0]);
+                n_ep20wireout = processing_time_cnt[0 +: 32];
+            end else if (ep01wirein == 17) begin
+                led = xem7360_led(processing_time_cnt[7+32:0+32]);
+                n_ep20wireout = processing_time_cnt[32 +: 32];
+            end else if (ep01wirein == 18) begin
+                led = xem7360_led({4'd0, sample_num_transition_cnt});
+                n_ep20wireout = {11'd0, fifo_d2p_command_valid, fifo_d2p_command_dout[14:0], fifo_p2d_command_full, sample_num_transition_cnt};
+            end else if (ep01wirein == 19) begin
+                led = xem7360_led(sample_num_executed_from_a[7:0]);
+                n_ep20wireout = sample_num_executed_from_a;
+            end else if (ep01wirein >= 20 && ep01wirein <= 31) begin
+                led = xem7360_led(samplefinish_num_epochfinish_num_label_num[32*(ep01wirein-20)+:8]);
+                n_ep20wireout = samplefinish_num_epochfinish_num_label_num[32*(ep01wirein-20)+:32];
+            end 
+        end else if (p_state == P_STATE_09_ASIC_INFERENCE_QUEUING || p_state == P_STATE_11_ASIC_TRAINING_QUEUING) begin
+            if (ep01wirein == 0) begin
+                if (asic_start_ready == 1) begin
+                    if (queuing_complete) begin
+                        led = xem7360_led(p_state & {8{blink_100ms}});
+                        n_ep20wireout = 1;
+                    end else begin
+                        led = xem7360_led(p_state & {8{blink_500ms}});
+                        n_ep20wireout = 1;
+                    end
+                end else begin
+                    led = xem7360_led(p_state & {8{blink_1000ms}});
+                    n_ep20wireout = 0;
+                end
+            end else if (ep01wirein == 1) begin // deprecated 
+                led = xem7360_led(config_stream_cnt[7:0]);
+                n_ep20wireout = {16'd0, config_stream_cnt};
+            end else if (ep01wirein == 2) begin
+                led = xem7360_led(sample_num[7:0]);
+                n_ep20wireout = sample_num;
+            end else if (ep01wirein == 10) begin
+                led = xem7360_led(dram_address[7:0]);
+                n_ep20wireout = dram_address;
+            end else if (ep01wirein == 11) begin
+                led = xem7360_led(dram_address_last[7:0]);
+                n_ep20wireout = dram_address_last;
+            end else if (ep01wirein == 19) begin
+                led = xem7360_led(sample_num_executed_from_a[7:0]);
+                n_ep20wireout = sample_num_executed_from_a;
+            end else if (ep01wirein == 20) begin
+                led = xem7360_led(data_stream_cnt_and_start_ready[7:0]);
+                n_ep20wireout = {15'd0, data_stream_cnt_and_start_ready};
+            end else if (ep01wirein == 21) begin
+                led = xem7360_led(data_stream_cnt_for_test_from_a[7:0]);
+                n_ep20wireout = data_stream_cnt_for_test_from_a;
+            end else if (ep01wirein == 22) begin
+                led = xem7360_led(timestep_from_a[7:0]);
+                n_ep20wireout = {16'd0, timestep_from_a};
+            end else if (ep01wirein == 23) begin
+                led = xem7360_led(sample_stream_cnt_small_from_a[7:0]);
+                n_ep20wireout = {24'd0, sample_stream_cnt_small_from_a};
+            end
+        end else if (p_state == P_STATE_10_ASIC_INFERENCE_PROCESSING || p_state == P_STATE_12_ASIC_TRAINING_PROCESSING) begin
+            if (execute_16_division == 0) begin
+                led = xem7360_led(p_state & {8{blink_100ms}});
+                n_ep20wireout = execute_16_division;
+            end else begin
+                led = xem7360_led({4'd0, execute_16_division} & {8{blink_100ms}});
+                n_ep20wireout = execute_16_division;
+            end
+
+            if (ep01wirein == 1) begin
+                n_ep20wireout = {15'd0, captured_sample_num_executed};
+            end else if (ep01wirein == 18) begin
+                led = xem7360_led({4'd0, sample_num_transition_cnt});
+                n_ep20wireout = {11'd0, fifo_d2p_command_valid, fifo_d2p_command_dout[14:0], fifo_p2d_command_full, sample_num_transition_cnt};
+            end else if (ep01wirein == 19) begin
+                n_ep20wireout = sample_num_executed_from_a;
+            end else if (ep01wirein == 21) begin
+                n_ep20wireout = data_stream_cnt_for_test_from_a;
+            end else if (ep01wirein == 22) begin
+                n_ep20wireout = {16'd0, timestep_from_a};
+            end else if (ep01wirein == 23) begin
+                n_ep20wireout = {24'd0, sample_stream_cnt_small_from_a};
+            end
+        end
+
+        if (!reset_n) begin
+            led = xem7360_led(255);
+        end
+    end
+
+
+    reg dram_reset_complete_trg_have_been_sent, n_dram_reset_complete_trg_have_been_sent;
+
+    always @(posedge okClk) begin
+        if(!reset_n) begin
+            p_state <= 0;
+
+            p_config_asic_mode <= 0;
+            p_config_training_epochs <= 0;
+            p_config_inference_epochs  <= 0;
+            p_config_dataset  <= 0;
+            p_config_timesteps  <= 0;
+            p_config_input_size_layer1_define  <= 0;
+            p_config_long_time_input_streaming_mode  <= 0;
+            p_config_binary_classifier_mode  <= 0;
+            p_config_loser_encourage_mode  <= 0;
+            p_config_layer1_cut_list  <= 0;
+            p_config_layer2_cut_list  <= 0;
+
+            p_config_cut_cnt  <= 0;
+            p_config_cut_cnt_past <= 0;
+
+            dram_reset_complete_trg_have_been_sent  <= 0;
+
+            config_all_domain_setting_ongoing <= 0;
+            config_all_domain_setting_complete <= 0;
+            config_all_domain_setting_cnt <= 0;
+
+            dram_address <= 0;
+            dram_address_last <= 0;
+            dram_address_transition_cnt <= 0;
+
+            app_rd_data_check <= 0;
+            asic_start_ready <= 0;
+            asic_config_ongoing <= 0;
+
+            config_stream_cnt <= 0;
+
+            sample_num <= 0;
+            sample_num_transition_cnt <= 0;
+
+            queuing_complete <= 0;
+
+            data_stream_cnt_and_start_ready <= 0;
+
+            execute_16_division <= 0;
+
+			correct_sample_num <= 0;
+			wrong_sample_num <= 0;
+			total_inference_sample_num <= 0;
+			result_transition_cnt <= 0;
+			processing_time_cnt <= 0;
+			processing_time_cnt_transition_cnt <= 0;
+
+            captured_sample_num_executed <= 0;
+
+            sample_num_executed_from_a <= 0;
+            sample_num_executed_from_a_transition_cnt <= 0;
+
+            data_stream_cnt_for_test_from_a <= 0;
+            timestep_from_a <= 0;
+            sample_stream_cnt_small_from_a <= 0;
+
+            samplefinish_num_epochfinish_num_label_num <= 0;
+
+            ps_phase <= 0;
+            psdone_oneclk_delay <= 0;
+            psen_delayed <= 0;
+            ps_phase2 <= 0;
+            psdone2_oneclk_delay <= 0;
+            psen2_delayed <= 0;
+        end else begin
+            p_state <= n_p_state;
+
+            p_config_asic_mode <= n_p_config_asic_mode;
+            p_config_training_epochs <= n_p_config_training_epochs;
+            p_config_inference_epochs <= n_p_config_inference_epochs;
+            p_config_dataset <= n_p_config_dataset;
+            p_config_timesteps <= n_p_config_timesteps;
+            p_config_input_size_layer1_define <= n_p_config_input_size_layer1_define;
+            p_config_long_time_input_streaming_mode <= n_p_config_long_time_input_streaming_mode;
+            p_config_binary_classifier_mode <= n_p_config_binary_classifier_mode;
+            p_config_loser_encourage_mode <= n_p_config_loser_encourage_mode;
+            p_config_layer1_cut_list <= n_p_config_layer1_cut_list;
+            p_config_layer2_cut_list <= n_p_config_layer2_cut_list;
+
+            p_config_cut_cnt <= n_p_config_cut_cnt;
+            p_config_cut_cnt_past <= n_p_config_cut_cnt_past;
+
+            dram_reset_complete_trg_have_been_sent <= n_dram_reset_complete_trg_have_been_sent;
+
+            config_all_domain_setting_ongoing <= n_config_all_domain_setting_ongoing;
+            config_all_domain_setting_complete <= n_config_all_domain_setting_complete;
+            config_all_domain_setting_cnt <= n_config_all_domain_setting_cnt;
+
+            dram_address <= n_dram_address;
+            dram_address_last <= n_dram_address_last;
+            dram_address_transition_cnt <= n_dram_address_transition_cnt;
+
+            app_rd_data_check <= n_app_rd_data_check;
+            asic_start_ready <= n_asic_start_ready;
+            asic_config_ongoing <= n_asic_config_ongoing;
+
+            config_stream_cnt <= n_config_stream_cnt;
+
+            sample_num <= n_sample_num;
+            sample_num_transition_cnt <= n_sample_num_transition_cnt;
+
+            queuing_complete <= n_queuing_complete;
+            
+            data_stream_cnt_and_start_ready <= n_data_stream_cnt_and_start_ready;
+            
+            execute_16_division <= n_execute_16_division;
+            
+			correct_sample_num <= n_correct_sample_num;
+			wrong_sample_num <= n_wrong_sample_num;
+			total_inference_sample_num <= n_total_inference_sample_num;
+            result_transition_cnt <= n_result_transition_cnt;
+            processing_time_cnt <= n_processing_time_cnt;
+            processing_time_cnt_transition_cnt <= n_processing_time_cnt_transition_cnt;
+
+            captured_sample_num_executed <= n_captured_sample_num_executed;
+
+            sample_num_executed_from_a <= n_sample_num_executed_from_a;
+            sample_num_executed_from_a_transition_cnt <= n_sample_num_executed_from_a_transition_cnt;
+            
+            data_stream_cnt_for_test_from_a <= n_data_stream_cnt_for_test_from_a;
+            timestep_from_a <= n_timestep_from_a;
+            sample_stream_cnt_small_from_a <= n_sample_stream_cnt_small_from_a;
+
+            samplefinish_num_epochfinish_num_label_num <= n_samplefinish_num_epochfinish_num_label_num;
+
+            ps_phase <= n_ps_phase;
+            psdone_oneclk_delay <= psdone;
+            psen_delayed <= {psen_delayed[3:0], psen};
+            ps_phase2 <= n_ps_phase2;
+            psdone2_oneclk_delay <= psdone2;
+            psen2_delayed <= {psen2_delayed[3:0], psen2};
+        end
+    end
+
+    reg [17 - 1:0] config_value;
+    always @ (*) begin
+        n_p_state = p_state;
+
+        n_p_config_asic_mode = p_config_asic_mode;
+        n_p_config_training_epochs = p_config_training_epochs;
+        n_p_config_inference_epochs = p_config_inference_epochs;
+        n_p_config_dataset = p_config_dataset;
+        n_p_config_timesteps = p_config_timesteps;
+        n_p_config_input_size_layer1_define = p_config_input_size_layer1_define;
+        n_p_config_long_time_input_streaming_mode = p_config_long_time_input_streaming_mode;
+        n_p_config_binary_classifier_mode = p_config_binary_classifier_mode;
+        n_p_config_loser_encourage_mode = p_config_loser_encourage_mode;
+        n_p_config_layer1_cut_list = p_config_layer1_cut_list;
+        n_p_config_layer2_cut_list = p_config_layer2_cut_list;
+
+        n_p_config_cut_cnt = p_config_cut_cnt;
+        n_p_config_cut_cnt_past = p_config_cut_cnt_past;
+
+        n_dram_reset_complete_trg_have_been_sent = dram_reset_complete_trg_have_been_sent;
+        
+        n_config_all_domain_setting_ongoing = config_all_domain_setting_ongoing;
+        n_config_all_domain_setting_complete = config_all_domain_setting_complete;
+
+        // ep60trigout = {31'b0, fsm_done};
+        ep60trigout = 32'd0;
+
+
+
+
+        fifo_p2d_command_wr_en = 0;
+        fifo_p2d_command_din = 0;
+
+        config_value = 0;
+        n_config_all_domain_setting_cnt = config_all_domain_setting_cnt;
+        fifo_d2p_command_rd_en = 0;
+
+
+        n_dram_address = dram_address;
+        n_dram_address_last = dram_address_last;
+        n_dram_address_transition_cnt = dram_address_transition_cnt;
+
+
+
+        fifo_p2d_data_wr_en = 0;
+        fifo_p2d_data_din = 0;
+        pipe_in_ready = 0;
+
+
+        n_dram_write_cnt = dram_write_cnt;
+        n_app_rd_data_check = app_rd_data_check;
+        n_asic_start_ready = asic_start_ready;
+        n_asic_config_ongoing = asic_config_ongoing;
+
+        n_config_stream_cnt = config_stream_cnt;
+
+        n_sample_num = sample_num;
+        n_sample_num_transition_cnt = sample_num_transition_cnt;
+
+        n_queuing_complete = queuing_complete;
+
+        n_data_stream_cnt_and_start_ready = data_stream_cnt_and_start_ready;
+
+        n_execute_16_division = execute_16_division;
+
+		n_correct_sample_num = correct_sample_num;
+		n_wrong_sample_num = wrong_sample_num;
+		n_total_inference_sample_num = total_inference_sample_num;
+		n_result_transition_cnt = result_transition_cnt;
+		n_processing_time_cnt = processing_time_cnt;
+		n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt;
+
+		n_captured_sample_num_executed = captured_sample_num_executed;
+
+		n_sample_num_executed_from_a = sample_num_executed_from_a;
+		n_sample_num_executed_from_a_transition_cnt = sample_num_executed_from_a_transition_cnt;
+
+		n_data_stream_cnt_for_test_from_a = data_stream_cnt_for_test_from_a;
+		n_timestep_from_a = timestep_from_a;
+		n_sample_stream_cnt_small_from_a = sample_stream_cnt_small_from_a;
+
+		n_samplefinish_num_epochfinish_num_label_num = samplefinish_num_epochfinish_num_label_num;
+
+		n_ps_phase = ps_phase;
+        psen = 0;
+        psincdec = 0;
+		n_ps_phase2 = ps_phase2;
+        psen2 = 0;
+        psincdec2 = 0;
+
+        if(ep40trigin[29]) begin
+            if (!fifo_p2d_data_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd6};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 6) begin
+            fifo_d2p_command_rd_en = 1;
+            // n_dram_write_cnt = dram_write_cnt + 1;
+            n_dram_write_cnt = fifo_d2p_command_dout[15 +: 17];
+            ep60trigout = {31'd0, 1'b1};
+        end
+
+
+        case(p_state)
+            P_STATE_00_IDLE: begin
+                if(ep40trigin[0]) begin
+                    if(ep01wirein == 1) begin
+                        n_p_state = P_STATE_01_WORKLOAD_CONFIG;
+                    end
+                end
+            end
+            P_STATE_01_WORKLOAD_CONFIG: begin
+                if(ep40trigin[0]) begin
+                    if(ep01wirein == 2) begin
+                        if (config_all_domain_setting_complete) begin
+                            n_p_state = P_STATE_02_WORKLOAD_CONFIG_DONE;
+                        end
+                    end
+                end
+            end
+            P_STATE_02_WORKLOAD_CONFIG_DONE: begin
+                if(ep40trigin[0]) begin
+                    if(ep01wirein == 3) begin
+                        n_p_state = P_STATE_03_DRAMFILL_WEIGHT_DATA;
+                    end else if(ep01wirein == 5) begin
+                        n_p_state = P_STATE_05_DRAMFILL_INFERENCE_DATA;
+                    end else if(ep01wirein == 7) begin
+                        n_p_state = P_STATE_07_ASIC_CONFIG;
+                    end 
+                end
+            end
+            P_STATE_03_DRAMFILL_WEIGHT_DATA: begin
+                if (!fifo_p2d_data_full) begin
+                    pipe_in_ready = 1;
+                    if (pipe_in_valid) begin
+                        fifo_p2d_data_wr_en = 1;
+                        fifo_p2d_data_din = pipe_in_data;
+                    end
+                end
+                // dram weight write complete
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 5) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
+                    n_app_rd_data_check = fifo_d2p_command_dout[15 +: 17];
+                end
+            end
+            P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE: begin
+                if(ep40trigin[0]) begin
+                    if(ep01wirein == 5) begin
+                        n_p_state = P_STATE_05_DRAMFILL_INFERENCE_DATA;
+                    end else if (ep01wirein == 6) begin
+                        n_p_state = P_STATE_06_DRAMFILL_TRAINING_DATA;
+                    end else if (ep01wirein == 7) begin
+                        n_p_state = P_STATE_07_ASIC_CONFIG;
+                    end else if (ep01wirein == 8) begin
+                        n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
+                    end 
+                end
+            end
+            P_STATE_05_DRAMFILL_INFERENCE_DATA: begin
+                if (!fifo_p2d_data_full) begin
+                    pipe_in_ready = 1;
+                    if (pipe_in_valid) begin
+                        fifo_p2d_data_wr_en = 1;
+                        fifo_p2d_data_din = pipe_in_data;
+                    end
+                end
+                // dram INFERENCE_DATA write complete
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 5) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
+                    n_app_rd_data_check = fifo_d2p_command_dout[15 +: 17];
+                end
+            end
+            P_STATE_06_DRAMFILL_TRAINING_DATA: begin
+                if (!fifo_p2d_data_full) begin
+                    pipe_in_ready = 1;
+                    if (pipe_in_valid) begin
+                        fifo_p2d_data_wr_en = 1;
+                        fifo_p2d_data_din = pipe_in_data;
+                    end
+                end
+                // dram TRAINING_DATA write complete
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 5) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
+                    n_app_rd_data_check = fifo_d2p_command_dout[15 +: 17];
+                end
+            end
+            P_STATE_07_ASIC_CONFIG: begin
+                if(ep40trigin[0]) begin
+                    if (!fifo_p2d_data_full) begin
+                        fifo_p2d_command_wr_en = 1;
+                        fifo_p2d_command_din = {17'd0, 15'd8};
+                        n_asic_start_ready = 0;
+                        n_config_stream_cnt = 0;
+                        n_asic_config_ongoing = 1;
+                    end
+                end
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 9) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
+                    n_asic_start_ready = fifo_d2p_command_dout[15];
+                    n_config_stream_cnt = fifo_d2p_command_dout[31:16];
+                    n_asic_config_ongoing = 0;
+                end
+            end
+            P_STATE_08_ASIC_CONFIG_DONE: begin
+                if(ep40trigin[0]) begin
+                    if (!fifo_p2d_data_full) begin
+                        fifo_p2d_command_wr_en = 1;
+                        fifo_p2d_command_din = {17'd0, 15'd12};
+                        n_queuing_complete = 0;
+                        n_p_state = P_STATE_11_ASIC_TRAINING_QUEUING;
+                    end
+                end else if(ep40trigin[1]) begin
+                    if (!fifo_p2d_data_full) begin
+                        fifo_p2d_command_wr_en = 1;
+                        fifo_p2d_command_din = {17'd0, 15'd13};
+                        n_queuing_complete = 0;
+                        n_p_state = P_STATE_09_ASIC_INFERENCE_QUEUING;
+                    end
+                end else if(ep40trigin[19]) begin
+                    n_p_state = P_STATE_04_DRAMFILL_WEIGHT_DATA_DONE;
+                end
+            end
+            P_STATE_09_ASIC_INFERENCE_QUEUING: begin
+                if (queuing_complete == 0) begin
+                    if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 13) begin
+                        fifo_d2p_command_rd_en = 1;
+                        n_queuing_complete = 1;
+                        ep60trigout = {31'd0, 1'b1};
+                    end
+                end else begin
+                    if(ep40trigin[0]) begin
+                        if (!fifo_p2d_data_full) begin
+                            fifo_p2d_command_wr_en = 1;
+                            fifo_p2d_command_din = {17'd0, 15'd17};
+                            n_queuing_complete = 0;
+                            n_p_state = P_STATE_10_ASIC_INFERENCE_PROCESSING;
+                        end
+                    end
+                end
+            end
+            P_STATE_10_ASIC_INFERENCE_PROCESSING: begin
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 15) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_queuing_complete = 0;
+                    n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
+                    n_data_stream_cnt_and_start_ready = fifo_d2p_command_dout[15 +: 17];
+                    n_execute_16_division = 0;
+                end
+            end
+            P_STATE_11_ASIC_TRAINING_QUEUING: begin
+                if (queuing_complete == 0) begin
+                    if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 12) begin
+                        fifo_d2p_command_rd_en = 1;
+                        n_queuing_complete = 1;
+                        ep60trigout = {31'd0, 1'b1};
+                    end
+                end else begin
+                    if(ep40trigin[0]) begin
+                        if (!fifo_p2d_data_full) begin
+                            fifo_p2d_command_wr_en = 1;
+                            fifo_p2d_command_din = {17'd0, 15'd16};
+                            n_queuing_complete = 0;
+                            n_p_state = P_STATE_12_ASIC_TRAINING_PROCESSING;
+                        end
+                    end
+                end
+            end
+            P_STATE_12_ASIC_TRAINING_PROCESSING: begin
+                if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 14) begin
+                    fifo_d2p_command_rd_en = 1;
+                    ep60trigout = {31'd0, 1'b1};
+                    n_queuing_complete = 0;
+                    n_p_state = P_STATE_08_ASIC_CONFIG_DONE;
+                    n_data_stream_cnt_and_start_ready = fifo_d2p_command_dout[15 +: 17];
+                    n_execute_16_division = 0;
+                end
+            end
+        endcase
+
+
+
+
+
+
+
+
+
+
+
+        if (p_state == P_STATE_00_IDLE) begin
+            if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 3) begin
+                if (dram_reset_complete_trg_have_been_sent == 0) begin
+                    ep60trigout = {31'd0, 1'b1};
+                    n_dram_reset_complete_trg_have_been_sent = 1;
+                    fifo_d2p_command_rd_en = 1;
+                end
+            end
+        end else if (p_state == P_STATE_01_WORKLOAD_CONFIG) begin
+            if(ep40trigin[1]) begin
+                n_p_config_asic_mode = ep01wirein[1:0];
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[2]) begin
+                n_p_config_training_epochs = ep01wirein[15:0];
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[3]) begin
+                n_p_config_inference_epochs = ep01wirein[15:0];
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[4]) begin
+                n_p_config_dataset = ep01wirein[1:0];
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[5]) begin
+                n_p_config_timesteps = ep01wirein[15:0];
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[6]) begin
+                n_p_config_input_size_layer1_define = ep01wirein[15:0];
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[7]) begin
+                n_p_config_long_time_input_streaming_mode = ep01wirein[0];
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[8]) begin
+                n_p_config_binary_classifier_mode = ep01wirein[0];
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[9]) begin
+                n_p_config_loser_encourage_mode = ep01wirein[0];
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[10]) begin
+                n_p_config_layer1_cut_list[17*p_config_cut_cnt +: 17] = ep01wirein[16:0];
+
+                if (p_config_cut_cnt == 14) begin
+                    n_p_config_cut_cnt = 0;
+                end
+                else begin
+                    n_p_config_cut_cnt = p_config_cut_cnt+1;
+                end
+                n_p_config_cut_cnt_past = p_config_cut_cnt;
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[11]) begin
+                n_p_config_layer2_cut_list[16*p_config_cut_cnt +: 16] = ep01wirein[15:0];
+
+                if (p_config_cut_cnt == 14) begin
+                    n_p_config_cut_cnt = 0;
+                end
+                else begin
+                    n_p_config_cut_cnt = p_config_cut_cnt+1;
+                end
+                n_p_config_cut_cnt_past = p_config_cut_cnt;
+                n_config_all_domain_setting_complete = 0;
+            end
+            if(ep40trigin[31]) begin
+                n_config_all_domain_setting_ongoing = 1;
+                n_config_all_domain_setting_complete = 0;
+            end
+        end
+
+
+
+
+
+
+
+
+
+        // dram address setting
+        if(dram_address_transition_cnt == 0) begin
+            if(ep40trigin[30]) begin
+                n_dram_address = ep01wirein;
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
+            end
+        end else if (dram_address_transition_cnt == 1) begin
+            if(ep40trigin[30]) begin
+                n_dram_address_last = ep01wirein;
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
+            end
+        end else if (dram_address_transition_cnt == 2) begin
+            if(!fifo_p2d_command_full) begin
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {1'b0, dram_address[0 +: 16], 15'd4};
+            end
+        end else if (dram_address_transition_cnt == 3) begin
+            if(!fifo_p2d_command_full) begin
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {1'b0, dram_address[16 +: 16], 15'd4};
+            end
+        end else if (dram_address_transition_cnt == 4) begin
+            if(!fifo_p2d_command_full) begin
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {1'b0, dram_address_last[0 +: 16], 15'd4};
+            end
+        end else if (dram_address_transition_cnt == 5) begin
+            if(!fifo_p2d_command_full) begin
+                n_dram_address_transition_cnt = dram_address_transition_cnt + 1;
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {1'b0, dram_address_last[16 +: 16], 15'd4};
+            end
+        end else if (dram_address_transition_cnt == 6) begin
+            if(fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 4) begin
+                fifo_d2p_command_rd_en = 1;
+                n_dram_address_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
+
+
+
+
+        // sample num setting
+        if(sample_num_transition_cnt == 0) begin
+            if(ep40trigin[26]) begin
+                n_sample_num = ep01wirein;
+                n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
+            end
+        end else if (sample_num_transition_cnt == 1) begin
+            if(!fifo_p2d_command_full) begin
+                n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {1'b0, sample_num[0 +: 16], 15'd11};
+            end
+        end else if (sample_num_transition_cnt == 2) begin
+            if(!fifo_p2d_command_full) begin
+                n_sample_num_transition_cnt = sample_num_transition_cnt + 1;
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {1'b0, sample_num[16 +: 16], 15'd11};
+            end
+        end else if (sample_num_transition_cnt == 3) begin
+            if(fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 11) begin
+                fifo_d2p_command_rd_en = 1;
+                n_sample_num_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
+
+
+
+
+
+
+
+
+        // Check ASIC start ready == 1
+        if(ep40trigin[28]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd7};
+                n_asic_start_ready = 0;
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 7) begin
+            fifo_d2p_command_rd_en = 1;
+            n_asic_start_ready = fifo_d2p_command_dout[15];
+            ep60trigout = {31'd0, 1'b1};
+        end
+
+
+        // STEAMING N번 WAIT
+        if(ep40trigin[27]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {ep01wirein[16:0], 15'd10};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 10) begin
+            fifo_d2p_command_rd_en = 1;
+            ep60trigout = {31'd0, 1'b1};
+        end
+
+
+
+
+        // 결과 세팅 하기
+        if(ep40trigin[25]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd19};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 19) begin
+            fifo_d2p_command_rd_en = 1;
+
+            if (result_transition_cnt == 0) begin
+                n_correct_sample_num[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 1) begin
+                n_correct_sample_num[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 2) begin
+                n_wrong_sample_num[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 3) begin
+                n_wrong_sample_num[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 4) begin
+                n_total_inference_sample_num[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = result_transition_cnt + 1;
+            end else if (result_transition_cnt == 5) begin
+                n_total_inference_sample_num[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_result_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
+
+
+
+
+
+
+        // clk phase 조절 커맨드
+        if(ep40trigin[24]) begin
+            n_ps_phase = ps_phase - 1;
+            psen = 1;
+            psincdec = 0;
+        end
+        // clk phase plus 조절 커맨드
+        if(ep40trigin[21]) begin
+            n_ps_phase = ps_phase + 1;
+            psen = 1;
+            psincdec = 1;
+        end
+        if (psdone_oneclk_delay && locked) begin
+            ep60trigout = {31'd0, 1'b1};
+        end
+
+
+
+        // clk phase 조절 커맨드
+        if(ep40trigin[18]) begin
+            n_ps_phase2 = ps_phase2 - 1;
+            psen2 = 1;
+            psincdec2 = 0;
+        end
+        // clk phase plus 조절 커맨드
+        if(ep40trigin[17]) begin
+            n_ps_phase2 = ps_phase2 + 1;
+            psen2 = 1;
+            psincdec2 = 1;
+        end
+        if (psdone2_oneclk_delay && locked2) begin
+            ep60trigout = {31'd0, 1'b1};
+        end
+
+
+
+
+        // processing time 세팅시키기
+        if(ep40trigin[23]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd21};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 21) begin
+            fifo_d2p_command_rd_en = 1;
+            if (processing_time_cnt_transition_cnt == 0) begin
+                n_processing_time_cnt[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
+            end else if (processing_time_cnt_transition_cnt == 1) begin
+                n_processing_time_cnt[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
+            end else if (processing_time_cnt_transition_cnt == 2) begin
+                n_processing_time_cnt[2*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_processing_time_cnt_transition_cnt = processing_time_cnt_transition_cnt + 1;
+            end else if (processing_time_cnt_transition_cnt == 3) begin
+                n_processing_time_cnt[3*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_processing_time_cnt_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
+
+
+
+
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 18) begin
+            fifo_d2p_command_rd_en = 1;
+            n_execute_16_division = execute_16_division + 1;
+            n_captured_sample_num_executed = fifo_d2p_command_dout[15 +: 17];
+        end
+
+
+
+
+
+
+
+
+
+
+        // executed_num from a 세팅시키기
+        if(ep40trigin[22]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd22};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 22) begin
+            fifo_d2p_command_rd_en = 1;
+            if (sample_num_executed_from_a_transition_cnt == 0) begin
+                n_sample_num_executed_from_a[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_sample_num_executed_from_a_transition_cnt = sample_num_executed_from_a_transition_cnt + 1;
+            end else if (sample_num_executed_from_a_transition_cnt == 1) begin
+                n_sample_num_executed_from_a[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_sample_num_executed_from_a_transition_cnt = sample_num_executed_from_a_transition_cnt + 1;
+            end else if (sample_num_executed_from_a_transition_cnt == 2) begin
+                n_data_stream_cnt_for_test_from_a[0*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_sample_num_executed_from_a_transition_cnt = sample_num_executed_from_a_transition_cnt + 1;
+            end else if (sample_num_executed_from_a_transition_cnt == 3) begin
+                n_data_stream_cnt_for_test_from_a[1*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+                n_sample_num_executed_from_a_transition_cnt = sample_num_executed_from_a_transition_cnt + 1;
+            end else if (sample_num_executed_from_a_transition_cnt == 4) begin
+                n_timestep_from_a = fifo_d2p_command_dout[15 +: 16];
+                n_sample_num_executed_from_a_transition_cnt = sample_num_executed_from_a_transition_cnt + 1;
+            end else if (sample_num_executed_from_a_transition_cnt == 5) begin
+                n_sample_stream_cnt_small_from_a = fifo_d2p_command_dout[15 +: 8];
+                n_sample_num_executed_from_a_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
+
+
+
+
+        // d domain 정보보기
+        if(ep40trigin[20]) begin
+            if (!fifo_p2d_command_full) begin
+                fifo_p2d_command_wr_en = 1;
+                fifo_p2d_command_din = {17'd0, 15'd24};
+            end
+        end
+        if (fifo_d2p_command_valid && fifo_d2p_command_dout[14:0] == 24) begin
+            fifo_d2p_command_rd_en = 1;
+            n_samplefinish_num_epochfinish_num_label_num[sample_num_executed_from_a_transition_cnt*16 +: 16] = fifo_d2p_command_dout[15 +: 16];
+            n_sample_num_executed_from_a_transition_cnt = sample_num_executed_from_a_transition_cnt + 1;
+            if (sample_num_executed_from_a_transition_cnt == 23) begin
+                n_sample_num_executed_from_a_transition_cnt = 0;
+                ep60trigout = {31'd0, 1'b1};
+            end
+        end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        if (config_all_domain_setting_ongoing) begin
+            if (config_all_domain_setting_cnt == 0) begin
+                config_value = {15'd0, p_config_asic_mode};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 1) begin
+                config_value = {1'd0, p_config_training_epochs};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 2) begin
+                config_value = {1'd0, p_config_inference_epochs};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 3) begin
+                config_value = {15'd0, p_config_dataset};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 4) begin
+                config_value = {1'd0, p_config_timesteps};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 5) begin
+                config_value = {1'd0, p_config_input_size_layer1_define};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 6) begin
+                config_value = {16'd0, p_config_long_time_input_streaming_mode};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 7) begin
+                config_value = {16'd0, p_config_binary_classifier_mode};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 8) begin
+                config_value = {16'd0, p_config_loser_encourage_mode};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 9) begin
+                config_value = {p_config_layer1_cut_list[17*0 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 10) begin
+                config_value = {p_config_layer1_cut_list[17*1 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 11) begin
+                config_value = {p_config_layer1_cut_list[17*2 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 12) begin
+                config_value = {p_config_layer1_cut_list[17*3 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 13) begin
+                config_value = {p_config_layer1_cut_list[17*4 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 14) begin
+                config_value = {p_config_layer1_cut_list[17*5 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 15) begin
+                config_value = {p_config_layer1_cut_list[17*6 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 16) begin
+                config_value = {p_config_layer1_cut_list[17*7 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 17) begin
+                config_value = {p_config_layer1_cut_list[17*8 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 18) begin
+                config_value = {p_config_layer1_cut_list[17*9 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 19) begin
+                config_value = {p_config_layer1_cut_list[17*10 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 20) begin
+                config_value = {p_config_layer1_cut_list[17*11 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 21) begin
+                config_value = {p_config_layer1_cut_list[17*12 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 22) begin
+                config_value = {p_config_layer1_cut_list[17*13 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 23) begin
+                config_value = {p_config_layer1_cut_list[17*14 +: 17]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 24) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*0 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 25) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*1 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 26) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*2 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 27) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*3 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 28) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*4 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 29) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*5 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 30) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*6 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 31) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*7 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 32) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*8 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 33) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*9 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 34) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*10 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 35) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*11 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 36) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*12 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 37) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*13 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 38) begin
+                config_value = {1'd0, p_config_layer2_cut_list[16*14 +: 16]};
+                if (!fifo_p2d_command_full) begin
+                    n_config_all_domain_setting_cnt = config_all_domain_setting_cnt + 1;
+                    fifo_p2d_command_wr_en = 1;
+                    fifo_p2d_command_din = {config_value, {14{1'b0}}, 1'b1};
+                end
+            end else if (config_all_domain_setting_cnt == 39) begin
+                if (fifo_d2p_command_valid) begin
+                    if (fifo_d2p_command_dout[14:0] == 2) begin
+                        fifo_d2p_command_rd_en = 1;
+                        n_config_all_domain_setting_cnt = 0;
+                        n_config_all_domain_setting_ongoing = 0;
+                        n_config_all_domain_setting_complete = 1;
+                        ep60trigout = {31'd0, 1'b1};
+                    end
+                end
+            end
+        end
+
+
+        
+    end
+    // ########################## P (okClk 100.8MHz) DOMAIN CONTROL ########################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+    // ########################## LED BLINK ########################################################################################
+    always @(posedge okClk) begin
+        if (!reset_n) begin
+            led_pos <= 3'd0;
+            led_dir <= 1'b0;
+        end
+        else if (blink_100ms & !blink_100ms_past) begin
+            if (!led_dir) begin
+                // left -> right
+                if (led_pos == 3'd7) begin
+                    led_dir <= 1'b1;
+                    led_pos <= 3'd6;
+                end
+                else begin
+                    led_pos <= led_pos + 1'b1;
+                end
+            end
+            else begin
+                // right -> left
+                if (led_pos == 3'd0) begin
+                    led_dir <= 1'b0;
+                    led_pos <= 3'd1;
+                end
+                else begin
+                    led_pos <= led_pos - 1'b1;
+                end
+            end
+        end
+    end
+    always @(posedge okClk) begin // 9.92ns 100.806MHz
+        if (!reset_n) begin
+            blink_1000ms     <= 1'b0;
+            blink_1000ms_past     <= 1'b0;
+            blink_1000ms_cnt <= 26'd0;
+        end
+        else begin
+            if (blink_1000ms_cnt == 26'd50505050 - 1) begin
+                blink_1000ms_cnt <= 26'd0;
+                blink_1000ms     <= ~blink_1000ms;   // 0.5초마다 토글
+            end
+            else begin
+                blink_1000ms_cnt <= blink_1000ms_cnt + 1'b1;
+            end
+            blink_1000ms_past <= blink_1000ms;
+        end
+    end
+    always @(posedge okClk) begin
+        if (!reset_n) begin
+            blink_500ms     <= 1'b0;
+            blink_500ms_past     <= 1'b0;
+            blink_500ms_cnt <= 26'd0;
+        end
+        else begin
+            if (blink_500ms_cnt == 26'd25252525 - 1) begin
+                blink_500ms_cnt <= 26'd0;
+                blink_500ms     <= ~blink_500ms;   // 0.05초마다 토글
+            end
+            else begin
+                blink_500ms_cnt <= blink_500ms_cnt + 1'b1;
+            end
+            blink_500ms_past <= blink_500ms;
+        end
+    end
+    always @(posedge okClk) begin
+        if (!reset_n) begin
+            blink_100ms     <= 1'b0;
+            blink_100ms_past     <= 1'b0;
+            blink_100ms_cnt <= 26'd0;
+        end
+        else begin
+            if (blink_100ms_cnt == 26'd5050505 - 1) begin
+                blink_100ms_cnt <= 26'd0;
+                blink_100ms     <= ~blink_100ms;   // 0.05초마다 토글
+            end
+            else begin
+                blink_100ms_cnt <= blink_100ms_cnt + 1'b1;
+            end
+            blink_100ms_past <= blink_100ms;
+        end
+    end
+    // ########################## LED BLINK ########################################################################################
+
+
+
+endmodule
