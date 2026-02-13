@@ -197,28 +197,28 @@ set_property SLEW FAST [get_ports {reset}]
 # Checked for FPGA I/O and Clock Capable Pins
 
 # MC1-116
-set_property PACKAGE_PIN A9 [get_ports {margin_pin_mc2[0]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[0]}]
+set_property PACKAGE_PIN A9 [get_ports {margin_pin[0]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[0]}]
 
 # MC1-112
-set_property PACKAGE_PIN B9 [get_ports {margin_pin_mc2[1]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[1]}]
+set_property PACKAGE_PIN B9 [get_ports {margin_pin[1]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[1]}]
 
 # MC1-110
-set_property PACKAGE_PIN C9 [get_ports {margin_pin_mc2[2]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[2]}]
+set_property PACKAGE_PIN C9 [get_ports {margin_pin[2]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[2]}]
 
 # MC1-108
-set_property PACKAGE_PIN C14 [get_ports {margin_pin_mc2[3]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[3]}]
+set_property PACKAGE_PIN C14 [get_ports {margin_pin[3]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[3]}]
 
 # MC1-106
-set_property PACKAGE_PIN A10 [get_ports {margin_pin_mc2[4]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[4]}]
+set_property PACKAGE_PIN A10 [get_ports {margin_pin[4]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[4]}]
 
 # MC1-104
-set_property PACKAGE_PIN B10 [get_ports {margin_pin_mc2[5]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[5]}]
+set_property PACKAGE_PIN B10 [get_ports {margin_pin[5]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[5]}]
 
 # MC1-102
 set_property PACKAGE_PIN J14 [get_ports {input_streaming_data_from_fpga_to_asic[29]}]
@@ -269,24 +269,24 @@ set_property PACKAGE_PIN F13 [get_ports {input_streaming_data_from_fpga_to_asic[
 set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[27]}]
 
 # MC1-74
-set_property PACKAGE_PIN F14 [get_ports {margin_pin_mc2[6]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[6]}]
+set_property PACKAGE_PIN F14 [get_ports {margin_pin[6]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[6]}]
 
 # MC1-70
-set_property PACKAGE_PIN F12 [get_ports {margin_pin_mc2[7]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[7]}]
+set_property PACKAGE_PIN F12 [get_ports {margin_pin[7]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[7]}]
 
 # MC1-68
-set_property PACKAGE_PIN G12 [get_ports {margin_pin_mc2[8]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[8]}]
+set_property PACKAGE_PIN G12 [get_ports {margin_pin[8]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[8]}]
 
 # MC1-64
-set_property PACKAGE_PIN G14 [get_ports {margin_pin_mc2[9]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[9]}]
+set_property PACKAGE_PIN G14 [get_ports {margin_pin[9]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[9]}]
 
 # MC1-62
-set_property PACKAGE_PIN H14 [get_ports {margin_pin_mc2[10]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[10]}]
+set_property PACKAGE_PIN H14 [get_ports {margin_pin[10]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[10]}]
 
 # MC1-117
 set_property PACKAGE_PIN H8 [get_ports {input_streaming_data_from_fpga_to_asic[31]}]
@@ -377,56 +377,56 @@ set_property PACKAGE_PIN E11 [get_ports {input_streaming_data_from_fpga_to_asic[
 set_property IOSTANDARD LVCMOS18 [get_ports {input_streaming_data_from_fpga_to_asic[25]}]
 
 # MC1-32
-set_property PACKAGE_PIN C16 [get_ports {margin_pin_mc2[11]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[11]}]
+set_property PACKAGE_PIN C16 [get_ports {margin_pin[11]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[11]}]
 
 # MC1-30
-set_property PACKAGE_PIN D15 [get_ports {margin_pin_mc2[12]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[12]}]
+set_property PACKAGE_PIN D15 [get_ports {margin_pin[12]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[12]}]
 
 # MC1-28
-set_property PACKAGE_PIN C18 [get_ports {margin_pin_mc2[13]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[13]}]
+set_property PACKAGE_PIN C18 [get_ports {margin_pin[13]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[13]}]
 
 # MC1-26
-set_property PACKAGE_PIN C17 [get_ports {margin_pin_mc2[14]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[14]}]
+set_property PACKAGE_PIN C17 [get_ports {margin_pin[14]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[14]}]
 
 # MC1-25
 set_property PACKAGE_PIN F17 [get_ports {clk_clock_generator}]
 set_property IOSTANDARD LVCMOS18 [get_ports {clk_clock_generator}]
 
 # MC1-22
-set_property PACKAGE_PIN G20 [get_ports {margin_pin_mc2[15]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[15]}]
+set_property PACKAGE_PIN G20 [get_ports {margin_pin[15]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[15]}]
 
 # MC1-20
-set_property PACKAGE_PIN H19 [get_ports {margin_pin_mc2[16]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[16]}]
+set_property PACKAGE_PIN H19 [get_ports {margin_pin[16]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[16]}]
 
 # MC1-16
-set_property PACKAGE_PIN E16 [get_ports {margin_pin_mc2[17]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[17]}]
+set_property PACKAGE_PIN E16 [get_ports {margin_pin[17]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[17]}]
 
 # MC1-14
-set_property PACKAGE_PIN E15 [get_ports {margin_pin_mc2[18]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[18]}]
+set_property PACKAGE_PIN E15 [get_ports {margin_pin[18]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[18]}]
 
 # MC1-10
-set_property PACKAGE_PIN A19 [get_ports {margin_pin_mc2[19]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[19]}]
+set_property PACKAGE_PIN A19 [get_ports {margin_pin[19]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[19]}]
 
 # MC1-8
-set_property PACKAGE_PIN A18 [get_ports {margin_pin_mc2[20]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[20]}]
+set_property PACKAGE_PIN A18 [get_ports {margin_pin[20]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[20]}]
 
 # MC1-4
-set_property PACKAGE_PIN B19 [get_ports {margin_pin_mc2[21]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[21]}]
+set_property PACKAGE_PIN B19 [get_ports {margin_pin[21]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[21]}]
 
 # MC1-2
-set_property PACKAGE_PIN C19 [get_ports {margin_pin_mc2[22]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin_mc2[22]}]
+set_property PACKAGE_PIN C19 [get_ports {margin_pin[22]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {margin_pin[22]}]
 
 # MC2-118
 set_property PACKAGE_PIN AA20 [get_ports {input_streaming_data_from_fpga_to_asic[63]}]

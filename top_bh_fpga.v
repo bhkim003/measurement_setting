@@ -117,7 +117,7 @@ module top_bh_fpga(
     
     
     
-        output [22:0] margin_pin_mc2
+        output [22:0] margin_pin
 
     
     
@@ -185,7 +185,7 @@ module top_bh_fpga(
 
 
 
-    assign margin_pin_mc2[22:8] = ep20wireout[14:0];
+    assign margin_pin[22:8] = ep20wireout[14:0];
 
 
 
@@ -851,7 +851,7 @@ module top_bh_fpga(
 
         .inferenced_label_from_asic_to_fpga  ( inferenced_label_from_asic_to_fpga  ),
 
-        .margin_pin (margin_pin_mc2[7:0])
+        .margin_pin (margin_pin[7:0])
     );
     // ########################## A DOMAIN ########################################################################################
 
