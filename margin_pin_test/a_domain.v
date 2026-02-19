@@ -238,7 +238,7 @@ module a_domain(
                 // end
 
                 input_streaming_valid_from_fpga_to_asic_buf[0] <= ~(margin_pin_filp_flop[0][0]);
-                input_streaming_data_from_fpga_to_asic_buf[0] <= {64{~(margin_pin_filp_flop[0][0])}};
+                input_streaming_data_from_fpga_to_asic_buf[0] <= {66{~(margin_pin_filp_flop[0][0])}};
                 start_training_signal_from_fpga_to_asic_buf[0] <= ~(margin_pin_filp_flop[0][0]);
                 start_inference_signal_from_fpga_to_asic_buf[0] <= ~(margin_pin_filp_flop[0][0]);
             
@@ -1229,7 +1229,7 @@ module a_domain(
     // assign margin_pin[7] = inferenced_label_for_margin;
 
     assign margin_pin = margin_pin_filp_flop[4];
-    always @(posedge clk_a_domain) begin
+    always @(posedge clk_a_domain_for_out) begin
         if(!reset_n) begin
             margin_pin_filp_flop[0] <= 0;
             margin_pin_filp_flop[1] <= 0;
