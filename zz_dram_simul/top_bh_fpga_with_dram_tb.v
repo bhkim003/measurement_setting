@@ -870,8 +870,7 @@ module top_bh_fpga_with_dram_tb;
           .ddr3_dm                          (   ddr3_dm_fpga                ),
 
           .clk_clock_generator                      (    clk_clock_generator_at_testbench                   ),
-          .clk_port_spare_0                         (                          ),
-          .clk_port_spare_1                         (  clk_port_spare_1_at_testbench                        ),
+          .clk_from_fpga                         (                          ),
 
           .margin_pin                         (                          ),
 
