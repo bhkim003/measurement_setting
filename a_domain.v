@@ -1,5 +1,8 @@
 // `define TEST_SETTING 1
 // `define ASIC_IN_FPGA 1
+// `define USING_FPGA_CLK 1
+
+
 `define USING_ANOTHER_CLK_FOR_OUT 1
 module a_domain(
         input clk_a_domain,
@@ -154,6 +157,53 @@ module a_domain(
     reg start_inference_signal_from_fpga_to_asic_buf [0:OUTPUT_BUf_NUM-1];
     `ifdef USING_ANOTHER_CLK_FOR_OUT
         `ifdef ASIC_IN_FPGA
+            wire fifo_a_domain_out_full;
+            wire fifo_a_domain_out_empty;
+            wire fifo_a_domain_out_valid;
+
+            wire input_streaming_valid_temp;
+            wire [65:0] input_streaming_data_temp;
+            wire start_training_signal_temp;
+            wire start_inference_signal_temp;
+            fifo_a_domain_out_builtin_200MHz_width69 u_fifo_a_domain_out_builtin_200MHz_width69(
+                .rst(!reset_n),
+                // write
+                .wr_clk(clk_a_domain),
+                .wr_en(1'b1),
+                .din({input_streaming_valid, input_streaming_data, start_training_signal, start_inference_signal}),
+                .full(fifo_a_domain_out_full),
+                // read
+                .rd_clk(clk_a_domain),
+                .rd_en(1'b1),
+                .dout({input_streaming_valid_temp, input_streaming_data_temp, start_training_signal_temp, start_inference_signal_temp}),
+                .empty(fifo_a_domain_out_empty),
+                .valid(fifo_a_domain_out_valid)
+            );
+            always @(posedge clk_a_domain) begin
+                if (fifo_a_domain_out_valid) begin
+                    input_streaming_valid_from_fpga_to_asic_buf[0] <= input_streaming_valid_temp;
+                    input_streaming_data_from_fpga_to_asic_buf[0] <= input_streaming_data_temp;
+                    start_training_signal_from_fpga_to_asic_buf[0] <= start_training_signal_temp;
+                    start_inference_signal_from_fpga_to_asic_buf[0] <= start_inference_signal_temp;
+                end else begin 
+                    input_streaming_valid_from_fpga_to_asic_buf[0] <= 0;
+                    input_streaming_data_from_fpga_to_asic_buf[0] <= 0;
+                    start_training_signal_from_fpga_to_asic_buf[0] <= 0;
+                    start_inference_signal_from_fpga_to_asic_buf[0] <= 0;
+                end
+            end
+            genvar output_gen_i;
+            generate
+                for (output_gen_i = 1; output_gen_i < OUTPUT_BUf_NUM; output_gen_i = output_gen_i + 1) begin : gen_output_buf
+                    always @(posedge clk_a_domain) begin
+                        input_streaming_valid_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_valid_from_fpga_to_asic_buf[output_gen_i-1];
+                        input_streaming_data_from_fpga_to_asic_buf[output_gen_i] <= input_streaming_data_from_fpga_to_asic_buf[output_gen_i-1];
+                        start_training_signal_from_fpga_to_asic_buf[output_gen_i] <= start_training_signal_from_fpga_to_asic_buf[output_gen_i-1];
+                        start_inference_signal_from_fpga_to_asic_buf[output_gen_i] <= start_inference_signal_from_fpga_to_asic_buf[output_gen_i-1];
+                    end
+                end
+            endgenerate
+        `elsif USING_FPGA_CLK 
             wire fifo_a_domain_out_full;
             wire fifo_a_domain_out_empty;
             wire fifo_a_domain_out_valid;
