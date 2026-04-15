@@ -235,8 +235,11 @@ def inspect_layer_details(model) -> None:
     """
     print_separator("STEP 4: 레이어별 파라미터 shape 및 개수")
 
+    # 가장 긴 파라미터 이름에 맞춰 동적으로 폭 결정
+    all_names = [name for name, _ in model.named_parameters()]
+    max_name_len = max(len(n) for n in all_names) + 2
     for name, param in model.named_parameters():
-        print(f"  {name:60s} | shape: {str(list(param.shape)):20s} | 파라미터 수: {param.numel():>12,}")
+        print(f"  {name:<{max_name_len}s} | shape: {str(list(param.shape)):20s} | 파라미터 수: {param.numel():>12,}")
 
     print("\n[ shape 읽는 법 ]")
     print("  • embed_tokens.weight [vocab_size, hidden_size]")

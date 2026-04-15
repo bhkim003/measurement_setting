@@ -151,7 +151,8 @@ from datetime import datetime
 
 
 def run_evaluation(model_name: str, tasks: list, device: str, batch_size: str,
-                   output_dir: str, num_fewshot: int = 0) -> dict:
+                   output_dir: str, num_fewshot: int = 0,
+                   dtype: str = "float16") -> dict:
     """
     lm_eval Python API를 사용하여 벤치마크를 실행합니다.
 
@@ -169,6 +170,8 @@ def run_evaluation(model_name: str, tasks: list, device: str, batch_size: str,
         결과 저장 경로
     num_fewshot : int
         few-shot 예제 수 (0 = zero-shot)
+    dtype : str
+        모델 가중치 정밀도 (float16, bfloat16, float32)
 
     Returns
     -------
@@ -200,7 +203,7 @@ def run_evaluation(model_name: str, tasks: list, device: str, batch_size: str,
     results = lm_eval.simple_evaluate(
         model="hf",                          # Hugging Face 모델 사용
         model_args=f"pretrained={model_name},"
-                   f"dtype=float16",          # FP16으로 메모리 절약
+                   f"dtype={dtype}",          # 정밀도 설정 (float16, bfloat16, float32)
         tasks=tasks,                          # 실행할 태스크 목록
         device=device,                        # GPU/CPU 지정
         batch_size=batch_size,                # 배치 크기
@@ -219,7 +222,11 @@ def run_evaluation(model_name: str, tasks: list, device: str, batch_size: str,
         for metric_name, value in task_result.items():
             # 'alias' 같은 메타데이터는 건너뛰기
             if isinstance(value, (int, float)):
-                print(f"     {metric_name}: {value:.4f} ({value * 100:.2f}%)")
+                # 0~1 범위의 메트릭만 퍼센트로 변환하여 표시
+                if 0 <= value <= 1:
+                    print(f"     {metric_name}: {value:.4f} ({value * 100:.2f}%)")
+                else:
+                    print(f"     {metric_name}: {value:.4f}")
             else:
                 print(f"     {metric_name}: {value}")
 
@@ -288,6 +295,12 @@ def main():
         default=0,
         help="few-shot 예제 수 (기본값: 0 = zero-shot)",
     )
+    parser.add_argument(
+        "--dtype",
+        type=str,
+        default="float16",
+        help="모델 가중치 정밀도 (기본값: float16, 선택: float16, bfloat16, float32)",
+    )
     args = parser.parse_args()
 
     # 태스크 문자열을 리스트로 변환
@@ -309,6 +322,7 @@ def main():
         batch_size=args.batch_size,
         output_dir=args.output_dir,
         num_fewshot=args.num_fewshot,
+        dtype=args.dtype,
     )
 
     print("\n" + "=" * 70)

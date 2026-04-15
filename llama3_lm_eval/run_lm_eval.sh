@@ -54,7 +54,7 @@ else
 fi
 
 # 가상환경 활성화
-# shellcheck disable=SC1091
+# shellcheck disable=SC1091 -- 가상환경 경로가 동적이라 정적 분석 시 파일을 찾을 수 없음
 source "${VENV_DIR}/bin/activate"
 
 # ──────────────────────────────────────────────────────────────────────────────
